@@ -1,0 +1,144 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-kagit: #f6f4ef;
+  --color-kagit-koyu: #ebe7de;
+  --color-murekkep: #14181f;
+  --color-murekkep-soft: #2c333d;
+  --color-cizgi: #cfc9bc;
+  --color-vurgu: #b4472a;
+  --color-vurgu-soft: #d8a08c;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #f6f4ef;
+  color: #14181f;
+  font-family:
+    'Inter',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ince milimetrik izgara — teknik kagit hissi */
+.izgara-zemin {
+  background-image:
+    linear-gradient(rgba(20, 24, 31, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 24, 31, 0.045) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.mono {
+  font-family: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+/* Analiz ciktisi tipografisi */
+.kritik h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 1.6rem 0 0.6rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #cfc9bc;
+  color: #14181f;
+}
+
+.kritik h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 1.1rem 0 0.4rem;
+}
+
+.kritik p {
+  margin: 0.55rem 0;
+  line-height: 1.7;
+}
+
+.kritik ul,
+.kritik ol {
+  margin: 0.55rem 0 0.55rem 1.15rem;
+  line-height: 1.7;
+}
+
+.kritik ul {
+  list-style: disc;
+}
+
+.kritik ol {
+  list-style: decimal;
+}
+
+.kritik li {
+  margin: 0.3rem 0;
+}
+
+.kritik strong {
+  font-weight: 700;
+}
+
+.kritik table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8rem 0;
+  font-size: 0.85rem;
+}
+
+.kritik th,
+.kritik td {
+  border: 1px solid #cfc9bc;
+  padding: 0.4rem 0.55rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.kritik th {
+  background: #ebe7de;
+  font-weight: 700;
+}
+
+.kritik code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+  background: #ebe7de;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+.kritik hr {
+  border: 0;
+  border-top: 1px solid #cfc9bc;
+  margin: 1.2rem 0;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #ebe7de;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3bcac;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a89f8c;
+}
