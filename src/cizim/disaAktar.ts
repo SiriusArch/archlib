@@ -11,6 +11,7 @@ import {
   birim,
   cikar,
   dik,
+  donatiYerelDenDunyaya,
   duvarKabugu,
   duvarNoktasi,
   duvarParcalari,
@@ -19,6 +20,7 @@ import {
   poligonAlan,
   uzaklik,
 } from './geometri'
+import { donatiDunyaCizimi, parca3B } from './donatiSekli'
 
 export { dosyaIndir } from '../lib/arazi/disaAktar'
 
@@ -75,6 +77,16 @@ function dxfYazi(p: Nokta, metin: string, yukseklik: number, katman: string): st
     c(72, 1) +
     c(11, p.x.toFixed(4)) +
     c(21, p.y.toFixed(4))
+  )
+}
+
+function dxfDaire(merkez: Nokta, yaricap: number, katman: string): string {
+  return (
+    c(0, 'CIRCLE') +
+    c(8, katman) +
+    c(10, merkez.x.toFixed(4)) +
+    c(20, merkez.y.toFixed(4)) +
+    c(40, yaricap.toFixed(4))
   )
 }
 
@@ -166,11 +178,15 @@ export function planDxf(kat: Kat, projeAdi: string): string {
     )
   }
   for (const m of kat.mobilyalar) {
-    govde += dxfPolyline(
-      kutuNoktalari(m.konum, m.genislik, m.derinlik, m.aci),
-      DXF_KATMANLARI.donati.ad,
-      true,
-    )
+    // Donati generik kutu degil, ekranda gorunen gercek sembol (donatiSekli.ts)
+    // ile ayni cizgilerle cikar; katman ve olcek her zaman metre/1:1.
+    const cizim = donatiDunyaCizimi(m.katalog, m.genislik, m.derinlik, m.konum, m.aci)
+    for (const p of cizim.poligonlar) {
+      govde += dxfPolyline(p.nokta, DXF_KATMANLARI.donati.ad, p.kapali)
+    }
+    for (const d of cizim.daireler) {
+      govde += dxfDaire(d.merkez, d.r, DXF_KATMANLARI.donati.ad)
+    }
     govde += dxfYazi(m.konum, m.ad, 0.14, DXF_KATMANLARI.donati.ad)
   }
   for (const o of kat.olculer) {
@@ -225,7 +241,20 @@ export function planDxf(kat: Kat, projeAdi: string): string {
 export function planSvg(kat: Kat, projeAdi: string, genislikPx = 1600): string {
   const noktalar: Nokta[] = []
   for (const w of kat.duvarlar) noktalar.push(...duvarKabugu(w))
-  for (const m of kat.mobilyalar) noktalar.push(m.konum)
+  for (const m of kat.mobilyalar) {
+    // Nominal g x d degil, gercek sembolun (sandalyeler tasmasi dahil)
+    // kapladigi alan: kenardaki bir donati kadraj disinda kalmasin.
+    const cizim = donatiDunyaCizimi(m.katalog, m.genislik, m.derinlik, m.konum, m.aci)
+    for (const p of cizim.poligonlar) noktalar.push(...p.nokta)
+    for (const d of cizim.daireler) {
+      noktalar.push(
+        { x: d.merkez.x - d.r, y: d.merkez.y },
+        { x: d.merkez.x + d.r, y: d.merkez.y },
+        { x: d.merkez.x, y: d.merkez.y - d.r },
+        { x: d.merkez.x, y: d.merkez.y + d.r },
+      )
+    }
+  }
   if (!noktalar.length) return ''
 
   const x0 = Math.min(...noktalar.map((n) => n.x))
@@ -288,10 +317,21 @@ export function planSvg(kat: Kat, projeAdi: string, genislikPx = 1600): string {
     }
   }
   for (const m of kat.mobilyalar) {
-    const p = kutuNoktalari(m.konum, m.genislik, m.derinlik, m.aci)
-    parca.push(
-      `<path d="${p.map((q, i) => `${i ? 'L' : 'M'}${X(q.x)} ${YY(q.y)}`).join(' ')} Z" fill="${m.renk}22" stroke="${m.renk}" stroke-width="1"/>`,
-    )
+    // Ekrandaki gercek sembol (donatiSekli.ts) — jenerik kutu degil.
+    const cizim = donatiDunyaCizimi(m.katalog, m.genislik, m.derinlik, m.konum, m.aci)
+    for (const p of cizim.poligonlar) {
+      const d = p.nokta.map((q, i) => `${i ? 'L' : 'M'}${X(q.x)} ${YY(q.y)}`).join(' ')
+      parca.push(
+        p.kapali
+          ? `<path d="${d} Z" fill="${m.renk}1f" stroke="${m.renk}" stroke-width="1"/>`
+          : `<path d="${d}" fill="none" stroke="${m.renk}" stroke-width="1"/>`,
+      )
+    }
+    for (const d of cizim.daireler) {
+      parca.push(
+        `<circle cx="${X(d.merkez.x)}" cy="${YY(d.merkez.y)}" r="${(d.r * k).toFixed(2)}" fill="${m.renk}1f" stroke="${m.renk}" stroke-width="1"/>`,
+      )
+    }
   }
   for (const c2 of kat.kolonlar) {
     const p = kutuNoktalari(c2.konum, c2.genislik, c2.derinlik, c2.aci)
@@ -319,7 +359,8 @@ ${parca.join('\n')}
 
 // ------------------------------------------------------------------- OBJ
 
-interface Kutu {
+interface ObjKutu {
+  tur: 'kutu'
   cx: number
   cy: number
   cz: number
@@ -330,8 +371,29 @@ interface Kutu {
   grup: string
 }
 
-function katKutulari(kat: Kat): Kutu[] {
-  const cikti: Kutu[] = []
+interface ObjSilindir {
+  tur: 'silindir'
+  cx: number
+  cy: number
+  cz: number
+  cap: number
+  yukseklik: number
+  grup: string
+}
+
+interface ObjKure {
+  tur: 'kure'
+  cx: number
+  cy: number
+  cz: number
+  cap: number
+  grup: string
+}
+
+type ObjParca = ObjKutu | ObjSilindir | ObjKure
+
+function katKutulari(kat: Kat): ObjParca[] {
+  const cikti: ObjParca[] = []
   const katY = kat.yukseklik
   const taban = kat.kot
 
@@ -349,6 +411,7 @@ function katKutulari(kat: Kat): Kutu[] {
       if (uzun < 0.005) continue
       const t = (s + e) / 2
       cikti.push({
+        tur: 'kutu',
         cx: w.a.x + ux * t,
         cy: w.a.y + uy * t,
         cz: taban + h / 2,
@@ -363,6 +426,7 @@ function katKutulari(kat: Kat): Kutu[] {
       const ust = h - (a.esik + a.yukseklik)
       if (ust > 0.01) {
         cikti.push({
+          tur: 'kutu',
           cx: w.a.x + ux * a.mesafe,
           cy: w.a.y + uy * a.mesafe,
           cz: taban + a.esik + a.yukseklik + ust / 2,
@@ -375,6 +439,7 @@ function katKutulari(kat: Kat): Kutu[] {
       }
       if (a.esik > 0.01) {
         cikti.push({
+          tur: 'kutu',
           cx: w.a.x + ux * a.mesafe,
           cy: w.a.y + uy * a.mesafe,
           cz: taban + a.esik / 2,
@@ -390,6 +455,7 @@ function katKutulari(kat: Kat): Kutu[] {
 
   for (const c2 of kat.kolonlar) {
     cikti.push({
+      tur: 'kutu',
       cx: c2.konum.x,
       cy: c2.konum.y,
       cz: taban + katY / 2,
@@ -400,17 +466,42 @@ function katKutulari(kat: Kat): Kutu[] {
       grup: 'kolon',
     })
   }
+
+  // Donati: jenerik kutu degil, ekranda gorunen gercek kutle (donatiSekli.ts)
+  // — televizyon OBJ'de de televizyona benzer.
   for (const m of kat.mobilyalar) {
-    cikti.push({
-      cx: m.konum.x,
-      cy: m.konum.y,
-      cz: taban + m.yukseklik / 2,
-      sx: m.genislik,
-      sy: m.derinlik,
-      sz: m.yukseklik,
-      aci: (m.aci * Math.PI) / 180,
-      grup: 'donati',
-    })
+    for (const parca of parca3B(m.katalog, m.genislik, m.derinlik, m.yukseklik)) {
+      const merkez = donatiYerelDenDunyaya(m.konum, m.aci, parca.m[0], parca.m[2])
+      const cz = taban + parca.m[1]
+      if (parca.tur === 'kure') {
+        cikti.push({ tur: 'kure', cx: merkez.x, cy: merkez.y, cz, cap: parca.b[0], grup: 'donati' })
+      } else if (parca.tur === 'silindir') {
+        cikti.push({
+          tur: 'silindir',
+          cx: merkez.x,
+          cy: merkez.y,
+          cz,
+          cap: parca.b[0],
+          yukseklik: parca.b[1],
+          grup: 'donati',
+        })
+      } else {
+        cikti.push({
+          tur: 'kutu',
+          cx: merkez.x,
+          cy: merkez.y,
+          cz,
+          // Parcanin yerel x (genislik) ve z (derinlik) ekseni, ustteki
+          // don() ile aynen kolon/duvarin bekledigi (sx boyunca genislik,
+          // sy boyunca "duz" plan ekseni) duzenle eslesir.
+          sx: parca.b[0],
+          sy: parca.b[2],
+          sz: parca.b[1],
+          aci: ((m.aci + (parca.aci ?? 0)) * Math.PI) / 180,
+          grup: 'donati',
+        })
+      }
+    }
   }
   return cikti
 }
@@ -467,7 +558,7 @@ export function modelObj(proje: Proje, katIdler: string[]): string {
   ]
   let sayac = 1
 
-  const kutuYaz = (k: Kutu) => {
+  const kutuYaz = (k: ObjKutu) => {
     const cs = Math.cos(k.aci)
     const sn = Math.sin(k.aci)
     const yariX = k.sx / 2
@@ -500,11 +591,73 @@ export function modelObj(proje: Proje, katIdler: string[]): string {
     sayac += 8
   }
 
+  // Dikey eksenli govdeler (yataktaki lamba, sandalye ayagi, agac govdesi...):
+  // yukseklik ekseni etrafinda simetrik oldugu icin donme acisi gerekmez.
+  const KENAR = 16
+  const silindirYaz = (k: ObjSilindir) => {
+    const r = k.cap / 2
+    const yariZ = k.yukseklik / 2
+    const ust = sayac
+    for (let i = 0; i < KENAR; i++) {
+      const a = (Math.PI * 2 * i) / KENAR
+      satir.push(
+        `v ${(k.cx + Math.cos(a) * r).toFixed(4)} ${(k.cy + Math.sin(a) * r).toFixed(4)} ${(k.cz + yariZ).toFixed(4)}`,
+      )
+    }
+    const alt = ust + KENAR
+    for (let i = 0; i < KENAR; i++) {
+      const a = (Math.PI * 2 * i) / KENAR
+      satir.push(
+        `v ${(k.cx + Math.cos(a) * r).toFixed(4)} ${(k.cy + Math.sin(a) * r).toFixed(4)} ${(k.cz - yariZ).toFixed(4)}`,
+      )
+    }
+    satir.push(`f ${Array.from({ length: KENAR }, (_, i) => ust + i).join(' ')}`)
+    satir.push(`f ${Array.from({ length: KENAR }, (_, i) => alt + (KENAR - 1 - i)).join(' ')}`)
+    for (let i = 0; i < KENAR; i++) {
+      const j = (i + 1) % KENAR
+      satir.push(`f ${ust + i} ${ust + j} ${alt + j} ${alt + i}`)
+    }
+    sayac += KENAR * 2
+  }
+
+  const DILIM = 12
+  const YIGIN = 8
+  const kureYaz = (k: ObjKure) => {
+    const r = k.cap / 2
+    const bas = sayac
+    const idx = (yy: number, xx: number) => bas + yy * (DILIM + 1) + xx
+    for (let yy = 0; yy <= YIGIN; yy++) {
+      const teta = (Math.PI * yy) / YIGIN
+      const yukseklik = Math.cos(teta) * r
+      const halkaR = Math.sin(teta) * r
+      for (let xx = 0; xx <= DILIM; xx++) {
+        const phi = (Math.PI * 2 * xx) / DILIM
+        satir.push(
+          `v ${(k.cx + Math.cos(phi) * halkaR).toFixed(4)} ${(k.cy + Math.sin(phi) * halkaR).toFixed(4)} ${(k.cz + yukseklik).toFixed(4)}`,
+        )
+      }
+    }
+    for (let yy = 0; yy < YIGIN; yy++) {
+      for (let xx = 0; xx < DILIM; xx++) {
+        // Kutuplarda halka yaricapi 0'a inince dortgen kendiliginden ucgene
+        // dejenere olur; bu OBJ'de gecerlidir, gorunumde sorun yaratmaz.
+        satir.push(`f ${idx(yy, xx)} ${idx(yy, xx + 1)} ${idx(yy + 1, xx + 1)} ${idx(yy + 1, xx)}`)
+      }
+    }
+    sayac += (YIGIN + 1) * (DILIM + 1)
+  }
+
+  const parcaYaz = (k: ObjParca) => {
+    if (k.tur === 'kutu') kutuYaz(k)
+    else if (k.tur === 'silindir') silindirYaz(k)
+    else kureYaz(k)
+  }
+
   for (const kat of proje.katlar) {
     if (!katIdler.includes(kat.id)) continue
     satir.push(`o ${kat.ad.replace(/\s+/g, '_')}`)
 
-    const gruplu = new Map<string, Kutu[]>()
+    const gruplu = new Map<string, ObjParca[]>()
     for (const k of katKutulari(kat)) {
       const liste = gruplu.get(k.grup) ?? []
       liste.push(k)
@@ -512,7 +665,7 @@ export function modelObj(proje: Proje, katIdler: string[]): string {
     }
     for (const [grup, liste] of gruplu) {
       satir.push(`g ${grup}`)
-      for (const k of liste) kutuYaz(k)
+      for (const k of liste) parcaYaz(k)
     }
 
     // doseme plakalari

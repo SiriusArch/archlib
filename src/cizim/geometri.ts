@@ -368,3 +368,26 @@ export function sinirKutusu(noktalar: readonly Nokta[]): {
   }
   return { min: { x: x0, y: y0 }, max: { x: x1, y: y1 }, bos: false }
 }
+
+// -------------------------------------------------------- donati donusumu
+
+/**
+ * Bir donatinin yerel eksenini (lx = genislik yonu, ly = derinlik yonu,
+ * +ly = "arka") dunya duzlemine tasir.
+ *
+ * TEK KAYNAK: 2B tuval (Canvas rotate), 3B sahne (Three.js Y-donmesi), ve
+ * butun disa aktarimlar (DXF/SVG/OBJ) donatiyi TAM OLARAK bu formulle
+ * konumlandirir. Canvas'in y ekseni dunya y eksenine gore ters oldugu icin
+ * bu donusum salt bir donme degil, donme ile ayna bilesimidir — ama butun
+ * ciktilar ayni bilesimi kullandigi surece ekranda gordugun ile 3B'de ve
+ * indirdigin dosyada gordugun birebir ayni kalir.
+ */
+export function donatiYerelDenDunyaya(konum: Nokta, aciDerece: number, lx: number, ly: number): Nokta {
+  const r = (aciDerece * Math.PI) / 180
+  const cs = Math.cos(r)
+  const sn = Math.sin(r)
+  return {
+    x: konum.x + lx * cs + ly * sn,
+    y: konum.y + lx * sn - ly * cs,
+  }
+}

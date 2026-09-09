@@ -14,6 +14,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { Kat, Proje } from './tipler'
 import { duvarParcalari, duvarUzunluk, odalariBul, poligonAlan } from './geometri'
+import { parca3B, tesrifat } from './donatiSekli'
 
 export type SahneTemasi = 'studyo' | 'maket' | 'tel'
 
@@ -30,6 +31,8 @@ interface Props {
   tavan: boolean
   /** Her artisinda kamera modele oturtulur */
   sigdirTetik: number
+  /** Acikken zeminde tum donatilarin Neufert bos-birakma alani gosterilir */
+  tesrifatGorunur: boolean
 }
 
 interface Malzemeler {
@@ -95,11 +98,158 @@ function kutuEkle(
   }
 }
 
+function silindirEkle(
+  ust: THREE.Object3D,
+  malzeme: THREE.Material,
+  yerel: THREE.Vector3,
+  cap: number,
+  yukseklik: number,
+  aci: number,
+  telKafes: boolean,
+): void {
+  const geo = new THREE.CylinderGeometry(cap / 2, cap / 2, yukseklik, 20)
+  const mesh = new THREE.Mesh(geo, malzeme)
+  mesh.position.copy(yerel)
+  mesh.rotation.y = aci
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  ust.add(mesh)
+  if (telKafes) {
+    const kenar = new THREE.LineSegments(
+      new THREE.EdgesGeometry(geo, 25),
+      new THREE.LineBasicMaterial({ color: 0x30332d, transparent: true, opacity: 0.28 }),
+    )
+    kenar.position.copy(yerel)
+    kenar.rotation.y = aci
+    ust.add(kenar)
+  }
+}
+
+function kureEkle(
+  ust: THREE.Object3D,
+  malzeme: THREE.Material,
+  yerel: THREE.Vector3,
+  cap: number,
+): void {
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(cap / 2, 16, 12), malzeme)
+  mesh.position.copy(yerel)
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  ust.add(mesh)
+}
+
+/**
+ * Bir donatinin butun parcalarini (parca3B) tek bir grup altina ekler.
+ * Grup, mobilyanin konum/aci degerleriyle konumlanir; parcalarin kendi
+ * yerel konumlari ve (varsa) ek acilari o grubun icinde kalir. Boylece
+ * 2B sembol ile 3B kutle AYNI don()/konum hesabini paylasir — plan
+ * sembolu neyi gosteriyorsa 3B'de tam o kutle cikar.
+ */
+function donatiEkle(
+  sahne: THREE.Group,
+  katalog: string,
+  g: number,
+  d: number,
+  y: number,
+  konum: THREE.Vector3,
+  aciDerece: number,
+  anaRenk: string,
+  telKafes: boolean,
+  soluk: boolean,
+): void {
+  const grup = new THREE.Group()
+  grup.position.copy(konum)
+  grup.rotation.y = (aciDerece * Math.PI) / 180
+  sahne.add(grup)
+
+  const malzemeOnbellek = new Map<string, THREE.MeshStandardMaterial>()
+  const malzemeAl = (renk: string) => {
+    let mat = malzemeOnbellek.get(renk)
+    if (!mat) {
+      mat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(renk),
+        roughness: 0.82,
+        transparent: soluk,
+        opacity: soluk ? 0.32 : 1,
+        depthWrite: !soluk,
+      })
+      malzemeOnbellek.set(renk, mat)
+    }
+    return mat
+  }
+
+  for (const parca of parca3B(katalog, g, d, y)) {
+    const malzeme = malzemeAl(parca.renk ?? anaRenk)
+    const yerel = new THREE.Vector3(parca.m[0], parca.m[1], parca.m[2])
+    const aciRad = ((parca.aci ?? 0) * Math.PI) / 180
+    if (parca.tur === 'silindir') {
+      silindirEkle(grup, malzeme, yerel, parca.b[0], parca.b[1], aciRad, telKafes)
+    } else if (parca.tur === 'kure') {
+      kureEkle(grup, malzeme, yerel, parca.b[0])
+    } else {
+      kutuEkle(
+        grup,
+        malzeme,
+        yerel,
+        new THREE.Vector3(parca.b[0], parca.b[1], parca.b[2]),
+        aciRad,
+        telKafes,
+      )
+    }
+  }
+}
+
+/**
+ * Neufert tesrifat alani icin zemine yapisik seffaf serit. Ayni strip
+ * hesabini (on/arka/sol/sag) 2B tuval de kullanir; burada yerel (x, "y")
+ * degerleri dogrudan (x, z) olarak okunur cunku donati grubunun kendi
+ * position/rotation.y'si 2B'deki donatiYerelDenDunyaya ile ayni sonucu verir.
+ */
+function tesrifatEkle(
+  sahne: THREE.Group,
+  katalog: string,
+  g: number,
+  d: number,
+  konum: THREE.Vector3,
+  aciDerece: number,
+): void {
+  const t = tesrifat(katalog)
+  if (!t || (t.on <= 0 && t.arka <= 0 && t.sol <= 0 && t.sag <= 0)) return
+
+  const grup = new THREE.Group()
+  grup.position.set(konum.x, konum.y + 0.006, konum.z)
+  grup.rotation.y = (aciDerece * Math.PI) / 180
+  sahne.add(grup)
+
+  const malzeme = new THREE.MeshBasicMaterial({
+    color: 0x5c7c92,
+    transparent: true,
+    opacity: 0.16,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  })
+
+  const gy = g / 2
+  const dy = d / 2
+  const serit = (wx: number, wz: number, cx: number, cz: number) => {
+    const geo = new THREE.PlaneGeometry(wx, wz)
+    geo.rotateX(-Math.PI / 2)
+    const mesh = new THREE.Mesh(geo, malzeme)
+    mesh.position.set(cx, 0, cz)
+    grup.add(mesh)
+  }
+
+  if (t.on > 0) serit(g, t.on, 0, dy + t.on / 2)
+  if (t.arka > 0) serit(g, t.arka, 0, -dy - t.arka / 2)
+  if (t.sol > 0) serit(t.sol, d, -gy - t.sol / 2, 0)
+  if (t.sag > 0) serit(t.sag, d, gy + t.sag / 2, 0)
+}
+
 function katiKur(
   grup: THREE.Group,
   kat: Kat,
   m: Malzemeler,
-  secenek: { tavan: boolean; tel: boolean; soluk: boolean },
+  secenek: { tavan: boolean; tel: boolean; soluk: boolean; tesrifat: boolean },
 ): void {
   const taban = kat.kot
   const katY = kat.yukseklik
@@ -227,31 +377,26 @@ function katiKur(
   }
 
   // ------------------------------------------------------------ mobilyalar
+  // Donati tek kaynaktan geliyor (donatiSekli.ts): plan sembolunu tarayan
+  // ogrenci, 3B'de ve indirdigi OBJ'de AYNI kutleyi gorur.
   for (const f of kat.mobilyalar) {
-    const malzeme = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(f.renk),
-      roughness: 0.85,
-      transparent: secenek.soluk,
-      opacity: secenek.soluk ? 0.32 : 1,
-      depthWrite: !secenek.soluk,
-    })
-    kutuEkle(
+    const konumSahne = new THREE.Vector3(f.konum.x, taban, -f.konum.y)
+    donatiEkle(
       grup,
-      malzeme,
-      new THREE.Vector3(f.konum.x, taban + f.yukseklik / 2 + 0.06, -f.konum.y),
-      new THREE.Vector3(f.genislik, f.yukseklik, f.derinlik),
-      (f.aci * Math.PI) / 180,
+      f.katalog,
+      f.genislik,
+      f.derinlik,
+      f.yukseklik,
+      konumSahne,
+      f.aci,
+      f.renk,
       secenek.tel,
+      secenek.soluk,
     )
+    if (secenek.tesrifat) tesrifatEkle(grup, f.katalog, f.genislik, f.derinlik, konumSahne, f.aci)
   }
-
 }
 
-/**
- * Soluk kat icin malzemeleri KOPYALAYARAK saydamlastirir.
- * Ayni malzeme nesneleri butun katlarda paylasildigi icin dogrudan
- * degistirmek aktif kati da soluklastiriyordu.
- */
 /**
  * Kamerayi modelin sinir kuresine gore konumlandirir.
  * Uzakligi dikey ve yatay gorus acisinin darindan turetiyoruz; boylece dar
@@ -457,7 +602,12 @@ export default function Sahne3B(props: Props) {
       if (!kat.gorunur) continue
       const soluk = props.tumKatlar && kat.id !== props.aktifKatId
       const grup = new THREE.Group()
-      katiKur(grup, kat, soluk ? solukSet : m, { tavan: props.tavan, tel, soluk })
+      katiKur(grup, kat, soluk ? solukSet : m, {
+        tavan: props.tavan,
+        tel,
+        soluk,
+        tesrifat: props.tesrifatGorunur && !soluk,
+      })
       model.add(grup)
     }
 

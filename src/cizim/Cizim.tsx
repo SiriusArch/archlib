@@ -63,6 +63,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
   const [izgaraGorunur, setIzgaraGorunur] = useState(true)
   const [altKatGorunur, setAltKatGorunur] = useState(true)
   const [odaEtiketi, setOdaEtiketi] = useState(true)
+  const [tesrifatGorunur, setTesrifatGorunur] = useState(false)
   const [tumKatlar, setTumKatlar] = useState(false)
   const [tema, setTema] = useState<SahneTemasi>('studyo')
   const [golge, setGolge] = useState(true)
@@ -241,6 +242,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
         <Anahtar acik={izgaraGorunur} degistir={setIzgaraGorunur} ad="Izgara" />
         <Anahtar acik={odaEtiketi} degistir={setOdaEtiketi} ad="Alan" />
         <Anahtar acik={altKatGorunur} degistir={setAltKatGorunur} ad="Alt kat izi" />
+        <Anahtar acik={tesrifatGorunur} degistir={setTesrifatGorunur} ad="Tesrifat" />
         {gorunum !== '2b' && (
           <>
             <Anahtar acik={tumKatlar} degistir={setTumKatlar} ad="Tum katlar" />
@@ -463,6 +465,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
               izgaraGorunur={izgaraGorunur}
               altKatGorunur={altKatGorunur}
               odaEtiketi={odaEtiketi}
+              tesrifatGorunur={tesrifatGorunur}
               gonder={gonder}
               aracDegistir={setArac}
               apiRef={tuvalApi}
@@ -480,6 +483,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                 gunesAcisi={gunesAcisi}
                 tavan={tavan}
                 sigdirTetik={sigdirTetik}
+                tesrifatGorunur={tesrifatGorunur}
               />
             </Suspense>
           )}
@@ -499,6 +503,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                   izgaraGorunur={izgaraGorunur}
                   altKatGorunur={altKatGorunur}
                   odaEtiketi={odaEtiketi}
+                  tesrifatGorunur={tesrifatGorunur}
                   gonder={gonder}
                   aracDegistir={setArac}
                   apiRef={tuvalApi}
@@ -516,6 +521,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                     gunesAcisi={gunesAcisi}
                     tavan={tavan}
                     sigdirTetik={sigdirTetik}
+                    tesrifatGorunur={tesrifatGorunur}
                   />
                 </Suspense>
               </div>

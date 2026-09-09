@@ -27,6 +27,7 @@ import {
   birim,
   cikar,
   dik,
+  donatiYerelDenDunyaya,
   duvarKabugu,
   duvarNoktasi,
   duvarUzunluk,
@@ -38,6 +39,7 @@ import {
   type Oda,
 } from './geometri'
 import { aciklikBul, donatiBul } from './katalog'
+import { sembol2B, tesrifat, type Sekil2B, type Tesrifat } from './donatiSekli'
 import type { Eylem } from './depo'
 
 // ------------------------------------------------------------------ renkler
@@ -85,6 +87,8 @@ interface Props {
   izgaraGorunur: boolean
   altKatGorunur: boolean
   odaEtiketi: boolean
+  /** Acikken tum donatilarda Neufert bos-birakma alani gosterilir */
+  tesrifatGorunur: boolean
   gonder: (e: Eylem) => void
   aracDegistir: (a: Arac) => void
   apiRef?: { current: TuvalApi | null }
@@ -223,7 +227,8 @@ export default function Tuval2B(props: Props) {
     }
 
     // --------------------------------------------------------- mobilyalar
-    for (const m of p.kat.mobilyalar) cizMobilya(ctx, m, d2e, g.k, secKume.has(`mobilya:${m.id}`))
+    for (const m of p.kat.mobilyalar)
+      cizMobilya(ctx, m, d2e, g.k, secKume.has(`mobilya:${m.id}`), p.tesrifatGorunur)
 
     // ------------------------------------------------------------ olculer
     for (const o of p.kat.olculer) cizOlcu(ctx, o, d2e)
@@ -876,12 +881,16 @@ export default function Tuval2B(props: Props) {
         p.gonder({ t: 'sil', secim: p.secim })
         return
       }
-      if (e.key === 'r' || e.key === 'R') {
+      // R/T yerlestirme acisini dondurur — ama YALNIZCA mobilya/kolon
+      // aracindayken. 'R' ayni zamanda "Oda" araci icin de kisayol; asagidaki
+      // arac-eslesmesi calisabilsin diye bu iki tus baska hicbir modda
+      // yakalanmamali.
+      if ((p.arac === 'mobilya' || p.arac === 'kolon') && (e.key === 'r' || e.key === 'R')) {
         yerlestirmeAciRef.current = (yerlestirmeAciRef.current + 15) % 360
         cizIstek()
         return
       }
-      if (e.key === 't' || e.key === 'T') {
+      if ((p.arac === 'mobilya' || p.arac === 'kolon') && (e.key === 't' || e.key === 'T')) {
         yerlestirmeAciRef.current = (yerlestirmeAciRef.current - 15 + 360) % 360
         cizIstek()
         return
@@ -1220,41 +1229,157 @@ function cizAciklikSekli(
   ctx.restore()
 }
 
+/**
+ * Sekil2B listesini ekrana cizer. Yerel koordinatlar zaten donati merkezine
+ * gore; ctx onceden translate/rotate edilmis olmali.
+ */
+function sekilCiz(ctx: CanvasRenderingContext2D, sekiller: Sekil2B[], k: number, renk: string) {
+  for (const s of sekiller) {
+    ctx.beginPath()
+    if (s.t === 'dik') {
+      const g = s.g * k
+      const d = s.d * k
+      const r = Math.min((s.r ?? 0) * k, g / 2, d / 2)
+      ctx.roundRect(s.x * k - g / 2, s.y * k - d / 2, g, d, r)
+    } else if (s.t === 'cizgi') {
+      ctx.moveTo(s.x1 * k, s.y1 * k)
+      ctx.lineTo(s.x2 * k, s.y2 * k)
+    } else if (s.t === 'daire') {
+      ctx.arc(s.x * k, s.y * k, s.r * k, 0, Math.PI * 2)
+    } else if (s.t === 'yay') {
+      ctx.arc(s.x * k, s.y * k, s.r * k, s.bas, s.bit)
+    } else if (s.t === 'poli') {
+      s.n.forEach(([x, y], i) => {
+        if (i === 0) ctx.moveTo(x * k, y * k)
+        else ctx.lineTo(x * k, y * k)
+      })
+      if (s.kapali) ctx.closePath()
+    }
+
+    if (s.t === 'cizgi') {
+      ctx.lineWidth = s.ince ? 0.9 : 1.2
+      ctx.strokeStyle = renk
+      ctx.stroke()
+      continue
+    }
+    if (s.t !== 'yay' && s.dolgu !== undefined) {
+      ctx.fillStyle = hexAlfa(renk, s.dolgu)
+      ctx.fill()
+    }
+    ctx.lineWidth = 1.1
+    ctx.strokeStyle = renk
+    ctx.stroke()
+  }
+}
+
+/** #rrggbb rengine alfa ekler (0-1); zaten alfali gelirse dokunmaz. */
+function hexAlfa(renk: string, alfa: number): string {
+  if (!renk.startsWith('#') || renk.length !== 7) return renk
+  const a = Math.round(Math.min(1, Math.max(0, alfa)) * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return `${renk}${a}`
+}
+
 function cizMobilya(
   ctx: CanvasRenderingContext2D,
   m: Kat['mobilyalar'][number],
   d2e: (p: Nokta) => Nokta,
   k: number,
   secili: boolean,
+  tesrifatGorunur: boolean,
 ) {
   const s = d2e(m.konum)
-  const g = m.genislik * k
-  const d = m.derinlik * k
   ctx.save()
   ctx.translate(s.x, s.y)
+  // Sembol arka-yon +y (plan asagi) varsayimiyla cizildi; kullanicinin
+  // "aci" alani ise saat yonunun tersini pozitif sayiyor (matematik yonu).
+  // Ekranda y asagi aktigi icin -aci dogru gorunumu verir.
   ctx.rotate((-m.aci * Math.PI) / 180)
-  ctx.fillStyle = `${m.renk}22`
-  ctx.strokeStyle = secili ? R.secim : m.renk
-  ctx.lineWidth = secili ? 1.8 : 1.2
-  ctx.beginPath()
-  ctx.rect(-g / 2, -d / 2, g, d)
-  ctx.fill()
-  ctx.stroke()
-  // on yonu isareti
-  ctx.beginPath()
-  ctx.moveTo(-g / 2, -d / 2)
-  ctx.lineTo(0, -d / 2 + Math.min(10, d * 0.25))
-  ctx.lineTo(g / 2, -d / 2)
-  ctx.strokeStyle = `${m.renk}99`
-  ctx.lineWidth = 1
-  ctx.stroke()
-  if (g > 44 && d > 18) {
+  sekilCiz(ctx, sembol2B(m.katalog, m.genislik, m.derinlik), k, m.renk)
+
+  if (secili) {
+    ctx.strokeStyle = R.secim
+    ctx.lineWidth = 1.6
+    ctx.setLineDash([4, 3])
+    ctx.strokeRect((-m.genislik / 2) * k - 3, (-m.derinlik / 2) * k - 3, m.genislik * k + 6, m.derinlik * k + 6)
+    ctx.setLineDash([])
+  }
+
+  if (m.genislik * k > 46 && m.derinlik * k > 20) {
     ctx.rotate(0)
     ctx.fillStyle = R.odaYazi
     ctx.font = '400 10px "DM Sans", system-ui, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(m.ad.length > 16 ? `${m.ad.slice(0, 15)}…` : m.ad, 0, 3)
+    ctx.fillText(m.ad.length > 16 ? `${m.ad.slice(0, 15)}…` : m.ad, 0, (m.derinlik / 2) * k + 13)
   }
+  ctx.restore()
+
+  if (secili || tesrifatGorunur) cizTesrifat(ctx, m, d2e, k)
+}
+
+/**
+ * Neufert tesrifat alani: donatinin cevresinde bos birakilmasi gereken
+ * kesikli seritler, kenarinda gerekce metniyle. Ust seritteki "Tesrifat"
+ * anahtari acikken tum donatilarda, kapaliyken yalnizca secili olanda
+ * gosterilir — surekli acik varsayilan olsaydi kalabalik bir plan okunmaz
+ * hale gelirdi.
+ */
+function cizTesrifat(
+  ctx: CanvasRenderingContext2D,
+  m: Kat['mobilyalar'][number],
+  d2e: (p: Nokta) => Nokta,
+  k: number,
+) {
+  const t = tesrifat(m.katalog)
+  if (!t || (t.on <= 0 && t.arka <= 0 && t.sol <= 0 && t.sag <= 0)) return
+
+  const s = d2e(m.konum)
+  const gy = m.genislik / 2
+  const dy = m.derinlik / 2
+  ctx.save()
+  ctx.translate(s.x, s.y)
+  ctx.rotate((-m.aci * Math.PI) / 180)
+  ctx.strokeStyle = R.vurgu
+  ctx.fillStyle = hexAlfa(R.vurgu, 0.08)
+  ctx.lineWidth = 1
+  ctx.setLineDash([4, 3])
+
+  // [yon, yerel x, yerel y, genislik, derinlik, deger(m)]
+  const seritler: [keyof Tesrifat, number, number, number, number, number][] = []
+  if (t.on > 0) seritler.push(['on', -gy, dy, m.genislik, t.on, t.on])
+  if (t.arka > 0) seritler.push(['arka', -gy, -dy - t.arka, m.genislik, t.arka, t.arka])
+  if (t.sol > 0) seritler.push(['sol', -gy - t.sol, -dy, t.sol, m.derinlik, t.sol])
+  if (t.sag > 0) seritler.push(['sag', gy, -dy, t.sag, m.derinlik, t.sag])
+
+  for (const [, x, y, g, d] of seritler) {
+    ctx.beginPath()
+    ctx.rect(x * k, y * k, g * k, d * k)
+    ctx.fill()
+    ctx.stroke()
+  }
+  ctx.setLineDash([])
+  ctx.restore()
+
+  // Etiket: en genis seridin disina, ekran eksenine paralel yazilir.
+  const enGenis = seritler.reduce((a, b) => (b[5] > a[5] ? b : a), seritler[0])
+  const merkezX = enGenis[1] + enGenis[3] / 2
+  const merkezY = enGenis[2] + enGenis[4] / 2
+  const es = d2e(donatiYerelDenDunyaya(m.konum, m.aci, merkezX, merkezY))
+  ctx.save()
+  ctx.font = '500 10.5px "DM Sans", system-ui, sans-serif'
+  const metin = `${Math.round(enGenis[5] * 100)} cm`
+  const gw = ctx.measureText(metin).width + 10
+  ctx.fillStyle = 'rgba(255,254,250,0.95)'
+  ctx.strokeStyle = R.vurgu
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.roundRect(es.x - gw / 2, es.y - 8, gw, 16, 4)
+  ctx.fill()
+  ctx.stroke()
+  ctx.fillStyle = R.vurgu
+  ctx.textAlign = 'center'
+  ctx.fillText(metin, es.x, es.y + 3.5)
   ctx.restore()
 }
 
@@ -1380,6 +1505,11 @@ function cizSecim(
   ctx.restore()
 }
 
+/**
+ * Yerlestirme oncesi hayalet: kolonda basit kare, donatida gercek sembol +
+ * Neufert tesrifat cizgileri. Boylece ogrenci komsu duvara ya da baska bir
+ * esyaya carpip carpmadigini birakmadan once gorur.
+ */
 function cizYerlestirmeHayaleti(
   ctx: CanvasRenderingContext2D,
   p: Props,
@@ -1389,18 +1519,43 @@ function cizYerlestirmeHayaleti(
   k: number,
 ) {
   const s = d2e(nokta)
-  const t = p.arac === 'kolon' ? { g: 0.4, d: 0.4, renk: R.duvarDis } : donatiBul(p.donatiKatalog)
-  const g = ('g' in t ? t.g : 0.4) * k
-  const d = ('d' in t ? t.d : 0.4) * k
+
+  if (p.arac === 'kolon') {
+    ctx.save()
+    ctx.globalAlpha = 0.55
+    ctx.translate(s.x, s.y)
+    ctx.rotate((-aci * Math.PI) / 180)
+    ctx.strokeStyle = R.secim
+    ctx.lineWidth = 1.4
+    ctx.setLineDash([5, 3])
+    ctx.strokeRect((-0.2) * k, (-0.2) * k, 0.4 * k, 0.4 * k)
+    ctx.restore()
+    return
+  }
+
+  const t = donatiBul(p.donatiKatalog)
+  const hayalet: Kat['mobilyalar'][number] = {
+    id: '__hayalet',
+    katalog: t.id,
+    ad: t.ad,
+    konum: nokta,
+    aci,
+    genislik: t.g,
+    derinlik: t.d,
+    yukseklik: t.y,
+    renk: t.renk,
+  }
   ctx.save()
-  ctx.globalAlpha = 0.5
+  ctx.globalAlpha = 0.6
   ctx.translate(s.x, s.y)
   ctx.rotate((-aci * Math.PI) / 180)
+  sekilCiz(ctx, sembol2B(t.id, t.g, t.d), k, t.renk)
   ctx.strokeStyle = R.secim
   ctx.lineWidth = 1.4
   ctx.setLineDash([5, 3])
-  ctx.strokeRect(-g / 2, -d / 2, g, d)
+  ctx.strokeRect((-t.g / 2) * k, (-t.d / 2) * k, t.g * k, t.d * k)
   ctx.restore()
+  cizTesrifat(ctx, hayalet, d2e, k)
 }
 
 function cizOlcek(ctx: CanvasRenderingContext2D, G: number, Y: number, k: number) {

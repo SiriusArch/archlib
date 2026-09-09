@@ -55,6 +55,8 @@ export const DONATILAR: DonatiTanimi[] = [
   { id: 'koltuk', ad: 'Tekli koltuk', grup: 'Yasama', g: 0.8, d: 0.85, y: 0.8, renk: '#8d9a7c', not: '' },
   { id: 'sehpa', ad: 'Orta sehpa', grup: 'Yasama', g: 1.1, d: 0.6, y: 0.4, renk: '#b08c62', not: 'Kanepeye 40 cm mesafe birak' },
   { id: 'tv-unite', ad: 'TV unitesi', grup: 'Yasama', g: 1.8, d: 0.45, y: 0.5, renk: '#7e7a72', not: 'Ekran uzakligi: kosegen x 2.5' },
+  { id: 'televizyon', ad: 'Televizyon (duvar)', grup: 'Yasama', g: 1.1, d: 0.08, y: 0.68, renk: '#2b2e30', not: 'Duvara montaj; ekran uzakligi kosegen x 2.5' },
+  { id: 'hali', ad: 'Hali', grup: 'Yasama', g: 2.0, d: 1.4, y: 0.02, renk: '#a97b4c', not: 'Kanepenin on ayaklari hali uzerinde olmali' },
   // --- yemek
   { id: 'masa-4', ad: 'Yemek masasi 4', grup: 'Yemek', g: 1.2, d: 0.8, y: 0.75, renk: '#b08c62', not: 'Kisi basi 60x40 cm; sandalye icin 80 cm cekme' },
   { id: 'masa-6', ad: 'Yemek masasi 6', grup: 'Yemek', g: 1.8, d: 0.9, y: 0.75, renk: '#b08c62', not: '' },
