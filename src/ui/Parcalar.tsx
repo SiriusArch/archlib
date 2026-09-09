@@ -19,11 +19,11 @@ export function SayfaBasligi({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <div className={`etiket ${renk}`}>{etiket}</div>
-          <h1 className="font-baslik mt-2 text-[30px] leading-[1.12] font-normal tracking-[-0.015em] text-murekkep sm:text-[38px]">
+          <h1 className="font-baslik mt-2 text-[34px] leading-[1.12] font-normal tracking-[-0.015em] text-murekkep sm:text-[43px]">
             {baslik}
           </h1>
           {aciklama && (
-            <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-murekkep-2">{aciklama}</p>
+            <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-murekkep-2">{aciklama}</p>
           )}
         </div>
         {sag}
@@ -154,7 +154,7 @@ export function Bos({ baslik, aciklama }: { baslik: string; aciklama?: string })
     <div className="flex flex-col items-center justify-center px-8 py-20 text-center">
       <div className="etiket text-murekkep-3">{baslik}</div>
       {aciklama && (
-        <p className="mt-3 max-w-sm text-[13.5px] leading-relaxed text-murekkep-3">{aciklama}</p>
+        <p className="mt-3 max-w-sm text-[15.5px] leading-relaxed text-murekkep-3">{aciklama}</p>
       )}
     </div>
   )

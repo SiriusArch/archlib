@@ -34,3 +34,23 @@ export fn linear_to_srgb(color: vec3f) -> vec3f {
   let x = max(color, vec3f(0.0));
   return select(1.055 * pow(x, vec3f(1.0 / 2.4)) - 0.055, x * 12.92, x <= vec3f(0.0031308));
 }
+
+/**
+ * Piksel genisligine normalize edilmis izgara maskesi.
+ * fwidth analitik turev verdigi icin cizgi kalinligi mesafeden bagimsiz
+ * sabit kalir; uzakta moire yerine duzgun bir ton olusur.
+ */
+export fn grid_mask(p: vec2f, spacing: f32, width: f32) -> f32 {
+  let g = p / spacing;
+  let derivative = fwidth(g) + vec2f(1e-5);
+  let distance_to_line = abs(fract(g - 0.5) - 0.5) / derivative;
+  let nearest = min(distance_to_line.x, distance_to_line.y);
+  return 1.0 - smoothstep(width - 0.5, width + 0.5, nearest);
+}
+
+export fn axis_mask(p: vec2f, width: f32) -> f32 {
+  let derivative = fwidth(p) + vec2f(1e-5);
+  let distance_to_axis = abs(p) / derivative;
+  let nearest = min(distance_to_axis.x, distance_to_axis.y);
+  return 1.0 - smoothstep(width - 0.5, width + 0.5, nearest);
+}

@@ -280,7 +280,7 @@ export default function Arazi() {
                   <li key={i} className="border-b border-cizgi last:border-0">
                     <button
                       onClick={() => sonucSec(s)}
-                      className="w-full px-3 py-2 text-left text-[12.5px] leading-snug text-murekkep-2 transition-colors hover:bg-mavi-soft hover:text-murekkep"
+                      className="w-full px-3 py-2 text-left text-[14px] leading-snug text-murekkep-2 transition-colors hover:bg-mavi-soft hover:text-murekkep"
                     >
                       {s.ad}
                     </button>
@@ -294,11 +294,11 @@ export default function Arazi() {
               className="mt-3 h-[280px] w-full border border-cizgi"
               style={{ background: '#e9e2d6' }}
             />
-            <p className="mt-2 text-[12px] text-murekkep-3">
+            <p className="mt-2 text-[13.5px] text-murekkep-3">
               Haritaya tikla ya da arama sonucundan sec. Kesikli kare indirilecek alani gosterir.
             </p>
 
-            <div className="sayi mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-murekkep-2">
+            <div className="sayi mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-murekkep-2">
               <span>Enlem {merkez.enlem.toFixed(5)}</span>
               <span>Boylam {merkez.boylam.toFixed(5)}</span>
             </div>
@@ -321,7 +321,7 @@ export default function Arazi() {
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-[12px] text-murekkep-3">
+            <p className="mt-2 text-[13.5px] text-murekkep-3">
               Kenar uzunlugu {2 * yaricap} m. Buyuk alanlar Overpass sunucusunu zorlar; 900 m ustu
               bilerek kapali.
             </p>
@@ -342,13 +342,13 @@ export default function Arazi() {
               <p className="etiket mt-3 text-mavi-koyu">{ilerleme}</p>
             )}
             {hata && (
-              <p className="mt-3 border-l-2 border-kiremit pl-3 text-[13px] leading-relaxed text-kiremit-koyu">
+              <p className="mt-3 border-l-2 border-kiremit pl-3 text-[14.5px] leading-relaxed text-kiremit-koyu">
                 {hata}
               </p>
             )}
 
             {veri && izgara && durum === 'hazir' && (
-              <dl className="mt-4 space-y-1.5 text-[12.5px]">
+              <dl className="mt-4 space-y-1.5 text-[14px]">
                 {[
                   ['Bina', veri.sayim.bina],
                   ['Yol', veri.sayim.yol],
@@ -421,7 +421,7 @@ export default function Arazi() {
                   }
                 />
               </div>
-              <p className="mt-3 text-[11.5px] leading-relaxed text-murekkep-3">
+              <p className="mt-3 text-[13px] leading-relaxed text-murekkep-3">
                 Veri kaynagi: OpenStreetMap (ODbL) ve AWS Terrain Tiles. Kullandiginda kaynak
                 belirtmen gerekiyor. Bina yuksekligi etiketli degilse iki kat (6,2 m) varsayilir.
               </p>
@@ -473,7 +473,7 @@ export default function Arazi() {
             )}
 
             {paket && kesitA && (
-              <p className="sayi mt-2 text-[11px] text-murekkep-3">
+              <p className="sayi mt-2 text-[12.5px] text-murekkep-3">
                 A ({kesitA.x.toFixed(0)}, {kesitA.y.toFixed(0)})
                 {kesitB && ` → B (${kesitB.x.toFixed(0)}, ${kesitB.y.toFixed(0)})`}
                 {kesitB &&
@@ -557,7 +557,7 @@ function IndirDugmesi({
       className="group border border-cizgi px-3 py-2.5 text-left transition-colors duration-300 hover:border-mavi hover:bg-mavi-soft disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-cizgi disabled:hover:bg-transparent"
     >
       <div className="etiket text-murekkep">{ad}</div>
-      <div className="mt-0.5 text-[11px] text-murekkep-3">{alt}</div>
+      <div className="mt-0.5 text-[12.5px] text-murekkep-3">{alt}</div>
     </button>
   )
 }

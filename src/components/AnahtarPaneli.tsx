@@ -65,7 +65,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
             <div className="etiket text-murekkep-3">Baglanti</div>
-            <h2 className="font-baslik mt-1.5 text-[24px] leading-tight text-murekkep">
+            <h2 className="font-baslik mt-1.5 text-[27px] leading-tight text-murekkep">
               API anahtari
             </h2>
           </div>
@@ -78,10 +78,10 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
         </div>
 
         <div className="space-y-7 px-7 py-6">
-          <p className="max-w-xl text-[13.5px] leading-relaxed text-murekkep-2">
+          <p className="max-w-xl text-[15.5px] leading-relaxed text-murekkep-2">
             ArchLib in sunucusu yoktur. Analiz istegi tarayicindan dogrudan sectigin saglayiciya
             gider; anahtarin yalnizca bu tarayicinin{' '}
-            <code className="bg-kagit-3 px-1 py-0.5 text-[12px]">localStorage</code> alaninda
+            <code className="bg-kagit-3 px-1 py-0.5 text-[13.5px]">localStorage</code> alaninda
             saklanir, hicbir yere gonderilmez. Token maliyetini kendi hesabin karsilar.
           </p>
 
@@ -98,7 +98,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
                     className="group relative border-t border-cizgi py-3 pr-4 text-left sm:border-t-0"
                   >
                     <span
-                      className={`font-baslik block text-[16px] transition-colors duration-300 ${
+                      className={`font-baslik block text-[18px] transition-colors duration-300 ${
                         seciliMi ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
                       }`}
                     >
@@ -116,7 +116,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
                 )
               })}
             </div>
-            <p className="mt-4 border-l-2 border-cizgi pl-3 text-[12.5px] leading-relaxed text-murekkep-2">
+            <p className="mt-4 border-l-2 border-cizgi pl-3 text-[14px] leading-relaxed text-murekkep-2">
               {bilgi.not}
             </p>
           </div>
@@ -164,13 +164,13 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
                 <option key={m} value={m} />
               ))}
             </datalist>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-murekkep-3">
+            <p className="mt-2 text-[14px] leading-relaxed text-murekkep-3">
               Listeden secebilir ya da elle yazabilirsin. "Model bulunamadi (404)" hatasi alirsan
               buradan guncelle.
             </p>
           </div>
 
-          {mesaj && <p className="text-[13px] text-adacayi-koyu">{mesaj}</p>}
+          {mesaj && <p className="text-[14.5px] text-adacayi-koyu">{mesaj}</p>}
 
           <div className="flex flex-wrap items-center gap-4 border-t border-cizgi pt-5">
             <Dugme onClick={kaydet} dolgu="bg-kiremit">

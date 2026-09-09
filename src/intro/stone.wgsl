@@ -62,8 +62,10 @@ fn fs_main(in: VertexOut) -> @location(0) vec4f {
   // Uzerine yonlu bir ana isik ekleniyor — kademeler, yivler ve voussoir
   // derzleri ancak boyle okunuyor. Yarim Lambert, sert kesim yapmasin diye.
   let sun = normalize(uniforms.sun_direction);
-  let half_lambert = pow(dot(normal, sun) * 0.5 + 0.5, 2.2);
-  let sky_bias = 0.55 + 0.45 * (normal.y * 0.5 + 0.5);
+  // Us degeri dusuk ve gok egilimi dar: kemerin ust bandi ile sutunlar
+  // ayni malzeme gibi okunsun, aralarinda deger ucurumu olmasin.
+  let half_lambert = pow(dot(normal, sun) * 0.5 + 0.5, 1.35);
+  let sky_bias = 0.84 + 0.16 * (normal.y * 0.5 + 0.5);
   let lighting = irradiance * uniforms.ambient * sky_bias
                + uniforms.sun_tint * half_lambert * uniforms.sun_strength;
   let diffuse = uniforms.base_color * lighting;

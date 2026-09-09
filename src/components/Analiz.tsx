@@ -213,11 +213,11 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                       tur === t ? 'bg-kiremit' : 'bg-cizgi-2 group-hover:bg-murekkep-3'
                     }`}
                   />
-                  <span className="text-[13px] leading-snug">{ANALIZ_TURU_ADI[t]}</span>
+                  <span className="text-[14.5px] leading-snug">{ANALIZ_TURU_ADI[t]}</span>
                 </button>
               ))}
             </div>
-            <p className="mt-3 border-l-2 border-cizgi pl-3 text-[12.5px] leading-relaxed text-murekkep-2">
+            <p className="mt-3 border-l-2 border-cizgi pl-3 text-[14px] leading-relaxed text-murekkep-2">
               {ANALIZ_TURU_ACIKLAMA[tur]}
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 if (e.dataTransfer?.files?.length) void gorselEkle(e.dataTransfer.files)
               }}
             >
-              <p className="mb-3 text-[12.5px] leading-relaxed text-murekkep-2">
+              <p className="mb-3 text-[14px] leading-relaxed text-murekkep-2">
                 Surukle birak, yapistir (Ctrl+V) ya da sec. En fazla 6 gorsel, her biri 3,5 MB.
               </p>
               <label className="etiket inline-block cursor-pointer border border-cizgi-2 px-3 py-2 text-murekkep-2 transition-colors hover:border-murekkep hover:text-murekkep">
@@ -331,7 +331,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
           </div>
 
           {hata && (
-            <p className="border-l-2 border-kiremit pl-3 text-[13px] leading-relaxed text-kiremit-koyu">
+            <p className="border-l-2 border-kiremit pl-3 text-[14.5px] leading-relaxed text-kiremit-koyu">
               {hata}
             </p>
           )}
@@ -403,10 +403,10 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                       onClick={() => setCikti(g.metin)}
                       className="w-full py-2.5 text-left transition-colors hover:text-kiremit-koyu"
                     >
-                      <span className="sayi mr-3 text-[11px] text-murekkep-3">
+                      <span className="sayi mr-3 text-[12.5px] text-murekkep-3">
                         {new Date(g.tarih).toLocaleDateString('tr-TR')}
                       </span>
-                      <span className="text-[13.5px] text-murekkep-2">{g.baslik}</span>
+                      <span className="text-[15.5px] text-murekkep-2">{g.baslik}</span>
                       <span className="etiket ml-2 text-murekkep-3">{g.tur}</span>
                     </button>
                   </li>

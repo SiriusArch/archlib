@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Public+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 @import 'tailwindcss';
 
 /* ==========================================================================
@@ -41,7 +41,7 @@
 
   /* --- tipografi -------------------------------------------------------- */
   --font-baslik: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  --font-govde: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-govde: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 
@@ -59,10 +59,10 @@ body {
   margin: 0;
   background-color: #f7f4ee;
   color: #262320;
-  font-family: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-weight: 400;
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: 17px;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -84,8 +84,8 @@ body {
 
 .etiket {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   font-weight: 500;
 }
@@ -179,7 +179,7 @@ body {
   border-bottom: 1px solid var(--color-cizgi);
   padding: 8px 2px;
   font-family: var(--font-govde);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--color-murekkep);
   outline: none;
   transition: border-color 260ms ease;
@@ -217,14 +217,14 @@ textarea.alan:focus {
 /* --- analiz ciktisi ------------------------------------------------------ */
 
 .kritik {
-  font-size: 15px;
-  line-height: 1.75;
+  font-size: 17px;
+  line-height: 1.78;
   color: var(--color-murekkep-2);
 }
 
 .kritik h2 {
   font-family: var(--font-baslik);
-  font-size: 1.15rem;
+  font-size: 1.28rem;
   font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -277,7 +277,7 @@ textarea.alan:focus {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 .kritik th,
 .kritik td {
@@ -289,8 +289,8 @@ textarea.alan:focus {
 }
 .kritik th {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   font-weight: 500;
   color: var(--color-murekkep-3);

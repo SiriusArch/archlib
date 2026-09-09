@@ -21,6 +21,9 @@ const HDR_FORMAT: GPUTextureFormat = "rgba16float";
 const ENV_SIZE: readonly [number, number] = [2048, 1024];
 const TEXEL_ANGLE = (2 * Math.PI) / ENV_SIZE[0];
 
+/** Kemerin kaidesinin oturdugu kot — izgara duzlemi de burada. */
+const ZEMIN_Y = -1.2;
+
 const SKY = {
   sun_direction: [-0.62, 0.34, -0.71],
   sun_angular_size: 0.021,
@@ -45,9 +48,9 @@ const STONE = {
   texel_angle: TEXEL_ANGLE,
   env_size: ENV_SIZE,
   sun_direction: SKY.sun_direction,
-  sun_strength: 1.05,
+  sun_strength: 0.55,
   sun_tint: [1.0, 0.97, 0.93],
-  ambient: 0.40,
+  ambient: 0.78,
 } as const;
 
 export async function createScene(gpu: Gpu, output: Target) {
@@ -214,6 +217,13 @@ export function render(
       background_intensity: 1,
       texel_angle: TEXEL_ANGLE,
       env_size: ENV_SIZE,
+      // Izgara artik cevre haritasindan degil, ekran uzayinda ciziliyor.
+      ground_color: SKY.ground_color,
+      ground_y: ZEMIN_Y,
+      grid_minor: SKY.grid_minor,
+      grid_major_step: SKY.grid_major_step,
+      grid_major: SKY.grid_major,
+      grid_fade: 0.004,
     },
   });
 

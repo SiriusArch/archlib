@@ -43,7 +43,7 @@ export default function Listeler() {
         aciklama="Cogu pafta, tasarim kotu oldugu icin degil, bu maddelerden birkaci atlandigi icin puan kaybeder. Isaretler bu tarayicida saklanir."
         sag={
           <div className="text-right">
-            <div className="sayi text-[26px] leading-none text-murekkep">
+            <div className="sayi text-[29.5px] leading-none text-murekkep">
               {tamam}
               <span className="text-murekkep-3">/{liste.maddeler.length}</span>
             </div>
@@ -56,7 +56,7 @@ export default function Listeler() {
         {KONTROL_LISTELERI.map((l) => (
           <button key={l.id} onClick={() => setAktif(l.id)} className="group relative py-1">
             <span
-              className={`font-baslik text-[17px] transition-colors duration-300 ${
+              className={`font-baslik text-[19px] transition-colors duration-300 ${
                 aktif === l.id ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
               }`}
             >
@@ -73,7 +73,7 @@ export default function Listeler() {
 
       <section>
         <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
-          <p className="max-w-2xl text-[13.5px] leading-relaxed text-murekkep-2">
+          <p className="max-w-2xl text-[15.5px] leading-relaxed text-murekkep-2">
             {liste.aciklama}
           </p>
           <button
@@ -97,7 +97,7 @@ export default function Listeler() {
             return (
               <li key={m.id} className="border-b border-cizgi">
                 <label className="flex cursor-pointer items-start gap-4 py-4">
-                  <span className="sayi w-6 shrink-0 pt-[3px] text-[11px] text-murekkep-3">
+                  <span className="sayi w-6 shrink-0 pt-[3px] text-[12.5px] text-murekkep-3">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <input
@@ -108,14 +108,14 @@ export default function Listeler() {
                   />
                   <div className="min-w-0 flex-1">
                     <div
-                      className={`text-[14.5px] leading-snug transition-colors duration-300 ${
+                      className={`text-[16.5px] leading-snug transition-colors duration-300 ${
                         isaretli ? 'text-murekkep-3 line-through' : 'text-murekkep'
                       }`}
                     >
                       {m.metin}
                     </div>
                     {m.aciklama && !isaretli && (
-                      <p className="mt-1.5 text-[12.5px] leading-relaxed text-murekkep-2">
+                      <p className="mt-1.5 text-[14px] leading-relaxed text-murekkep-2">
                         {m.aciklama}
                       </p>
                     )}

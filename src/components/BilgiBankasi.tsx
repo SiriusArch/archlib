@@ -5,7 +5,7 @@ import { SayfaBasligi } from '../ui/Parcalar'
 
 function Metin({ icerik }: { icerik: string }) {
   return (
-    <div className="space-y-2 text-[13.5px] leading-[1.75] text-murekkep-2">
+    <div className="space-y-2 text-[15.5px] leading-[1.75] text-murekkep-2">
       {icerik.split('\n').map((satir, i) => {
         const k = satir.trim()
         if (!k) return <div key={i} className="h-2" />
@@ -79,7 +79,7 @@ export default function BilgiBankasi() {
               className="group relative py-1"
             >
               <span
-                className={`font-baslik text-[17px] transition-colors duration-300 ${
+                className={`font-baslik text-[19px] transition-colors duration-300 ${
                   sekme === k ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
                 }`}
               >
@@ -104,16 +104,16 @@ export default function BilgiBankasi() {
       {sekme === 'kavram' && (
         <div className="space-y-14">
           {bolumler.length === 0 && (
-            <p className="border-t border-cizgi py-16 text-center text-[14px] text-murekkep-3">
+            <p className="border-t border-cizgi py-16 text-center text-[16px] text-murekkep-3">
               Eslesen kayit yok.
             </p>
           )}
           {bolumler.map((b) => (
             <section key={b.id}>
               <div className="mb-4 border-b border-cizgi pb-2">
-                <h2 className="font-baslik text-[22px] leading-tight text-murekkep">{b.baslik}</h2>
+                <h2 className="font-baslik text-[25px] leading-tight text-murekkep">{b.baslik}</h2>
               </div>
-              <p className="mb-2 max-w-2xl text-[13.5px] leading-relaxed text-murekkep-2">
+              <p className="mb-2 max-w-2xl text-[15.5px] leading-relaxed text-murekkep-2">
                 {b.aciklama}
               </p>
               <p className="etiket mb-6 text-murekkep-3">{b.kaynak}</p>
@@ -128,7 +128,7 @@ export default function BilgiBankasi() {
                         className="group flex w-full items-baseline justify-between gap-4 py-3.5 text-left"
                       >
                         <span
-                          className={`font-baslik text-[16px] transition-colors duration-300 ${
+                          className={`font-baslik text-[18px] transition-colors duration-300 ${
                             secili ? 'text-kehribar-koyu' : 'text-murekkep group-hover:text-kehribar-koyu'
                           }`}
                         >
@@ -163,17 +163,17 @@ export default function BilgiBankasi() {
       {sekme === 'olcu' && (
         <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
           {tablolar.length === 0 && (
-            <p className="border-t border-cizgi py-16 text-center text-[14px] text-murekkep-3 lg:col-span-2">
+            <p className="border-t border-cizgi py-16 text-center text-[16px] text-murekkep-3 lg:col-span-2">
               Eslesen olcu yok.
             </p>
           )}
           {tablolar.map((t) => (
             <section key={t.id}>
               <div className="mb-1 border-b border-cizgi pb-2">
-                <h2 className="font-baslik text-[18px] leading-tight text-murekkep">{t.baslik}</h2>
+                <h2 className="font-baslik text-[20.5px] leading-tight text-murekkep">{t.baslik}</h2>
               </div>
               <p className="etiket mb-3 text-murekkep-3">{t.kaynak}</p>
-              <table className="w-full text-[13px]">
+              <table className="w-full text-[14.5px]">
                 <tbody>
                   {t.satirlar.map((s, i) => (
                     <tr key={i} className="border-b border-cizgi align-top">
@@ -181,7 +181,7 @@ export default function BilgiBankasi() {
                       <td className="py-2">
                         <span className="sayi text-murekkep">{s.deger}</span>
                         {s.not && (
-                          <div className="mt-0.5 text-[12px] leading-relaxed text-murekkep-3">
+                          <div className="mt-0.5 text-[13.5px] leading-relaxed text-murekkep-3">
                             {s.not}
                           </div>
                         )}

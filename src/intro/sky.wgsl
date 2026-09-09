@@ -1,4 +1,4 @@
-import { direction_from_equirect } from "./env-common.wgsl";
+import { direction_from_equirect, grid_mask, axis_mask } from "./env-common.wgsl";
 
 struct Sky {
   sun_direction: vec3f,
@@ -66,21 +66,6 @@ fn cloud_layer(direction: vec3f, sun: vec3f) -> vec2f {
 // yogunlugu mesafeye gore sonumlenir, boylece ufukta gri bir yuzeye donusur.
 // --------------------------------------------------------------------------
 
-fn grid_mask(p: vec2f, spacing: f32, width: f32) -> f32 {
-  let g = p / spacing;
-  let derivative = fwidth(g) + vec2f(1e-5);
-  let distance_to_line = abs(fract(g - 0.5) - 0.5) / derivative;
-  let nearest = min(distance_to_line.x, distance_to_line.y);
-  return 1.0 - smoothstep(width - 0.5, width + 0.5, nearest);
-}
-
-fn axis_mask(p: vec2f, width: f32) -> f32 {
-  let derivative = fwidth(p) + vec2f(1e-5);
-  let distance_to_axis = abs(p) / derivative;
-  let nearest = min(distance_to_axis.x, distance_to_axis.y);
-  return 1.0 - smoothstep(width - 0.5, width + 0.5, nearest);
-}
-
 fn ground(direction: vec3f, sun: vec3f) -> vec3f {
   let depth = max(-direction.y, 0.001);
   let plane = direction.xz / depth * sky.ground_scale;
@@ -90,7 +75,7 @@ fn ground(direction: vec3f, sun: vec3f) -> vec3f {
 
   var color = sky.ground_color;
 
-  let minor = grid_mask(plane, 1.0, 0.55) * 0.72;
+  let minor = grid_mask(plane, 1.0, 0.55) * 0.35;
   let major = grid_mask(plane, sky.grid_major_step, 0.9);
   let axis = axis_mask(plane, 1.1);
 

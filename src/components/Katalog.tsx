@@ -13,12 +13,12 @@ function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
   return (
     <Kart onClick={() => ac(site)} vurgu="bg-adacayi" className="flex h-full flex-col p-5">
       <div className="mb-2.5 flex items-start justify-between gap-3">
-        <h3 className="font-baslik text-[17px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
+        <h3 className="font-baslik text-[19px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
           {site.ad}
         </h3>
         <Rozet className={`${UCRET_SINIF[site.ucret]} shrink-0`}>{UCRET_ADI[site.ucret]}</Rozet>
       </div>
-      <p className="mb-4 flex-1 text-[13px] leading-relaxed text-murekkep-2">{site.ozet}</p>
+      <p className="mb-4 flex-1 text-[14.5px] leading-relaxed text-murekkep-2">{site.ozet}</p>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {site.asamalar.slice(0, 2).map((a) => (
           <span key={a} className="etiket text-murekkep-3">
@@ -47,7 +47,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
             <div className="etiket text-adacayi-koyu">{KATEGORI_ADI[site.kategori]}</div>
-            <h2 className="font-baslik mt-1.5 text-[26px] leading-tight text-murekkep">
+            <h2 className="font-baslik mt-1.5 text-[29.5px] leading-tight text-murekkep">
               {site.ad}
             </h2>
           </div>
@@ -72,12 +72,12 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
 
           <section>
             <h3 className="etiket mb-2 text-murekkep-3">Ne ise yarar</h3>
-            <p className="text-[14px] leading-relaxed text-murekkep-2">{site.anlatim}</p>
+            <p className="text-[16px] leading-relaxed text-murekkep-2">{site.anlatim}</p>
           </section>
 
           <section>
             <h3 className="etiket mb-2 text-murekkep-3">Projende nerede kullanirsin</h3>
-            <p className="border-l-2 border-adacayi pl-4 text-[14px] leading-relaxed text-murekkep-2">
+            <p className="border-l-2 border-adacayi pl-4 text-[16px] leading-relaxed text-murekkep-2">
               {site.kullanim}
             </p>
           </section>
@@ -85,14 +85,14 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
           {site.fiyatNotu && (
             <section>
               <h3 className="etiket mb-2 text-murekkep-3">Fiyat</h3>
-              <p className="text-[14px] text-murekkep-2">{site.fiyatNotu}</p>
+              <p className="text-[16px] text-murekkep-2">{site.fiyatNotu}</p>
             </section>
           )}
 
           {site.uyari && (
             <section className="bg-kiremit-soft px-4 py-3">
               <h3 className="etiket mb-1.5 text-kiremit-koyu">Dikkat</h3>
-              <p className="text-[13.5px] leading-relaxed text-murekkep-2">{site.uyari}</p>
+              <p className="text-[15.5px] leading-relaxed text-murekkep-2">{site.uyari}</p>
             </section>
           )}
 
@@ -175,8 +175,8 @@ export default function Katalog() {
         baslik="Ogrencinin isine yarayan 48 arac"
         aciklama="Ucret, icerik ve proje asamasina gore siniflandirildi. Her kartta aracin ne ise yaradigi ve projende tam olarak nerede kullanilacagi yaziyor."
         sag={
-          <div className="sayi text-right text-[13px] text-murekkep-3">
-            <div className="text-[26px] leading-none text-murekkep">{sonuclar.length}</div>
+          <div className="sayi text-right text-[14.5px] text-murekkep-3">
+            <div className="text-[29.5px] leading-none text-murekkep">{sonuclar.length}</div>
             <div className="etiket mt-1">listeleniyor</div>
           </div>
         }
@@ -238,7 +238,7 @@ export default function Katalog() {
       </section>
 
       {gruplu.length === 0 && (
-        <p className="border-t border-cizgi py-16 text-center text-[14px] text-murekkep-3">
+        <p className="border-t border-cizgi py-16 text-center text-[16px] text-murekkep-3">
           Bu filtreyle eslesen arac yok.
         </p>
       )}
@@ -247,12 +247,12 @@ export default function Katalog() {
         {gruplu.map(([kat, liste]) => (
           <section key={kat}>
             <div className="mb-5 flex items-baseline justify-between gap-6 border-b border-cizgi pb-2">
-              <h2 className="font-baslik text-[21px] leading-tight text-murekkep">
+              <h2 className="font-baslik text-[23.5px] leading-tight text-murekkep">
                 {KATEGORI_ADI[kat]}
               </h2>
-              <span className="sayi text-[12px] text-murekkep-3">{liste.length}</span>
+              <span className="sayi text-[13.5px] text-murekkep-3">{liste.length}</span>
             </div>
-            <p className="mb-6 max-w-2xl text-[13.5px] leading-relaxed text-murekkep-2">
+            <p className="mb-6 max-w-2xl text-[15.5px] leading-relaxed text-murekkep-2">
               {KATEGORI_ACIKLAMA[kat]}
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

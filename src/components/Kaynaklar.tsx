@@ -27,13 +27,13 @@ export default function Kaynaklar() {
           {ana.map((k) => (
             <article key={k.id} className="border-b border-cizgi py-5">
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                <h3 className="font-baslik text-[19px] leading-tight text-murekkep">{k.baslik}</h3>
+                <h3 className="font-baslik text-[21.5px] leading-tight text-murekkep">{k.baslik}</h3>
                 <span className={`etiket ${GUVEN_SINIF[k.guven]}`}>guven {k.guven}</span>
               </div>
               <div className="etiket mt-1 text-murekkep-3">
                 {k.yazar} · {k.tur}
               </div>
-              <p className="mt-3 max-w-3xl text-[13.5px] leading-relaxed text-murekkep-2">{k.not}</p>
+              <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-murekkep-2">{k.not}</p>
             </article>
           ))}
         </div>
@@ -45,13 +45,13 @@ export default function Kaynaklar() {
           {destek.map((k) => (
             <article key={k.id} className="border-b border-cizgi py-4">
               <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5">
-                <h3 className="font-baslik text-[16px] text-murekkep">
+                <h3 className="font-baslik text-[18px] text-murekkep">
                   {k.baslik}
-                  <span className="ml-2 text-[13px] text-murekkep-3">{k.yazar}</span>
+                  <span className="ml-2 text-[14.5px] text-murekkep-3">{k.yazar}</span>
                 </h3>
                 <span className={`etiket ${GUVEN_SINIF[k.guven]}`}>{k.guven}</span>
               </div>
-              <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-murekkep-2">{k.not}</p>
+              <p className="mt-2 max-w-3xl text-[14.5px] leading-relaxed text-murekkep-2">{k.not}</p>
             </article>
           ))}
         </div>
@@ -59,7 +59,7 @@ export default function Kaynaklar() {
 
       <section className="mb-14 bg-kiremit-soft px-6 py-6">
         <h2 className="etiket mb-3 text-kiremit-koyu">Sinirlar — bunlari bilerek kullan</h2>
-        <ul className="space-y-2.5 text-[13.5px] leading-relaxed text-murekkep-2">
+        <ul className="space-y-2.5 text-[15.5px] leading-relaxed text-murekkep-2">
           <li>
             Neufert <strong className="font-medium text-murekkep">DIN (Alman) standartlarina</strong>{' '}
             dayanir. Turkiye de ruhsat ve yonetmelik uyumu icin{' '}
@@ -90,7 +90,7 @@ export default function Kaynaklar() {
       {dogrulanmayan.length > 0 && (
         <section className="mb-14">
           <BolumBasligi>Katalogda dogrulanamayan siteler</BolumBasligi>
-          <p className="mb-4 text-[13.5px] leading-relaxed text-murekkep-2">
+          <p className="mb-4 text-[15.5px] leading-relaxed text-murekkep-2">
             Bu sitelerin icerigi erisim sirasinda teyit edilemedi (sunucu engeli ya da yanit
             vermemesi). Aciklamalari temkinli yazildi; kullanmadan once kendin kontrol et.
           </p>
@@ -101,11 +101,11 @@ export default function Kaynaklar() {
                   href={s.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="font-baslik text-[16px] text-murekkep underline decoration-cizgi-2 underline-offset-4 transition-colors hover:text-kiremit-koyu"
+                  className="font-baslik text-[18px] text-murekkep underline decoration-cizgi-2 underline-offset-4 transition-colors hover:text-kiremit-koyu"
                 >
                   {s.ad}
                 </a>
-                <p className="mt-1 text-[12.5px] leading-relaxed text-murekkep-2">{s.uyari}</p>
+                <p className="mt-1 text-[14px] leading-relaxed text-murekkep-2">{s.uyari}</p>
               </li>
             ))}
           </ul>
@@ -114,10 +114,10 @@ export default function Kaynaklar() {
 
       <section>
         <BolumBasligi>Gizlilik</BolumBasligi>
-        <p className="max-w-3xl text-[13.5px] leading-relaxed text-murekkep-2">
+        <p className="max-w-3xl text-[15.5px] leading-relaxed text-murekkep-2">
           ArchLib in sunucusu yoktur; tamamen statik bir sitedir. API anahtarin, kontrol listesi
           isaretlerin ve kritik gecmisin yalnizca bu tarayicinin{' '}
-          <code className="bg-kagit-3 px-1 py-0.5 text-[12px]">localStorage</code> alaninda tutulur.
+          <code className="bg-kagit-3 px-1 py-0.5 text-[13.5px]">localStorage</code> alaninda tutulur.
           Yukledigin gorseller ve yazdigin metin, analiz sirasinda dogrudan sectigin saglayiciya
           (Anthropic / OpenAI / Google) gonderilir — arada ArchLib e ait hicbir sunucu yoktur.
           Arazi araci OpenStreetMap, Nominatim ve AWS Terrain Tiles servislerine dogrudan istek
