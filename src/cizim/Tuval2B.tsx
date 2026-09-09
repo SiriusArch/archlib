@@ -466,6 +466,12 @@ export default function Tuval2B(props: Props) {
     cizIstek()
   })
 
+  useEffect(() => {
+    const tazele = () => cizIstek()
+    window.addEventListener(GORSEL_OLAYI, tazele)
+    return () => window.removeEventListener(GORSEL_OLAYI, tazele)
+  }, [cizIstek])
+
   // ------------------------------------------------------------- etkilesim
   const yakalamaHesapla = useCallback(
     (dunya: Nokta, shift: boolean) => {
@@ -806,6 +812,10 @@ export default function Tuval2B(props: Props) {
   const onPointerUp = useCallback(() => {
     const s = surukleRef.current
     const p = pRef.current
+    // Surukleme bitti: sonraki surukleme yeni bir geri-al adimi acsin.
+    if (s.tur === 'tasi' || s.tur === 'duvarUcu' || s.tur === 'aciklikKaydir') {
+      p.gonder({ t: 'birlesim-kes' })
+    }
     if (s.tur === 'secKutu') {
       const x0 = Math.min(s.bas.x, s.son.x)
       const x1 = Math.max(s.bas.x, s.son.x)
@@ -1002,10 +1012,15 @@ function cizAltlik(
 }
 
 const gorselOnbellek = new Map<string, HTMLImageElement>()
+/** Altlik gorseli yuklendiginde tuvalin yeniden cizilmesi icin. */
+const GORSEL_OLAYI = 'archlib-cizim-gorsel'
+
 function gorselGetir(veri: string): HTMLImageElement | null {
   let img = gorselOnbellek.get(veri)
   if (!img) {
     img = new Image()
+    // Yukleme bitince tuval bir kez daha cizilmezse altlik ekrana hic gelmez.
+    img.onload = () => window.dispatchEvent(new Event(GORSEL_OLAYI))
     img.src = veri
     gorselOnbellek.set(veri, img)
     return null
@@ -1190,11 +1205,16 @@ function cizAciklikSekli(
       y: menteseDunya.y + u.y * a.genislik,
     })
     const bit = Math.atan2(acikUc.y - mentese.y, acikUc.x - mentese.x)
+    // Yay her zaman kisa yoldan (90°) cizilsin; yon bayragina birakildiginda
+    // bazi dogrultularda 270°'lik ters yay ciziliyordu.
+    let fark = bit - bas
+    while (fark <= -Math.PI) fark += Math.PI * 2
+    while (fark > Math.PI) fark -= Math.PI * 2
     ctx.strokeStyle = R.kapiYay
     ctx.lineWidth = 1
     ctx.setLineDash([4, 3])
     ctx.beginPath()
-    ctx.arc(mentese.x, mentese.y, a.genislik * k, bas, bit, yon > 0)
+    ctx.arc(mentese.x, mentese.y, a.genislik * k, bas, bas + fark, fark < 0)
     ctx.stroke()
   }
   ctx.restore()

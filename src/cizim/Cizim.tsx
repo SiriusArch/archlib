@@ -68,6 +68,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
   const [golge, setGolge] = useState(true)
   const [tavan, setTavan] = useState(false)
   const [gunesAcisi, setGunesAcisi] = useState(135)
+  const [sigdirTetik, setSigdirTetik] = useState(0)
   const [projelerAcik, setProjelerAcik] = useState(false)
   const [projeler, setProjeler] = useState<ProjeOzeti[]>([])
 
@@ -250,7 +251,10 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
 
         <div className="ml-auto flex items-center gap-2">
           <button
-            onClick={() => tuvalApi.current?.sigdir()}
+            onClick={() => {
+              tuvalApi.current?.sigdir()
+              setSigdirTetik((v) => v + 1)
+            }}
             className="rounded-[6px] border border-cizgi px-2.5 py-1.5 text-[13px] font-medium text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
           >
             Sigdir
@@ -475,6 +479,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                 izgara={izgaraGorunur}
                 gunesAcisi={gunesAcisi}
                 tavan={tavan}
+                sigdirTetik={sigdirTetik}
               />
             </Suspense>
           )}
@@ -510,6 +515,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                     izgara={izgaraGorunur}
                     gunesAcisi={gunesAcisi}
                     tavan={tavan}
+                    sigdirTetik={sigdirTetik}
                   />
                 </Suspense>
               </div>

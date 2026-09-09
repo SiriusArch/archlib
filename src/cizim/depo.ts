@@ -69,9 +69,18 @@ export type Eylem =
   | { t: 'secim'; secim: Secim[] }
   | { t: 'altlik'; altlik: Altlik | null }
   | { t: 'varsayilan'; yama: Partial<Varsayilanlar> }
+  /** Surukleme bitti: sonraki ayni turden eylem yeni bir gecmis adimi acar. */
+  | { t: 'birlesim-kes' }
 
 /** Gecmise yazilmayan, yalnizca gorunumu etkileyen eylemler. */
-const GECICI: Eylem['t'][] = ['secim', 'kat-sec']
+const GECICI: Eylem['t'][] = ['secim', 'kat-sec', 'birlesim-kes']
+
+/**
+ * Surukleme sirasinda saniyede onlarca kez gelen eylemler.
+ * Ilki gecmise yazilir, ardi ardina gelen ayni turdekiler ona katilir;
+ * boylece bir surukleme tek "geri al" adimi olur.
+ */
+const BIRLESEN: Eylem['t'][] = ['tasi', 'duvar-uc', 'aciklik-yama']
 
 function katYama(p: Proje, katId: string, degis: (k: Kat) => Kat): Proje {
   return {
@@ -343,6 +352,10 @@ function indirge(d: Durum, e: Eylem): Durum {
     case 'secim':
       return { ...d, secim: e.secim }
 
+    case 'birlesim-kes':
+      // Durumu degistirmez; yalnizca gecmis birlestirmesini keser.
+      return { ...d }
+
     case 'altlik':
       return { ...d, proje: katYama(d.proje, kat.id, (k) => ({ ...k, altlik: e.altlik })) }
 
@@ -365,6 +378,8 @@ interface GecmisliDurum {
   simdi: Durum
   geri: Durum[]
   ileri: Durum[]
+  /** En son islenen eylem turu; birlestirme karari icin */
+  son: string
 }
 
 function gecmisliIndirge(g: GecmisliDurum, e: Eylem | { t: '__geri' } | { t: '__ileri' }): GecmisliDurum {
@@ -375,6 +390,7 @@ function gecmisliIndirge(g: GecmisliDurum, e: Eylem | { t: '__geri' } | { t: '__
       simdi: onceki,
       geri: g.geri.slice(0, -1),
       ileri: [g.simdi, ...g.ileri].slice(0, GECMIS_SINIR),
+      son: '__geri',
     }
   }
   if (e.t === '__ileri') {
@@ -383,13 +399,22 @@ function gecmisliIndirge(g: GecmisliDurum, e: Eylem | { t: '__geri' } | { t: '__
       simdi: g.ileri[0],
       geri: [...g.geri, g.simdi].slice(-GECMIS_SINIR),
       ileri: g.ileri.slice(1),
+      son: '__ileri',
     }
   }
 
+  const tur = (e as Eylem).t
   const yeni = indirge(g.simdi, e as Eylem)
-  if (yeni === g.simdi) return g
-  if (GECICI.includes((e as Eylem).t)) return { ...g, simdi: yeni }
-  return { simdi: yeni, geri: [...g.geri, g.simdi].slice(-GECMIS_SINIR), ileri: [] }
+  if (yeni === g.simdi) return { ...g, son: tur }
+  if (GECICI.includes(tur)) return { ...g, simdi: yeni, son: tur }
+  // Ayni surukleme icinde: durumu ilerlet ama yeni gecmis adimi acma.
+  if (BIRLESEN.includes(tur) && g.son === tur) return { ...g, simdi: yeni, son: tur }
+  return {
+    simdi: yeni,
+    geri: [...g.geri, g.simdi].slice(-GECMIS_SINIR),
+    ileri: [],
+    son: tur,
+  }
 }
 
 // ---------------------------------------------------------------- saklama
@@ -448,7 +473,12 @@ function baslangic(): GecmisliDurum {
     proje = null
   }
   const p = proje ?? yeniProje('Ilk plan')
-  return { simdi: { proje: p, aktifKatId: p.katlar[0].id, secim: [] }, geri: [], ileri: [] }
+  return {
+    simdi: { proje: p, aktifKatId: p.katlar[0].id, secim: [] },
+    geri: [],
+    ileri: [],
+    son: '',
+  }
 }
 
 // ------------------------------------------------------------------- kanca

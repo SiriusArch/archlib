@@ -28,6 +28,8 @@ interface Props {
   /** Gunes yonu, derece */
   gunesAcisi: number
   tavan: boolean
+  /** Her artisinda kamera modele oturtulur */
+  sigdirTetik: number
 }
 
 interface Malzemeler {
@@ -132,7 +134,10 @@ function katiKur(
     const boy = duvarUzunluk(w)
     if (boy < 0.02) continue
     const h = w.yukseklik > 0 ? w.yukseklik : katY
-    const aci = Math.atan2(-(w.b.y - w.a.y), w.b.x - w.a.x)
+    // Y ekseni etrafinda donme: yerel +X, sahne (cos, -sin) yonune gider.
+    // Plan yonu (dx, dy) icin bu aci dogrudan atan2(dy, dx) olur; isareti
+    // ters almak duvari X eksenine gore aynalar ve egik duvarlari bozar.
+    const aci = Math.atan2(w.b.y - w.a.y, w.b.x - w.a.x)
     const malzeme = w.tur === 'bolme' ? m.bolme : w.tur === 'cam' ? m.cam : m.duvar
     const ux = (w.b.x - w.a.x) / boy
     const uy = (w.b.y - w.a.y) / boy
@@ -216,7 +221,7 @@ function katiKur(
       m.kolon,
       new THREE.Vector3(c.konum.x, taban + katY / 2, -c.konum.y),
       new THREE.Vector3(c.genislik, katY, c.derinlik),
-      (-c.aci * Math.PI) / 180,
+      (c.aci * Math.PI) / 180,
       secenek.tel,
     )
   }
@@ -226,25 +231,72 @@ function katiKur(
     const malzeme = new THREE.MeshStandardMaterial({
       color: new THREE.Color(f.renk),
       roughness: 0.85,
+      transparent: secenek.soluk,
+      opacity: secenek.soluk ? 0.32 : 1,
+      depthWrite: !secenek.soluk,
     })
     kutuEkle(
       grup,
       malzeme,
       new THREE.Vector3(f.konum.x, taban + f.yukseklik / 2 + 0.06, -f.konum.y),
       new THREE.Vector3(f.genislik, f.yukseklik, f.derinlik),
-      (-f.aci * Math.PI) / 180,
+      (f.aci * Math.PI) / 180,
       secenek.tel,
     )
   }
 
-  if (secenek.soluk) {
-    grup.traverse((o) => {
-      const mesh = o as THREE.Mesh
-      if (!mesh.isMesh) return
-      const mat = mesh.material as THREE.Material
-      mat.transparent = true
-      mat.opacity = 0.35
-    })
+}
+
+/**
+ * Soluk kat icin malzemeleri KOPYALAYARAK saydamlastirir.
+ * Ayni malzeme nesneleri butun katlarda paylasildigi icin dogrudan
+ * degistirmek aktif kati da soluklastiriyordu.
+ */
+/**
+ * Kamerayi modelin sinir kuresine gore konumlandirir.
+ * Uzakligi dikey ve yatay gorus acisinin darindan turetiyoruz; boylece dar
+ * bolunmus panelde de model kadraja tam oturuyor.
+ */
+function kadrajaOturt(
+  model: THREE.Object3D,
+  kamera: THREE.PerspectiveCamera,
+  kontrol: OrbitControls,
+): void {
+  const sinir = new THREE.Box3().setFromObject(model)
+  if (sinir.isEmpty()) return
+  const kure = sinir.getBoundingSphere(new THREE.Sphere())
+  const yaricap = Math.max(kure.radius, 2.5)
+  const dikeyFov = (kamera.fov * Math.PI) / 180
+  const yatayFov = 2 * Math.atan(Math.tan(dikeyFov / 2) * Math.max(0.2, kamera.aspect))
+  const u = (yaricap / Math.sin(Math.min(dikeyFov, yatayFov) / 2)) * 1.08
+
+  kontrol.target.set(kure.center.x, Math.max(1, kure.center.y), kure.center.z)
+  kamera.position.set(
+    kure.center.x + u * 0.62,
+    kure.center.y + u * 0.5,
+    kure.center.z + u * 0.72,
+  )
+  kamera.updateProjectionMatrix()
+  kontrol.update()
+}
+
+function solukMalzemeler(m: Malzemeler): Malzemeler {
+  const soluk = <T extends THREE.Material>(x: T): T => {
+    const k = x.clone() as T
+    k.transparent = true
+    k.opacity = 0.3
+    k.depthWrite = false
+    return k
+  }
+  return {
+    duvar: soluk(m.duvar),
+    bolme: soluk(m.bolme),
+    doseme: soluk(m.doseme),
+    tavan: soluk(m.tavan),
+    cam: soluk(m.cam),
+    dograma: soluk(m.dograma),
+    kolon: soluk(m.kolon),
+    cizgi: m.cizgi,
   }
 }
 
@@ -257,6 +309,9 @@ export default function Sahne3B(props: Props) {
   const modelRef = useRef<THREE.Group | null>(null)
   const gunesRef = useRef<THREE.DirectionalLight | null>(null)
   const izgaraRef = useRef<THREE.GridHelper | null>(null)
+  const ilkModelRef = useRef(true)
+  /** Tuval olculeri hazir olmadan kadraj hesaplanamaz; istek burada bekler. */
+  const kadrajBekliyorRef = useRef(false)
   const pRef = useRef(props)
   pRef.current = props
 
@@ -347,6 +402,12 @@ export default function Sahne3B(props: Props) {
       kamera.aspect = g / y
       kamera.updateProjectionMatrix()
       cizer.setSize(g, y, false)
+      // Model, tuval olculmeden once kurulmus olabilir; bekleyen kadraj
+      // istegi dogru en-boy oraniyla burada karsilanir.
+      if (kadrajBekliyorRef.current) {
+        kadrajBekliyorRef.current = false
+        kadrajaOturt(model, kamera, kontrol)
+      }
     })
     goz.observe(kutu)
 
@@ -371,17 +432,22 @@ export default function Sahne3B(props: Props) {
   useEffect(() => {
     const model = modelRef.current
     if (!model) return
-    // eski icerigi bosalt
+    // Eski icerigi bosalt: geometri ve malzemeleri birlikte birak, yoksa her
+    // yeniden kurulumda GPU tarafinda birikirler.
     for (let i = model.children.length - 1; i >= 0; i--) {
       const c = model.children[i]
       model.remove(c)
       c.traverse((o) => {
         const mesh = o as THREE.Mesh
         if (mesh.geometry) mesh.geometry.dispose()
+        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined
+        if (Array.isArray(mat)) mat.forEach((x) => x.dispose())
+        else mat?.dispose()
       })
     }
 
     const m = malzemeKur(props.tema)
+    const solukSet = solukMalzemeler(m)
     const tel = props.tema === 'tel'
     const katlar = props.tumKatlar
       ? props.proje.katlar
@@ -389,21 +455,45 @@ export default function Sahne3B(props: Props) {
 
     for (const kat of katlar) {
       if (!kat.gorunur) continue
+      const soluk = props.tumKatlar && kat.id !== props.aktifKatId
       const grup = new THREE.Group()
-      katiKur(grup, kat, m, {
-        tavan: props.tavan,
-        tel,
-        soluk: props.tumKatlar && kat.id !== props.aktifKatId,
-      })
+      katiKur(grup, kat, soluk ? solukSet : m, { tavan: props.tavan, tel, soluk })
       model.add(grup)
     }
 
-    // kamerayi ilk kurulumda modele ayarla
-    const kutu = new THREE.Box3().setFromObject(model)
-    if (kutu.isEmpty()) return
-    const merkez = kutu.getCenter(new THREE.Vector3())
-    kontrolRef.current?.target.set(merkez.x, Math.max(1, merkez.y), merkez.z)
+    // Kamerayi modele oturt. Plan orijinden uzakta cizilmis olabilir; ilk
+    // kurulumda ya da model kadrajin cok disina cikmissa yeniden konumlanir.
+    const sinir = new THREE.Box3().setFromObject(model)
+    if (sinir.isEmpty()) return
+    const kontrol = kontrolRef.current
+    const kamera = kameraRef.current
+    if (!kamera || !kontrol) return
+    const merkez = sinir.getCenter(new THREE.Vector3())
+    const cap = Math.max(sinir.getSize(new THREE.Vector3()).length(), 4)
+
+    if (ilkModelRef.current || kamera.position.distanceTo(merkez) > cap * 6) {
+      ilkModelRef.current = false
+      const kutuEl = kutuRef.current
+      if (kutuEl && kutuEl.clientWidth > 0 && kutuEl.clientHeight > 0) {
+        kamera.aspect = kutuEl.clientWidth / kutuEl.clientHeight
+        kadrajaOturt(model, kamera, kontrol)
+      } else {
+        kadrajBekliyorRef.current = true
+      }
+    } else {
+      kontrol.target.set(merkez.x, Math.max(1, merkez.y), merkez.z)
+      kontrol.update()
+    }
   }, [props.proje, props.aktifKatId, props.tumKatlar, props.tema, props.tavan])
+
+  // Ust seritteki "Sigdir" dugmesi 3B kadraji da tazeler.
+  useEffect(() => {
+    const model = modelRef.current
+    const kamera = kameraRef.current
+    const kontrol = kontrolRef.current
+    if (!model || !kamera || !kontrol || !props.sigdirTetik) return
+    kadrajaOturt(model, kamera, kontrol)
+  }, [props.sigdirTetik])
 
   // -------------------------------------------------------- isik / izgara
   useEffect(() => {

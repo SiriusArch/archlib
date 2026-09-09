@@ -137,7 +137,9 @@ export function duvarParcalari(
 ): { dolu: [number, number][]; delik: Aciklik[] } {
   const boy = duvarUzunluk(d)
   const kendi = aciklikar
-    .filter((a) => a.duvarId === d.id)
+    // Duvardan genis aciklik gecerli bir bosluk uretemez (duvar kisaltilmis
+    // olabilir); parcalama bozulmasin diye disarida birakilir.
+    .filter((a) => a.duvarId === d.id && a.genislik < boy - 0.02)
     .map((a) => ({
       ...a,
       mesafe: Math.min(boy - a.genislik / 2, Math.max(a.genislik / 2, a.mesafe)),
