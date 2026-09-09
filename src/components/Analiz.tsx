@@ -17,7 +17,8 @@ import {
   type GecmisKaydi,
 } from '../lib/storage'
 import Markdown from './Markdown'
-import { SayfaBasligi, BolumBasligi, Dugme, Bos } from '../ui/Parcalar'
+import { SayfaBasligi, Bos } from '../ui/Parcalar'
+import { Panel, PanelBasligi, Cip } from '../ui/Kontroller'
 
 const TURLER: AnalizTuru[] = [
   'pafta',
@@ -188,100 +189,115 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
   return (
     <div className="kademe">
       <SayfaBasligi
-        etiket="01 — Kritik Masasi"
+        etiket="Kritik"
         renk="text-kiremit-koyu"
         baslik="Paftani juri oncesi bir kez daha oku"
         aciklama="Gorseli ya da soruyu birak. Degerlendirme, I. Hulusi Gungor un Temel Tasar kitabindaki mimari elestiri cercevesi (Bolum 14), Neufert olculeri ve TS/DIN cizim standartlari uzerinden yapilir."
+        sag={
+          <button
+            onClick={anahtarPaneliniAc}
+            className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-200 ${
+              anahtarVar
+                ? 'border-adacayi/45 bg-adacayi-soft text-adacayi-koyu'
+                : 'border-kiremit/45 bg-kiremit-soft text-kiremit-koyu'
+            }`}
+          >
+            {anahtarVar ? `${saglayiciBul(saglayici).ad} bagli` : 'API anahtari gerekli'}
+          </button>
+        }
       />
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,352px)_minmax(0,1fr)]">
         {/* ------------------------------------------------------------ sol */}
-        <div className="space-y-8">
-          <div>
-            <BolumBasligi renk="text-kiremit-koyu">1 — Kritik turu</BolumBasligi>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-0">
-              {TURLER.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTur(t)}
-                  className={`group flex items-baseline gap-2 border-b border-cizgi py-2.5 text-left transition-colors duration-300 ${
-                    tur === t ? 'text-murekkep' : 'text-murekkep-2 hover:text-murekkep'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-[5px] w-[5px] shrink-0 translate-y-[-2px] rounded-full transition-colors duration-300 ${
-                      tur === t ? 'bg-kiremit' : 'bg-cizgi-2 group-hover:bg-murekkep-3'
-                    }`}
-                  />
-                  <span className="text-[14.5px] leading-snug">{ANALIZ_TURU_ADI[t]}</span>
-                </button>
-              ))}
-            </div>
-            <p className="mt-3 border-l-2 border-cizgi pl-3 text-[14px] leading-relaxed text-murekkep-2">
-              {ANALIZ_TURU_ACIKLAMA[tur]}
-            </p>
-          </div>
-
-          <div>
-            <BolumBasligi renk="text-kiremit-koyu">2 — Gorsel</BolumBasligi>
-            <div
-              className={`border border-dashed px-4 py-5 transition-colors duration-300 ${
-                suruklenen ? 'border-kiremit bg-kiremit-soft' : 'border-cizgi-2'
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setSuruklenen(true)
-              }}
-              onDragLeave={() => setSuruklenen(false)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setSuruklenen(false)
-                if (e.dataTransfer?.files?.length) void gorselEkle(e.dataTransfer.files)
-              }}
-            >
-              <p className="mb-3 text-[14px] leading-relaxed text-murekkep-2">
-                Surukle birak, yapistir (Ctrl+V) ya da sec. En fazla 6 gorsel, her biri 3,5 MB.
+        <div className="space-y-3.5">
+          <Panel>
+            <PanelBasligi baslik="Kritik turu" />
+            <div className="px-4 py-3.5">
+              <div className="flex flex-wrap gap-1.5">
+                {TURLER.map((t) => (
+                  <Cip key={t} secili={tur === t} onClick={() => setTur(t)}>
+                    {ANALIZ_TURU_ADI[t]}
+                  </Cip>
+                ))}
+              </div>
+              <p className="mt-3 text-[13.5px] leading-relaxed text-murekkep-3">
+                {ANALIZ_TURU_ACIKLAMA[tur]}
               </p>
-              <label className="etiket inline-block cursor-pointer border border-cizgi-2 px-3 py-2 text-murekkep-2 transition-colors hover:border-murekkep hover:text-murekkep">
-                Dosya sec
-                <input
-                  type="file"
-                  accept={IZINLI_GORSEL_TURLERI.join(',')}
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files?.length) void gorselEkle(e.target.files)
-                    e.target.value = ''
-                  }}
-                />
-              </label>
+            </div>
+          </Panel>
+
+          <Panel>
+            <PanelBasligi
+              baslik="Gorsel"
+              sag={
+                <span className="sayi text-[13px] text-murekkep-3">{gorseller.length} / 6</span>
+              }
+            />
+            <div className="px-4 py-3.5">
+              <div
+                className={`rounded-[7px] border border-dashed px-4 py-5 text-center transition-colors duration-300 ${
+                  suruklenen ? 'border-kiremit bg-kiremit-soft' : 'border-cizgi-2 bg-kagit'
+                }`}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setSuruklenen(true)
+                }}
+                onDragLeave={() => setSuruklenen(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setSuruklenen(false)
+                  if (e.dataTransfer?.files?.length) void gorselEkle(e.dataTransfer.files)
+                }}
+              >
+                <p className="mb-3 text-[13.5px] leading-relaxed text-murekkep-3">
+                  Surukle birak, yapistir (Ctrl+V) ya da sec.
+                  <br />
+                  En fazla 6 gorsel, her biri 3,5 MB.
+                </p>
+                <label className="inline-block cursor-pointer rounded-[6px] border border-cizgi bg-kart px-3.5 py-2 text-[13.5px] font-medium text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep">
+                  Dosya sec
+                  <input
+                    type="file"
+                    accept={IZINLI_GORSEL_TURLERI.join(',')}
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.length) void gorselEkle(e.target.files)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+              </div>
 
               {gorseller.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-3 gap-2">
                   {gorseller.map((g) => (
-                    <div key={g.id} className="group relative border border-cizgi">
+                    <div
+                      key={g.id}
+                      className="group relative overflow-hidden rounded-[6px] border border-cizgi"
+                    >
                       <img src={g.onizleme} alt={g.ad} className="h-20 w-full object-cover" />
                       <button
                         onClick={() => setGorseller((x) => x.filter((y) => y.id !== g.id))}
-                        className="etiket absolute inset-0 flex items-center justify-center bg-kagit/85 opacity-0 transition-opacity group-hover:opacity-100"
+                        className="absolute inset-0 flex items-center justify-center bg-kart/88 text-[13px] font-medium text-kiremit-koyu opacity-0 transition-opacity group-hover:opacity-100"
                       >
-                        kaldir
+                        Kaldir
                       </button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
+          </Panel>
 
-          <div>
-            <BolumBasligi renk="text-kiremit-koyu">3 — Baglam ve soru</BolumBasligi>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+          <Panel>
+            <PanelBasligi baslik="Baglam ve soru" />
+            <div className="space-y-3 px-4 py-3.5">
+              <div className="grid grid-cols-2 gap-3">
                 <input
                   value={ders}
                   onChange={(e) => setDers(e.target.value)}
-                  placeholder="Ders / stuyo"
+                  placeholder="Ders / studyo"
                   className="alan"
                 />
                 <input
@@ -307,112 +323,107 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 className="alan"
               />
             </div>
-          </div>
+          </Panel>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {!calisiyor ? (
-              <Dugme onClick={() => void calistir()} dolgu="bg-kiremit" className="flex-1">
-                Kritigi al
-              </Dugme>
-            ) : (
-              <button
-                onClick={() => iptalRef.current?.abort()}
-                className="etiket flex-1 border border-kiremit px-6 py-3 text-kiremit-koyu"
-              >
-                Durdur
-              </button>
-            )}
+          {calisiyor ? (
             <button
-              onClick={anahtarPaneliniAc}
-              className="etiket border border-cizgi px-4 py-3 text-murekkep-2 transition-colors hover:border-murekkep hover:text-murekkep"
+              onClick={() => iptalRef.current?.abort()}
+              className="w-full rounded-[7px] border border-kiremit bg-kiremit-soft px-5 py-3.5 text-[15px] font-medium text-kiremit-koyu transition-opacity hover:opacity-90"
             >
-              {anahtarVar ? 'Anahtar tamam' : 'Anahtar gir'}
+              Durdur
             </button>
-          </div>
+          ) : (
+            <button
+              onClick={() => void calistir()}
+              className="w-full rounded-[7px] bg-kiremit px-5 py-3.5 text-[15px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
+            >
+              Kritigi al
+            </button>
+          )}
 
           {hata && (
-            <p className="border-l-2 border-kiremit pl-3 text-[14.5px] leading-relaxed text-kiremit-koyu">
+            <p className="rounded-[7px] bg-kiremit-soft px-3.5 py-2.5 text-[13.5px] leading-relaxed text-kiremit-koyu">
               {hata}
             </p>
           )}
         </div>
 
         {/* ------------------------------------------------------------ sag */}
-        <div className="min-w-0">
-          <BolumBasligi
-            renk="text-kiremit-koyu"
-            sag={
-              cikti && !calisiyor ? (
-                <span className="flex gap-4">
-                  <button
-                    onClick={() => navigator.clipboard?.writeText(cikti).catch(() => {})}
-                    className="etiket text-murekkep-3 transition-colors hover:text-murekkep"
-                  >
-                    Kopyala
-                  </button>
-                  <button
-                    onClick={indir}
-                    className="etiket text-murekkep-3 transition-colors hover:text-murekkep"
-                  >
-                    .md indir
-                  </button>
-                </span>
-              ) : calisiyor ? (
-                <span className="etiket text-kiremit-koyu">yaziliyor</span>
-              ) : undefined
-            }
-          >
-            Kritik
-          </BolumBasligi>
-
-          <div
-            ref={ciktiRef}
-            className="max-h-[calc(100vh-260px)] min-h-[560px] overflow-y-auto"
-          >
-            {!cikti && !calisiyor && (
-              <Bos
-                baslik="Kritik masasi bos"
-                aciklama="Soldan kritik turunu sec, paftani ya da maket fotografini yukle ve Kritigi al de. Yanit; ne gordugu, guclu yonler, oncelikli sorunlar, olcu kontrolu, jurinin soracagi sorular ve teslime kadar yapilacaklar basliklariyla gelir."
-              />
-            )}
-            {calisiyor && !cikti && <Bos baslik="Model dusunuyor" />}
-            {cikti && <Markdown metin={cikti} />}
-          </div>
+        <div className="min-w-0 space-y-3.5">
+          <Panel>
+            <PanelBasligi
+              baslik="Kritik"
+              sag={
+                cikti && !calisiyor ? (
+                  <span className="flex gap-3.5">
+                    <button
+                      onClick={() => navigator.clipboard?.writeText(cikti).catch(() => {})}
+                      className="text-[13px] font-medium text-murekkep-3 transition-colors hover:text-murekkep"
+                    >
+                      Kopyala
+                    </button>
+                    <button
+                      onClick={indir}
+                      className="text-[13px] font-medium text-murekkep-3 transition-colors hover:text-murekkep"
+                    >
+                      .md indir
+                    </button>
+                  </span>
+                ) : calisiyor ? (
+                  <span className="text-[13px] font-medium text-kiremit-koyu">yaziliyor</span>
+                ) : undefined
+              }
+            />
+            <div
+              ref={ciktiRef}
+              className="max-h-[calc(100vh-250px)] min-h-[520px] overflow-y-auto px-6 py-5"
+            >
+              {!cikti && !calisiyor && (
+                <Bos
+                  baslik="Kritik masasi bos"
+                  aciklama="Soldan kritik turunu sec, paftani ya da maket fotografini yukle ve Kritigi al de. Yanit; ne gordugu, guclu yonler, oncelikli sorunlar, olcu kontrolu, jurinin soracagi sorular ve teslime kadar yapilacaklar basliklariyla gelir."
+                />
+              )}
+              {calisiyor && !cikti && <Bos baslik="Model dusunuyor" />}
+              {cikti && <Markdown metin={cikti} />}
+            </div>
+          </Panel>
 
           {gecmis.length > 0 && (
-            <section className="mt-10">
-              <BolumBasligi
+            <Panel>
+              <PanelBasligi
+                baslik="Son kritikler"
                 sag={
                   <button
                     onClick={() => {
                       gecmisiTemizle()
                       setGecmis([])
                     }}
-                    className="etiket text-murekkep-3 transition-colors hover:text-kiremit-koyu"
+                    className="text-[13px] font-medium text-murekkep-3 transition-colors hover:text-kiremit-koyu"
                   >
                     Temizle
                   </button>
                 }
-              >
-                Son kritikler
-              </BolumBasligi>
+              />
               <ul>
                 {gecmis.map((g) => (
-                  <li key={g.id} className="border-b border-cizgi">
+                  <li key={g.id} className="border-b border-cizgi/70 last:border-0">
                     <button
                       onClick={() => setCikti(g.metin)}
-                      className="w-full py-2.5 text-left transition-colors hover:text-kiremit-koyu"
+                      className="flex w-full items-baseline gap-3 px-4 py-2.5 text-left transition-colors hover:bg-kagit-2/70"
                     >
-                      <span className="sayi mr-3 text-[12.5px] text-murekkep-3">
+                      <span className="sayi shrink-0 text-[12.5px] text-murekkep-3">
                         {new Date(g.tarih).toLocaleDateString('tr-TR')}
                       </span>
-                      <span className="text-[15.5px] text-murekkep-2">{g.baslik}</span>
-                      <span className="etiket ml-2 text-murekkep-3">{g.tur}</span>
+                      <span className="min-w-0 flex-1 truncate text-[14.5px] text-murekkep-2">
+                        {g.baslik}
+                      </span>
+                      <span className="shrink-0 text-[12.5px] text-murekkep-3">{g.tur}</span>
                     </button>
                   </li>
                 ))}
               </ul>
-            </section>
+            </Panel>
           )}
         </div>
       </div>

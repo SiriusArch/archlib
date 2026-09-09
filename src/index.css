@@ -1,52 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Manrope:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 /* ==========================================================================
    ArchLib tasarim belirteclleri
-   Editoryal pastel minimalizm. Kutu ve golge yerine kagit, ince cizgi ve
-   bosluk. Renk bir sus degil, bolum isaretleyicisi.
+   Sade, modern, pastel. Golge yok; ayrim ince kenar ve zemin farkiyla kurulur.
+   Kose yaricaplari kucuk (6-10px) — yumusak ama sisirilmis degil.
    ========================================================================== */
 
 @theme {
-  /* --- kagit ve murekkep ------------------------------------------------ */
-  --color-kagit: #f7f4ee;
-  --color-kagit-2: #f1ece2;
-  --color-kagit-3: #e9e2d6;
-  --color-murekkep: #262320;
-  --color-murekkep-2: #4c463e;
-  --color-murekkep-3: #7d7568;
-  --color-cizgi: #ded6c8;
-  --color-cizgi-2: #c6bcaa;
+  /* --- zemin ------------------------------------------------------------ */
+  --color-kagit: #fcfbf8;
+  --color-kart: #fffefa;
+  --color-yan: #f5f4ef;
+  --color-kagit-2: #f4f3ed;
+  --color-kagit-3: #edece4;
 
-  /* --- bes bolum rengi -------------------------------------------------- */
-  --color-kiremit: #b03e3e;
-  --color-adacayi: #519976;
-  --color-kehribar: #be8144;
-  --color-mavi: #517a95;
-  --color-mor: #5c5992;
+  /* --- metin ------------------------------------------------------------ */
+  --color-murekkep: #30332d;
+  --color-murekkep-2: #5f6259;
+  --color-murekkep-3: #85857b;
 
-  /* --- pastel yikamalar (zemin icin) ------------------------------------ */
-  --color-kiremit-soft: #f4e6e3;
-  --color-adacayi-soft: #e5efe9;
-  --color-kehribar-soft: #f7ecdf;
-  --color-mavi-soft: #e5ecf2;
-  --color-mor-soft: #eae8f0;
+  /* --- cizgi ------------------------------------------------------------ */
+  --color-cizgi: #e8e7df;
+  --color-cizgi-2: #dcdad0;
 
-  /* --- koyu tonlar (metin icin, kontrast guvenli) ----------------------- */
-  --color-kiremit-koyu: #8d3131;
-  --color-adacayi-koyu: #3d735a;
-  --color-kehribar-koyu: #8d5f31;
-  --color-mavi-koyu: #3d5c70;
-  --color-mor-koyu: #46446e;
+  /* --- vurgular --------------------------------------------------------- */
+  --color-kiremit: #b9573e;
+  --color-kiremit-koyu: #a54a34;
+  --color-kiremit-soft: #f4e9e2;
+
+  --color-adacayi: #727d63;
+  --color-adacayi-koyu: #5f6a52;
+  --color-adacayi-soft: #eaece3;
+
+  --color-kehribar: #a97b4c;
+  --color-kehribar-koyu: #8f6740;
+  --color-kehribar-soft: #f3ece2;
+
+  --color-mavi: #5c7c92;
+  --color-mavi-koyu: #4c697c;
+  --color-mavi-soft: #e8eef1;
+
+  --color-mor: #6d6a8f;
+  --color-mor-koyu: #5c5979;
+  --color-mor-soft: #ecebf1;
 
   /* --- tipografi -------------------------------------------------------- */
-  --font-baslik: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  --font-govde: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-baslik: 'Manrope', system-ui, sans-serif;
+  --font-govde: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'DM Sans', system-ui, sans-serif;
 }
 
 :root {
   color-scheme: light;
+}
+
+html {
+  background-color: #fcfbf8;
 }
 
 html,
@@ -57,42 +67,59 @@ body,
 
 body {
   margin: 0;
-  background-color: #f7f4ee;
-  color: #262320;
-  font-family: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: #30332d;
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-weight: 400;
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Kagit dokusu: cok ince, neredeyse gorunmez bir grenlilik.
-   Duz renk zeminin dijital sertligini kiriyor. */
-.kagit-doku::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image: radial-gradient(rgba(38, 35, 32, 0.055) 0.5px, transparent 0.5px);
-  background-size: 3px 3px;
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.18;
+  margin: 0;
 }
 
-/* --- tipografi yardimcilari --------------------------------------------- */
+/* --- yardimci siniflar --------------------------------------------------- */
 
+/*
+ * Kucuk ust etiket. Onceki surumde genis harf arali, buyuk harfli monospace
+ * kullaniliyordu; goz yordugu icin govde fontunun kucuk ve orta kalin haline
+ * cevrildi. Buyuk harf yalnizca .etiket-buyuk'te, o da olculu bir aralikla.
+ */
 .etiket {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  font-family: var(--font-govde);
+  font-size: 12.5px;
   font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-murekkep-3);
+}
+
+.etiket-buyuk {
+  font-family: var(--font-govde);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  color: var(--color-murekkep-3);
 }
 
 .sayi {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+}
+
+.kart {
+  background: var(--color-kart);
+  border: 1px solid var(--color-cizgi);
+  border-radius: 8px;
 }
 
 /* --- gecisler ------------------------------------------------------------ */
@@ -100,7 +127,7 @@ body {
 @keyframes acilis {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -111,7 +138,7 @@ body {
 @keyframes sayfa-gir {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -119,44 +146,31 @@ body {
   }
 }
 
-@keyframes cizgi-ac {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
 .animasyon-acilis {
-  animation: acilis 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: acilis 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animasyon-sayfa {
-  animation: sayfa-gir 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sayfa-gir 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Sayfa icindeki bloklar sirayla girsin — editoryal ritim. */
 .kademe > * {
-  animation: sayfa-gir 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sayfa-gir 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .kademe > *:nth-child(1) {
   animation-delay: 0ms;
 }
 .kademe > *:nth-child(2) {
-  animation-delay: 60ms;
+  animation-delay: 50ms;
 }
 .kademe > *:nth-child(3) {
-  animation-delay: 120ms;
+  animation-delay: 100ms;
 }
 .kademe > *:nth-child(4) {
-  animation-delay: 180ms;
+  animation-delay: 150ms;
 }
-.kademe > *:nth-child(5) {
-  animation-delay: 240ms;
-}
-.kademe > *:nth-child(n + 6) {
-  animation-delay: 300ms;
+.kademe > *:nth-child(n + 5) {
+  animation-delay: 200ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -170,22 +184,25 @@ body {
   }
 }
 
-/* --- form ogeleri: kutudan cok alt cizgi -------------------------------- */
+/* --- form ogeleri -------------------------------------------------------- */
 
 .alan {
   width: 100%;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--color-cizgi);
-  padding: 8px 2px;
+  background: var(--color-kart);
+  border: 1px solid var(--color-cizgi);
+  border-radius: 6px;
+  padding: 9px 12px;
   font-family: var(--font-govde);
-  font-size: 16px;
+  font-size: 15px;
   color: var(--color-murekkep);
   outline: none;
-  transition: border-color 260ms ease;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease;
 }
 .alan:focus {
-  border-bottom-color: var(--color-kiremit);
+  border-color: var(--color-murekkep-3);
+  background: #fff;
 }
 .alan::placeholder {
   color: var(--color-murekkep-3);
@@ -197,51 +214,45 @@ select.alan {
   background-image: linear-gradient(45deg, transparent 50%, var(--color-murekkep-3) 50%),
     linear-gradient(135deg, var(--color-murekkep-3) 50%, transparent 50%);
   background-position:
-    calc(100% - 10px) calc(50% + 1px),
-    calc(100% - 5px) calc(50% + 1px);
-  background-size: 5px 5px;
+    calc(100% - 14px) calc(50% + 1px),
+    calc(100% - 9px) calc(50% + 1px);
   background-repeat: no-repeat;
-  padding-right: 22px;
+  background-size: 5px 5px;
+  padding-right: 28px;
 }
 
 textarea.alan {
-  border: 1px solid var(--color-cizgi);
-  padding: 10px 12px;
-  line-height: 1.7;
+  line-height: 1.65;
   resize: vertical;
 }
-textarea.alan:focus {
-  border-color: var(--color-kiremit);
+
+input[type='checkbox'] {
+  accent-color: #b9573e;
 }
 
 /* --- analiz ciktisi ------------------------------------------------------ */
 
 .kritik {
-  font-size: 17px;
-  line-height: 1.78;
+  font-size: 16px;
+  line-height: 1.72;
   color: var(--color-murekkep-2);
 }
 
 .kritik h2 {
-  font-family: var(--font-baslik);
-  font-size: 1.28rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  text-transform: none;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: var(--color-murekkep);
   margin: 2rem 0 0.7rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.45rem;
   border-bottom: 1px solid var(--color-cizgi);
 }
-
 .kritik h2:first-child {
   margin-top: 0;
 }
 
 .kritik h3 {
-  font-family: var(--font-baslik);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.03rem;
+  font-weight: 600;
   color: var(--color-murekkep);
   margin: 1.3rem 0 0.4rem;
 }
@@ -252,7 +263,7 @@ textarea.alan:focus {
 
 .kritik ul,
 .kritik ol {
-  margin: 0.7rem 0 0.7rem 1.2rem;
+  margin: 0.7rem 0 0.7rem 1.15rem;
 }
 .kritik ul {
   list-style: disc;
@@ -261,8 +272,7 @@ textarea.alan:focus {
   list-style: decimal;
 }
 .kritik li {
-  margin: 0.35rem 0;
-  padding-left: 0.2rem;
+  margin: 0.3rem 0;
 }
 .kritik li::marker {
   color: var(--color-cizgi-2);
@@ -277,31 +287,28 @@ textarea.alan:focus {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
-  font-size: 15px;
+  font-size: 14.5px;
 }
 .kritik th,
 .kritik td {
-  border: 0;
   border-bottom: 1px solid var(--color-cizgi);
   padding: 0.5rem 0.7rem 0.5rem 0;
   text-align: left;
   vertical-align: top;
 }
 .kritik th {
-  font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-murekkep-3);
-  border-bottom-color: var(--color-cizgi-2);
 }
 
 .kritik code {
-  font-family: var(--font-mono);
-  font-size: 0.86em;
+  font-size: 0.88em;
   background: var(--color-kagit-3);
-  padding: 0.08rem 0.32rem;
+  padding: 0.1rem 0.34rem;
+  border-radius: 4px;
 }
 
 .kritik hr {
@@ -310,28 +317,29 @@ textarea.alan:focus {
   margin: 1.5rem 0;
 }
 
-/* --- kaydirma cubugu ----------------------------------------------------- */
+/* --- kaydirma ------------------------------------------------------------ */
 
 ::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-kagit-2);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-cizgi-2);
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-murekkep-3);
 }
 
 ::selection {
-  background: #b03e3e;
-  color: #f7f4ee;
+  background: #f0e6dc;
+  color: #30332d;
 }
 
-/* --- Leaflet: varsayilan gorunumu kendi dilimize cek --------------------- */
+/* --- Leaflet -------------------------------------------------------------- */
 
 .leaflet-container {
   font-family: var(--font-govde);
@@ -339,10 +347,10 @@ textarea.alan:focus {
 }
 
 .leaflet-control-zoom a {
-  border-radius: 0 !important;
+  border-radius: 6px !important;
   border-color: var(--color-cizgi) !important;
   color: var(--color-murekkep) !important;
-  background: var(--color-kagit) !important;
+  background: var(--color-kart) !important;
   font-weight: 400;
 }
 .leaflet-control-zoom a:hover {
@@ -350,8 +358,7 @@ textarea.alan:focus {
 }
 
 .leaflet-control-attribution {
-  background: rgba(247, 244, 238, 0.85) !important;
-  font-family: var(--font-mono);
+  background: rgba(252, 251, 248, 0.9) !important;
   font-size: 10px !important;
   color: var(--color-murekkep-3) !important;
 }
@@ -359,22 +366,22 @@ textarea.alan:focus {
   color: var(--color-murekkep-2) !important;
 }
 
-/* Olcu balonlari: CAD kotasi gibi, kutu degil etiket */
 .archlib-olcu,
 .archlib-olcu-kucuk {
-  background: var(--color-kagit);
+  background: var(--color-kart);
   border: 1px solid var(--color-cizgi-2);
-  border-radius: 0;
+  border-radius: 5px;
   box-shadow: none;
-  padding: 2px 7px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  font-family: var(--font-govde);
+  font-size: 11.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--color-murekkep);
   white-space: nowrap;
 }
 .archlib-olcu-kucuk {
-  font-size: 10px;
+  font-size: 10.5px;
   color: var(--color-murekkep-3);
 }
 .archlib-olcu::before,

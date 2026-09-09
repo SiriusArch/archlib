@@ -21,9 +21,11 @@ export interface YukseklikIzgarasi {
   readonly sutun: number
   /** Metre cinsinden yukseklikler, satir-oncelikli */
   readonly veri: Float32Array
-  /** Izgaranin kapladigi yarim genislik (metre) */
-  readonly yaricap: number
-  /** Hucre boyutu (metre) */
+  /** Izgaranin yari genisligi (dogu-bati, metre) */
+  readonly yariGenislik: number
+  /** Izgaranin yari yuksekligi (kuzey-guney, metre) */
+  readonly yariYukseklik: number
+  /** Hucre boyutu (metre) — iki eksende de ayni */
   readonly adim: number
   readonly enDusuk: number
   readonly enYuksek: number
@@ -80,14 +82,19 @@ function zoomSec(merkezEnlem: number, yaricapMetre: number, hedefHucre: number):
 
 export async function yukseklikGetir(
   proj: Projeksiyon,
-  yaricapMetre: number,
-  bolme = 160,
+  yariGenislik: number,
+  yariYukseklik: number,
+  hedefHucre = 6,
   signal?: AbortSignal,
 ): Promise<YukseklikIzgarasi> {
-  const adim = (2 * yaricapMetre) / bolme
-  const zoom = zoomSec(proj.merkez.enlem, yaricapMetre, adim)
+  // Hucre boyutu kullanicidan gelir (arazi agi cozunurlugu); izgara sayisi
+  // ondan turer. Cok yogun istememek icin ust sinir var.
+  const adim = Math.max(2, hedefHucre)
+  const sutunSayisi = Math.min(400, Math.round((2 * yariGenislik) / adim))
+  const satirSayisi = Math.min(400, Math.round((2 * yariYukseklik) / adim))
+  const zoom = zoomSec(proj.merkez.enlem, Math.max(yariGenislik, yariYukseklik), adim)
 
-  const [guney, bati, kuzey, dogu] = proj.sinirKutusu(yaricapMetre)
+  const [guney, bati, kuzey, dogu] = proj.sinirKutusu(yariGenislik, yariYukseklik)
   const solUst = karoKoordinati(kuzey, bati, zoom)
   const sagAlt = karoKoordinati(guney, dogu, zoom)
 
@@ -131,17 +138,19 @@ export async function yukseklikGetir(
 
   const piksel = ctx.getImageData(0, 0, tuval.width, tuval.height).data
 
-  const satir = bolme + 1
-  const sutun = bolme + 1
+  const satir = satirSayisi + 1
+  const sutun = sutunSayisi + 1
+  const adimY = (2 * yariYukseklik) / Math.max(1, satirSayisi)
+  const adimX = (2 * yariGenislik) / Math.max(1, sutunSayisi)
   const veri = new Float32Array(satir * sutun)
   let enDusuk = Infinity
   let enYuksek = -Infinity
 
   for (let i = 0; i < satir; i++) {
     // i = 0 kuzey kenari
-    const y = yaricapMetre - i * adim
+    const y = yariYukseklik - i * adimY
     for (let j = 0; j < sutun; j++) {
-      const x = -yaricapMetre + j * adim
+      const x = -yariGenislik + j * adimX
       const { enlem, boylam } = proj.geri(x, y)
       const k = karoKoordinati(enlem, boylam, zoom)
 
@@ -162,8 +171,9 @@ export async function yukseklikGetir(
     satir,
     sutun,
     veri,
-    yaricap: yaricapMetre,
-    adim,
+    yariGenislik,
+    yariYukseklik,
+    adim: Math.max(adimX, adimY),
     enDusuk: Number.isFinite(enDusuk) ? enDusuk : 0,
     enYuksek: Number.isFinite(enYuksek) ? enYuksek : 0,
     zoom,
@@ -190,9 +200,11 @@ export function kesitProfili(
 
 /** Iki dogrusal ara degerlemeyle izgaradan kot okur. */
 export function kotOku(izgara: YukseklikIzgarasi, x: number, y: number): number {
-  const { yaricap, adim, satir, sutun, veri } = izgara
-  const fj = (x + yaricap) / adim
-  const fi = (yaricap - y) / adim
+  const { yariGenislik, yariYukseklik, satir, sutun, veri } = izgara
+  const adimX = (2 * yariGenislik) / Math.max(1, sutun - 1)
+  const adimY = (2 * yariYukseklik) / Math.max(1, satir - 1)
+  const fj = (x + yariGenislik) / adimX
+  const fi = (yariYukseklik - y) / adimY
 
   const j0 = Math.min(sutun - 1, Math.max(0, Math.floor(fj)))
   const i0 = Math.min(satir - 1, Math.max(0, Math.floor(fi)))

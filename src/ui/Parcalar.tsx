@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
-/** Sayfa basligi — serif, ustunde mono etiket, altinda ince kural. */
+/** Sayfa basligi — ust etiket, baslik, aciklama; altinda ince ayirac yok,
+ *  bosluk yeterli. */
 export function SayfaBasligi({
   etiket,
   baslik,
@@ -15,15 +16,13 @@ export function SayfaBasligi({
   sag?: ReactNode
 }) {
   return (
-    <header className="mb-8 border-b border-cizgi pb-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-8">
+      <div className="flex flex-wrap items-end justify-between gap-5">
         <div className="max-w-2xl">
-          <div className={`etiket ${renk}`}>{etiket}</div>
-          <h1 className="font-baslik mt-2 text-[34px] leading-[1.12] font-normal tracking-[-0.015em] text-murekkep sm:text-[43px]">
-            {baslik}
-          </h1>
+          <div className={`etiket-buyuk ${renk}`}>{etiket}</div>
+          <h1 className="mt-2.5 text-[30px] text-murekkep sm:text-[34px]">{baslik}</h1>
           {aciklama && (
-            <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-murekkep-2">{aciklama}</p>
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-murekkep-2">{aciklama}</p>
           )}
         </div>
         {sag}
@@ -32,7 +31,7 @@ export function SayfaBasligi({
   )
 }
 
-/** Bolum basligi — kucuk mono etiket + ince kural. */
+/** Bolum basligi — kart iclerinde ve liste ustlerinde. */
 export function BolumBasligi({
   children,
   sag,
@@ -43,14 +42,14 @@ export function BolumBasligi({
   renk?: string
 }) {
   return (
-    <div className="mb-4 flex items-baseline justify-between gap-4 border-b border-cizgi pb-2">
-      <h2 className={`etiket ${renk}`}>{children}</h2>
+    <div className="mb-3 flex items-center justify-between gap-4">
+      <h2 className={`etiket-buyuk ${renk}`}>{children}</h2>
       {sag}
     </div>
   )
 }
 
-/** Kutu degil: yalnizca ince cizgi ve bosluk. */
+/** Icerik karti — golgesiz, ince kenarli, 8px kose. */
 export function Kart({
   children,
   className = '',
@@ -60,18 +59,18 @@ export function Kart({
   children: ReactNode
   className?: string
   onClick?: () => void
-  /** Ust kenarda ince renk seridi */
+  /** Ustte beliren ince renk seridi */
   vurgu?: string
 }) {
-  const ortak = `group relative border border-cizgi bg-kagit/60 transition-all duration-300 ${
-    onClick ? 'cursor-pointer hover:border-cizgi-2 hover:bg-kagit' : ''
+  const ortak = `group relative overflow-hidden rounded-[8px] border border-cizgi bg-kart transition-all duration-250 ${
+    onClick ? 'cursor-pointer hover:border-cizgi-2 hover:bg-white' : ''
   } ${className}`
 
   const icerik = (
     <>
       {vurgu && (
         <span
-          className={`absolute inset-x-0 top-0 h-[2px] origin-left scale-x-0 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 ${vurgu}`}
+          className={`absolute inset-x-0 top-0 h-[2px] origin-left scale-x-0 transition-transform duration-350 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 ${vurgu}`}
         />
       )}
       {children}
@@ -88,7 +87,7 @@ export function Kart({
   return <div className={ortak}>{icerik}</div>
 }
 
-/** Mono etiket rozeti. */
+/** Hap bicimli kucuk rozet. */
 export function Rozet({
   children,
   className = '',
@@ -98,14 +97,14 @@ export function Rozet({
 }) {
   return (
     <span
-      className={`etiket inline-block border px-1.5 py-[3px] leading-none ${className}`}
+      className={`inline-block rounded-full border px-2.5 py-[3px] text-[11.5px] leading-none font-medium ${className}`}
     >
       {children}
     </span>
   )
 }
 
-/** Birincil eylem: ustten dolan renk. */
+/** Birincil eylem dugmesi. */
 export function Dugme({
   children,
   onClick,
@@ -119,6 +118,7 @@ export function Dugme({
   tur?: 'birincil' | 'ikincil'
   className?: string
   disabled?: boolean
+  /** Birincil dugmenin zemin rengi */
   dolgu?: string
 }) {
   if (tur === 'ikincil') {
@@ -126,7 +126,7 @@ export function Dugme({
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`etiket border border-cizgi-2 px-4 py-2.5 text-murekkep-2 transition-colors duration-300 hover:border-murekkep hover:text-murekkep disabled:opacity-40 ${className}`}
+        className={`rounded-[6px] border border-cizgi bg-kart px-4 py-2.5 text-[14px] font-medium text-murekkep-2 transition-colors duration-200 hover:border-cizgi-2 hover:text-murekkep disabled:opacity-40 ${className}`}
       >
         {children}
       </button>
@@ -137,24 +137,20 @@ export function Dugme({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`group relative overflow-hidden border border-murekkep px-6 py-3 text-murekkep transition-colors duration-400 hover:text-kagit disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-murekkep ${className}`}
+      className={`rounded-[6px] px-5 py-3 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${dolgu} ${className}`}
     >
-      <span
-        aria-hidden="true"
-        className={`absolute inset-0 -translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-disabled:translate-y-[-100%] ${dolgu}`}
-      />
-      <span className="etiket relative">{children}</span>
+      {children}
     </button>
   )
 }
 
-/** Bos durum — kutu degil, ortalanmis ince metin. */
+/** Bos durum. */
 export function Bos({ baslik, aciklama }: { baslik: string; aciklama?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center px-8 py-20 text-center">
-      <div className="etiket text-murekkep-3">{baslik}</div>
+    <div className="flex flex-col items-center justify-center rounded-[8px] border border-dashed border-cizgi-2 px-8 py-20 text-center">
+      <div className="text-[15px] font-medium text-murekkep-2">{baslik}</div>
       {aciklama && (
-        <p className="mt-3 max-w-sm text-[15.5px] leading-relaxed text-murekkep-3">{aciklama}</p>
+        <p className="mt-2.5 max-w-md text-[14px] leading-relaxed text-murekkep-3">{aciklama}</p>
       )}
     </div>
   )

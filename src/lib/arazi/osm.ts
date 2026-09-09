@@ -121,10 +121,11 @@ async function aynayaSor(url: string, sorgu: string, signal?: AbortSignal): Prom
 
 export async function araziVerisiGetir(
   proj: Projeksiyon,
-  yaricapMetre: number,
+  yariGenislik: number,
+  yariYukseklik: number,
   signal?: AbortSignal,
 ): Promise<AraziVerisi> {
-  const [guney, bati, kuzey, dogu] = proj.sinirKutusu(yaricapMetre)
+  const [guney, bati, kuzey, dogu] = proj.sinirKutusu(yariGenislik, yariYukseklik)
   const sorgu = sorguMetni(guney, bati, kuzey, dogu)
 
   let ogeler: OverpassOge[] | undefined

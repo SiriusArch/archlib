@@ -13,7 +13,7 @@ function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
   return (
     <Kart onClick={() => ac(site)} vurgu="bg-adacayi" className="flex h-full flex-col p-5">
       <div className="mb-2.5 flex items-start justify-between gap-3">
-        <h3 className="font-baslik text-[19px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
+        <h3 className="text-[18px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
           {site.ad}
         </h3>
         <Rozet className={`${UCRET_SINIF[site.ucret]} shrink-0`}>{UCRET_ADI[site.ucret]}</Rozet>
@@ -41,15 +41,13 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
       onClick={kapat}
     >
       <div
-        className="animasyon-sayfa my-10 w-full max-w-2xl border border-cizgi bg-kagit"
+        className="animasyon-sayfa my-10 w-full max-w-2xl overflow-hidden rounded-[10px] border border-cizgi bg-kart"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
             <div className="etiket text-adacayi-koyu">{KATEGORI_ADI[site.kategori]}</div>
-            <h2 className="font-baslik mt-1.5 text-[29.5px] leading-tight text-murekkep">
-              {site.ad}
-            </h2>
+            <h2 className="mt-1.5 text-[27px] leading-tight text-murekkep">{site.ad}</h2>
           </div>
           <button
             onClick={kapat}
@@ -90,7 +88,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
           )}
 
           {site.uyari && (
-            <section className="bg-kiremit-soft px-4 py-3">
+            <section className="rounded-[7px] bg-kiremit-soft px-4 py-3">
               <h3 className="etiket mb-1.5 text-kiremit-koyu">Dikkat</h3>
               <p className="text-[15.5px] leading-relaxed text-murekkep-2">{site.uyari}</p>
             </section>
@@ -109,13 +107,9 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
               href={site.url}
               target="_blank"
               rel="noreferrer noopener"
-              className="group relative overflow-hidden border border-murekkep px-6 py-3 text-murekkep transition-colors duration-400 hover:text-kagit"
+              className="rounded-[6px] bg-adacayi px-5 py-2.5 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
             >
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 -translate-y-full bg-adacayi transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0"
-              />
-              <span className="etiket relative">Siteye git</span>
+              Siteye git
             </a>
             <span className="etiket text-murekkep-3">
               {site.dogrulama === 'dogrulandi'
@@ -170,7 +164,7 @@ export default function Katalog() {
   return (
     <div className="kademe">
       <SayfaBasligi
-        etiket="03 — Arac Kitapligi"
+        etiket="Kitaplik"
         renk="text-adacayi-koyu"
         baslik="Ogrencinin isine yarayan 48 arac"
         aciklama="Ucret, icerik ve proje asamasina gore siniflandirildi. Her kartta aracin ne ise yaradigi ve projende tam olarak nerede kullanilacagi yaziyor."
@@ -246,13 +240,11 @@ export default function Katalog() {
       <div className="space-y-14">
         {gruplu.map(([kat, liste]) => (
           <section key={kat}>
-            <div className="mb-5 flex items-baseline justify-between gap-6 border-b border-cizgi pb-2">
-              <h2 className="font-baslik text-[23.5px] leading-tight text-murekkep">
-                {KATEGORI_ADI[kat]}
-              </h2>
-              <span className="sayi text-[13.5px] text-murekkep-3">{liste.length}</span>
+            <div className="mb-1.5 flex items-baseline justify-between gap-6">
+              <h2 className="text-[21px] leading-tight text-murekkep">{KATEGORI_ADI[kat]}</h2>
+              <span className="sayi text-[13px] text-murekkep-3">{liste.length} arac</span>
             </div>
-            <p className="mb-6 max-w-2xl text-[15.5px] leading-relaxed text-murekkep-2">
+            <p className="mb-5 max-w-2xl text-[15px] leading-relaxed text-murekkep-2">
               {KATEGORI_ACIKLAMA[kat]}
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

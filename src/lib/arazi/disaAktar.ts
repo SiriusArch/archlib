@@ -22,7 +22,10 @@ export interface AraziPaketi {
   readonly konturlar: readonly KonturCizgisi[]
   readonly izgara: YukseklikIzgarasi
   readonly merkez: { enlem: number; boylam: number }
-  readonly yaricap: number
+  /** Secim dikdortgeninin yari genisligi (dogu-bati, m) */
+  readonly yariGenislik: number
+  /** Secim dikdortgeninin yari yuksekligi (kuzey-guney, m) */
+  readonly yariYukseklik: number
   readonly konturAralik: number
 }
 
@@ -119,8 +122,8 @@ export function planDxf(p: AraziPaketi): string {
   s += dxfCift(0, 'SECTION') + dxfCift(2, 'HEADER')
   s += dxfCift(9, '$ACADVER') + dxfCift(1, 'AC1009')
   s += dxfCift(9, '$INSUNITS') + dxfCift(70, 6) // 6 = metre
-  s += dxfCift(9, '$EXTMIN') + dxfCift(10, (-p.yaricap).toFixed(3)) + dxfCift(20, (-p.yaricap).toFixed(3)) + dxfCift(30, '0.0')
-  s += dxfCift(9, '$EXTMAX') + dxfCift(10, p.yaricap.toFixed(3)) + dxfCift(20, p.yaricap.toFixed(3)) + dxfCift(30, '0.0')
+  s += dxfCift(9, '$EXTMIN') + dxfCift(10, (-p.yariGenislik).toFixed(3)) + dxfCift(20, (-p.yariYukseklik).toFixed(3)) + dxfCift(30, '0.0')
+  s += dxfCift(9, '$EXTMAX') + dxfCift(10, p.yariGenislik.toFixed(3)) + dxfCift(20, p.yariYukseklik.toFixed(3)) + dxfCift(30, '0.0')
   s += dxfCift(0, 'ENDSEC')
 
   // --- TABLES (katmanlar)
@@ -151,23 +154,24 @@ export function planDxf(p: AraziPaketi): string {
   }
 
   // Sinir cercevesi ve kunye
-  const r = p.yaricap
+  const gx = p.yariGenislik
+  const gy = p.yariYukseklik
   s += dxfPolyline(
     KATMANLAR.sinir.ad,
     [
-      { x: -r, y: -r },
-      { x: r, y: -r },
-      { x: r, y: r },
-      { x: -r, y: r },
+      { x: -gx, y: -gy },
+      { x: gx, y: -gy },
+      { x: gx, y: gy },
+      { x: -gx, y: gy },
     ],
     true,
   )
   s += dxfMetin(
     KATMANLAR.sinir.ad,
-    { x: -r, y: -r - 14 },
-    Math.max(3, r / 60),
-    `ArchLib  ${p.merkez.enlem.toFixed(5)}, ${p.merkez.boylam.toFixed(5)}  R=${r}m  ` +
-      `KONTUR=${p.konturAralik}m  BIRIM=METRE`,
+    { x: -gx, y: -gy - 14 },
+    Math.max(3, Math.max(gx, gy) / 60),
+    `ArchLib  ${p.merkez.enlem.toFixed(5)}, ${p.merkez.boylam.toFixed(5)}  ` +
+      `${(2 * gx).toFixed(0)}x${(2 * gy).toFixed(0)}m  KONTUR=${p.konturAralik}m  BIRIM=METRE`,
   )
 
   s += dxfCift(0, 'ENDSEC')
@@ -217,104 +221,113 @@ export function kesitDxf(profil: { mesafe: number; kot: number }[], abartma: num
 
 // ---------------------------------------------------------------------- SVG
 
-function svgYol(noktalar: readonly Nokta[], kapali: boolean, olcek: number, r: number): string {
+function svgYol(
+  noktalar: readonly Nokta[],
+  kapali: boolean,
+  olcek: number,
+  gx: number,
+  gy: number,
+): string {
   const d = noktalar
     .map((n, i) => {
-      const x = ((n.x + r) * olcek).toFixed(2)
-      const y = ((r - n.y) * olcek).toFixed(2)
+      const x = ((n.x + gx) * olcek).toFixed(2)
+      const y = ((gy - n.y) * olcek).toFixed(2)
       return `${i === 0 ? 'M' : 'L'}${x} ${y}`
     })
     .join(' ')
   return kapali ? `${d} Z` : d
 }
 
-export function planSvg(p: AraziPaketi, boyutPx = 1400): string {
-  const r = p.yaricap
-  const olcek = boyutPx / (2 * r)
+export function planSvg(p: AraziPaketi, uzunKenarPx = 1400): string {
+  const gx = p.yariGenislik
+  const gy = p.yariYukseklik
+  const olcek = uzunKenarPx / (2 * Math.max(gx, gy))
+  const G = Math.round(2 * gx * olcek)
+  const Y = Math.round(2 * gy * olcek)
   const g: string[] = []
+  const yol = (n: readonly Nokta[], kapali: boolean) => svgYol(n, kapali, olcek, gx, gy)
 
-  g.push(`<rect width="${boyutPx}" height="${boyutPx}" fill="#f7f4ee"/>`)
+  g.push(`<rect width="${G}" height="${Y}" fill="#fcfbf8"/>`)
 
-  // yesil alanlar (dolgu)
   const yesil = p.cizgiler.filter((c) => c.tur === 'yesil' && c.kapali)
   if (yesil.length) {
-    g.push(`<g fill="#519976" fill-opacity="0.12" stroke="none">`)
-    for (const c of yesil) g.push(`<path d="${svgYol(c.noktalar, true, olcek, r)}"/>`)
+    g.push(`<g fill="#727d63" fill-opacity="0.13" stroke="none">`)
+    for (const c of yesil) g.push(`<path d="${yol(c.noktalar, true)}"/>`)
     g.push('</g>')
   }
 
-  // su (dolgu)
   const su = p.cizgiler.filter((c) => c.tur === 'su')
   if (su.length) {
-    g.push(`<g fill="#517a95" fill-opacity="0.16" stroke="#517a95" stroke-opacity="0.5" stroke-width="${(0.8 * olcek).toFixed(2)}">`)
-    for (const c of su) g.push(`<path d="${svgYol(c.noktalar, c.kapali, olcek, r)}" ${c.kapali ? '' : 'fill="none"'}/>`)
+    g.push(
+      `<g fill="#5c7c92" fill-opacity="0.17" stroke="#5c7c92" stroke-opacity="0.55" stroke-width="${(0.8 * olcek).toFixed(2)}">`,
+    )
+    for (const c of su)
+      g.push(`<path d="${yol(c.noktalar, c.kapali)}" ${c.kapali ? '' : 'fill="none"'}/>`)
     g.push('</g>')
   }
 
-  // konturlar
   const ince = p.konturlar.filter((k) => !k.ana)
   const kalin = p.konturlar.filter((k) => k.ana)
-  g.push(`<g fill="none" stroke="${KATMANLAR.kontur.svg}" stroke-width="${(0.6).toFixed(2)}" stroke-opacity="0.9">`)
-  for (const k of ince) g.push(`<path d="${svgYol(k.noktalar, false, olcek, r)}"/>`)
+  g.push(`<g fill="none" stroke="#dcdad0" stroke-width="0.7">`)
+  for (const k of ince) g.push(`<path d="${yol(k.noktalar, false)}"/>`)
   g.push('</g>')
-  g.push(`<g fill="none" stroke="${KATMANLAR.konturAna.svg}" stroke-width="1.1" stroke-opacity="0.95">`)
-  for (const k of kalin) g.push(`<path d="${svgYol(k.noktalar, false, olcek, r)}"/>`)
+  g.push(`<g fill="none" stroke="#a97b4c" stroke-width="1.15" stroke-opacity="0.9">`)
+  for (const k of kalin) g.push(`<path d="${yol(k.noktalar, false)}"/>`)
   g.push('</g>')
 
-  // yollar — sinifa gore genislik
-  g.push(`<g fill="none" stroke="${KATMANLAR.yol.svg}" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.75">`)
+  g.push(
+    `<g fill="none" stroke="#85857b" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8">`,
+  )
   for (const c of p.cizgiler.filter((x) => x.tur === 'yol')) {
     const w = Math.max(0.6, yolGenisligi(c.sinif) * olcek * 0.5)
-    g.push(`<path d="${svgYol(c.noktalar, false, olcek, r)}" stroke-width="${w.toFixed(2)}"/>`)
+    g.push(`<path d="${yol(c.noktalar, false)}" stroke-width="${w.toFixed(2)}"/>`)
   }
   g.push('</g>')
 
-  // demiryolu
   const dy = p.cizgiler.filter((x) => x.tur === 'demiryolu')
   if (dy.length) {
-    g.push(`<g fill="none" stroke="${KATMANLAR.demiryolu.svg}" stroke-width="1.4" stroke-dasharray="8 5">`)
-    for (const c of dy) g.push(`<path d="${svgYol(c.noktalar, false, olcek, r)}"/>`)
+    g.push(`<g fill="none" stroke="#6d6a8f" stroke-width="1.4" stroke-dasharray="8 5">`)
+    for (const c of dy) g.push(`<path d="${yol(c.noktalar, false)}"/>`)
     g.push('</g>')
   }
 
-  // binalar
-  g.push(`<g fill="#b03e3e" fill-opacity="0.18" stroke="${KATMANLAR.bina.svg}" stroke-width="1" stroke-linejoin="round">`)
+  g.push(
+    `<g fill="#b9573e" fill-opacity="0.16" stroke="#b9573e" stroke-width="1" stroke-linejoin="round">`,
+  )
   for (const c of p.cizgiler.filter((x) => x.tur === 'bina')) {
-    g.push(`<path d="${svgYol(c.noktalar, true, olcek, r)}"/>`)
+    g.push(`<path d="${yol(c.noktalar, true)}"/>`)
   }
   g.push('</g>')
 
-  // agaclar
   if (p.agaclar.length) {
-    g.push(`<g fill="${KATMANLAR.agac.svg}" fill-opacity="0.5">`)
+    g.push(`<g fill="#727d63" fill-opacity="0.5">`)
     for (const a of p.agaclar) {
       g.push(
-        `<circle cx="${((a.x + r) * olcek).toFixed(1)}" cy="${((r - a.y) * olcek).toFixed(1)}" r="${Math.max(1.5, 2.5 * olcek).toFixed(1)}"/>`,
+        `<circle cx="${((a.x + gx) * olcek).toFixed(1)}" cy="${((gy - a.y) * olcek).toFixed(1)}" r="${Math.max(1.5, 2.5 * olcek).toFixed(1)}"/>`,
       )
     }
     g.push('</g>')
   }
 
-  // cerceve ve kunye
-  g.push(
-    `<rect x="0.5" y="0.5" width="${boyutPx - 1}" height="${boyutPx - 1}" fill="none" stroke="#262320" stroke-width="1"/>`,
-  )
   const olcekCubuk = 100 * olcek
   g.push(
-    `<g stroke="#262320" stroke-width="2" fill="none">` +
-      `<path d="M24 ${boyutPx - 30} h${olcekCubuk.toFixed(1)}"/>` +
-      `<path d="M24 ${boyutPx - 36} v12"/>` +
-      `<path d="M${(24 + olcekCubuk).toFixed(1)} ${boyutPx - 36} v12"/>` +
-      `</g>` +
-      `<text x="24" y="${boyutPx - 42}" font-family="monospace" font-size="13" fill="#262320">100 m</text>` +
-      `<text x="24" y="28" font-family="monospace" font-size="13" fill="#262320">` +
-      `ArchLib · ${p.merkez.enlem.toFixed(5)}, ${p.merkez.boylam.toFixed(5)} · R=${r}m · kontur ${p.konturAralik}m</text>` +
-      `<g stroke="#262320" stroke-width="2" fill="none">` +
-      `<path d="M${boyutPx - 44} 62 v-34 M${boyutPx - 52} 38 l8 -10 l8 10"/></g>` +
-      `<text x="${boyutPx - 48}" y="80" font-family="monospace" font-size="12" fill="#262320">N</text>`,
+    `<rect x="0.5" y="0.5" width="${G - 1}" height="${Y - 1}" fill="none" stroke="#30332d" stroke-width="1"/>` +
+      `<g stroke="#30332d" stroke-width="2" fill="none">` +
+      `<path d="M24 ${Y - 30} h${olcekCubuk.toFixed(1)}"/>` +
+      `<path d="M24 ${Y - 36} v12"/>` +
+      `<path d="M${(24 + olcekCubuk).toFixed(1)} ${Y - 36} v12"/></g>` +
+      `<text x="24" y="${Y - 42}" font-family="DM Sans, sans-serif" font-size="13" fill="#30332d">100 m</text>` +
+      `<text x="24" y="28" font-family="DM Sans, sans-serif" font-size="13" fill="#30332d">` +
+      `ArchLib · ${p.merkez.enlem.toFixed(5)}, ${p.merkez.boylam.toFixed(5)} · ` +
+      `${(2 * gx).toFixed(0)}×${(2 * gy).toFixed(0)} m · kontur ${p.konturAralik} m</text>` +
+      `<g stroke="#30332d" stroke-width="2" fill="none">` +
+      `<path d="M${G - 44} 62 v-34 M${G - 52} 38 l8 -10 l8 10"/></g>` +
+      `<text x="${G - 48}" y="80" font-family="DM Sans, sans-serif" font-size="12" fill="#30332d">N</text>`,
   )
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${boyutPx}" height="${boyutPx}" viewBox="0 0 ${boyutPx} ${boyutPx}">\n${g.join('\n')}\n</svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${G}" height="${Y}" viewBox="0 0 ${G} ${Y}">
+${g.join('\n')}
+</svg>`
 }
 
 export function kesitSvg(
@@ -413,19 +426,24 @@ function ucgenle(noktalar: Nokta[]): [number, number, number][] {
 export function modelObj(p: AraziPaketi, binaEkle = true): string {
   const satir: string[] = []
   satir.push('# ArchLib arazi modeli')
-  satir.push(`# merkez ${p.merkez.enlem.toFixed(6)}, ${p.merkez.boylam.toFixed(6)}  yaricap ${p.yaricap} m`)
+  satir.push(
+    `# merkez ${p.merkez.enlem.toFixed(6)}, ${p.merkez.boylam.toFixed(6)}  ` +
+      `alan ${(2 * p.yariGenislik).toFixed(0)}x${(2 * p.yariYukseklik).toFixed(0)} m`,
+  )
   satir.push('# birim: metre — X dogu, Y yukari, Z guney (Y-up, sag el)')
   satir.push('')
 
-  const { satir: sr, sutun: st, veri, yaricap, adim } = p.izgara
+  const { satir: sr, sutun: st, veri, yariGenislik: gx, yariYukseklik: gy } = p.izgara
+  const adimX = (2 * gx) / Math.max(1, st - 1)
+  const adimY = (2 * gy) / Math.max(1, sr - 1)
   let vSayac = 0
 
   // --- arazi
   satir.push('o arazi')
   for (let i = 0; i < sr; i++) {
     for (let j = 0; j < st; j++) {
-      const x = -yaricap + j * adim
-      const y = yaricap - i * adim
+      const x = -gx + j * adimX
+      const y = gy - i * adimY
       const z = veri[i * st + j]
       // OBJ'de Y yukari: (x, kot, -y)
       satir.push(`v ${x.toFixed(3)} ${z.toFixed(3)} ${(-y).toFixed(3)}`)
@@ -526,7 +544,8 @@ export function geoJson(p: AraziPaketi, geri: (x: number, y: number) => { enlem:
       metadata: {
         uretici: 'ArchLib',
         merkez: p.merkez,
-        yaricap_m: p.yaricap,
+        genislik_m: 2 * p.yariGenislik,
+        yukseklik_m: 2 * p.yariYukseklik,
         kontur_araligi_m: p.konturAralik,
         kot_araligi_m: [p.izgara.enDusuk, p.izgara.enYuksek],
         veri: 'OpenStreetMap (ODbL) + AWS Terrain Tiles',

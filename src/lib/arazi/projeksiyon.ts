@@ -49,10 +49,13 @@ export class Projeksiyon {
     }
   }
 
-  /** Merkezden yaricap metre uzaklikta bir kare sinir kutusu (guney,bati,kuzey,dogu). */
-  sinirKutusu(yaricapMetre: number): [number, number, number, number] {
-    const dEnlem = yaricapMetre / this.enlemOlcek
-    const dBoylam = yaricapMetre / this.boylamOlcek
+  /**
+   * Merkezden yari-genislik / yari-yukseklik kadar uzanan sinir kutusu
+   * (guney, bati, kuzey, dogu). Ikinci deger verilmezse kare olur.
+   */
+  sinirKutusu(yariGenislik: number, yariYukseklik = yariGenislik): [number, number, number, number] {
+    const dEnlem = yariYukseklik / this.enlemOlcek
+    const dBoylam = yariGenislik / this.boylamOlcek
     return [
       this.merkez.enlem - dEnlem,
       this.merkez.boylam - dBoylam,

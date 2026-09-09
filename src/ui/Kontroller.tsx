@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-/** Arac panellerinde kullanilan yumusak blok. */
+/** Arac panellerinde kullanilan kart blogu. */
 export function Panel({
   children,
   className = '',
@@ -9,7 +9,9 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`border border-cizgi bg-kagit/70 ${className}`}>{children}</section>
+    <section className={`overflow-hidden rounded-[8px] border border-cizgi bg-kart ${className}`}>
+      {children}
+    </section>
   )
 }
 
@@ -18,11 +20,10 @@ export function PanelBasligi({
   sag,
   acik,
   degistir,
-  renk = 'text-murekkep-3',
+  renk = 'text-murekkep',
 }: {
   baslik: string
   sag?: ReactNode
-  /** Verilirse basliga acma/kapama kutusu eklenir */
   acik?: boolean
   degistir?: (v: boolean) => void
   renk?: string
@@ -35,17 +36,17 @@ export function PanelBasligi({
             type="checkbox"
             checked={Boolean(acik)}
             onChange={(e) => degistir(e.target.checked)}
-            className="h-3.5 w-3.5 accent-[#517a95]"
+            className="h-4 w-4 rounded-[3px]"
           />
         )}
-        <span className={`etiket ${renk}`}>{baslik}</span>
+        <span className={`text-[14.5px] font-medium ${renk}`}>{baslik}</span>
       </label>
       {sag}
     </div>
   )
 }
 
-/** Format secim cipi. */
+/** Format / secenek cipi — hap bicimli. */
 export function Cip({
   secili,
   onClick,
@@ -64,10 +65,10 @@ export function Cip({
       onClick={onClick}
       disabled={pasif}
       title={ipucu}
-      className={`etiket border px-3 py-2 transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-35 ${
+      className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-35 ${
         secili
-          ? 'border-mavi bg-mavi-soft text-mavi-koyu'
-          : 'border-cizgi text-murekkep-2 hover:border-cizgi-2 hover:text-murekkep'
+          ? 'border-kiremit bg-kiremit-soft text-kiremit-koyu'
+          : 'border-cizgi bg-kart text-murekkep-2 hover:border-cizgi-2 hover:text-murekkep'
       }`}
     >
       {children}
@@ -87,7 +88,6 @@ export function KatmanSatiri({
   acik: boolean
   degistir: (v: boolean) => void
   ad: string
-  /** Sol taraftaki renk isareti */
   renk: string
   sag?: ReactNode
   pasif?: boolean
@@ -95,7 +95,7 @@ export function KatmanSatiri({
   return (
     <label
       className={`flex items-center justify-between gap-3 border-b border-cizgi/70 px-4 py-2.5 last:border-0 ${
-        pasif ? 'opacity-40' : 'cursor-pointer hover:bg-kagit-2/60'
+        pasif ? 'opacity-40' : 'cursor-pointer hover:bg-kagit-2/70'
       }`}
     >
       <span className="flex items-center gap-3">
@@ -104,17 +104,17 @@ export function KatmanSatiri({
           checked={acik}
           disabled={pasif}
           onChange={(e) => degistir(e.target.checked)}
-          className="h-3.5 w-3.5 accent-[#517a95]"
+          className="h-4 w-4 rounded-[3px]"
         />
-        <span className={`inline-block h-2.5 w-2.5 shrink-0 ${renk}`} />
-        <span className="text-[15px] text-murekkep-2">{ad}</span>
+        <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-[3px] ${renk}`} />
+        <span className="text-[14.5px] text-murekkep-2">{ad}</span>
       </span>
       {sag}
     </label>
   )
 }
 
-/** Sayisal deger secici — kontur araligi gibi kucuk ayarlar icin. */
+/** Kucuk deger secici — kontur araligi, cozunurluk gibi ayarlar icin. */
 export function DegerSecici<T extends string | number>({
   degerler,
   secili,
@@ -127,7 +127,7 @@ export function DegerSecici<T extends string | number>({
   birim?: string
 }) {
   return (
-    <span className="flex gap-1">
+    <span className="flex overflow-hidden rounded-full border border-cizgi">
       {degerler.map((d) => (
         <button
           key={String(d)}
@@ -135,10 +135,10 @@ export function DegerSecici<T extends string | number>({
             e.preventDefault()
             degistir(d)
           }}
-          className={`etiket border px-2 py-1 transition-colors ${
+          className={`px-2.5 py-1 text-[12px] font-medium transition-colors ${
             secili === d
-              ? 'border-mavi bg-mavi-soft text-mavi-koyu'
-              : 'border-cizgi text-murekkep-3 hover:border-cizgi-2'
+              ? 'bg-kiremit-soft text-kiremit-koyu'
+              : 'text-murekkep-3 hover:bg-kagit-2 hover:text-murekkep-2'
           }`}
         >
           {d}
@@ -146,5 +146,37 @@ export function DegerSecici<T extends string | number>({
         </button>
       ))}
     </span>
+  )
+}
+
+/** Iki-uc secenekli segment denetimi. */
+export function Segment<T extends string>({
+  secenekler,
+  secili,
+  degistir,
+  className = '',
+}: {
+  secenekler: readonly { deger: T; ad: string; ipucu?: string }[]
+  secili: T
+  degistir: (v: T) => void
+  className?: string
+}) {
+  return (
+    <div className={`flex overflow-hidden rounded-[7px] border border-cizgi bg-kart ${className}`}>
+      {secenekler.map((s) => (
+        <button
+          key={s.deger}
+          title={s.ipucu}
+          onClick={() => degistir(s.deger)}
+          className={`flex-1 px-3 py-2 text-[13.5px] font-medium transition-colors duration-200 ${
+            secili === s.deger
+              ? 'bg-kiremit-soft text-kiremit-koyu'
+              : 'text-murekkep-3 hover:bg-kagit-2 hover:text-murekkep-2'
+          }`}
+        >
+          {s.ad}
+        </button>
+      ))}
+    </div>
   )
 }

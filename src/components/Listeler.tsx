@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { KONTROL_LISTELERI } from '../data/kritik'
 import { listeDurumuOku, listeDurumuYaz } from '../lib/storage'
 import { SayfaBasligi } from '../ui/Parcalar'
+import { Panel, PanelBasligi, Cip } from '../ui/Kontroller'
 
 export default function Listeler() {
   const [durum, setDurum] = useState<Record<string, boolean>>({})
@@ -37,98 +38,91 @@ export default function Listeler() {
   return (
     <div className="kademe">
       <SayfaBasligi
-        etiket="05 — Kontrol Listeleri"
+        etiket="Listeler"
         renk="text-mor-koyu"
         baslik="Teslimden once tek tek isaretle"
         aciklama="Cogu pafta, tasarim kotu oldugu icin degil, bu maddelerden birkaci atlandigi icin puan kaybeder. Isaretler bu tarayicida saklanir."
         sag={
           <div className="text-right">
-            <div className="sayi text-[29.5px] leading-none text-murekkep">
+            <div className="sayi text-[28px] leading-none text-murekkep">
               {tamam}
               <span className="text-murekkep-3">/{liste.maddeler.length}</span>
             </div>
-            <div className="etiket mt-1 text-murekkep-3">tamamlandi</div>
+            <div className="etiket mt-1">tamamlandi</div>
           </div>
         }
       />
 
-      <div className="mb-8 flex flex-wrap gap-x-8 gap-y-2">
+      <div className="mb-4 flex flex-wrap gap-1.5">
         {KONTROL_LISTELERI.map((l) => (
-          <button key={l.id} onClick={() => setAktif(l.id)} className="group relative py-1">
-            <span
-              className={`font-baslik text-[19px] transition-colors duration-300 ${
-                aktif === l.id ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
-              }`}
-            >
-              {l.baslik}
-            </span>
-            <span
-              className={`absolute -bottom-0.5 left-0 h-[2px] w-full origin-left bg-mor transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                aktif === l.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-              }`}
-            />
-          </button>
+          <Cip key={l.id} secili={aktif === l.id} onClick={() => setAktif(l.id)}>
+            {l.baslik}
+          </Cip>
         ))}
       </div>
 
-      <section>
-        <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
-          <p className="max-w-2xl text-[15.5px] leading-relaxed text-murekkep-2">
+      <Panel>
+        <PanelBasligi
+          baslik={liste.baslik}
+          renk="text-murekkep"
+          sag={
+            <button
+              onClick={() => sifirla(liste.id)}
+              className="text-[13px] font-medium text-murekkep-3 transition-colors hover:text-kiremit-koyu"
+            >
+              Sifirla
+            </button>
+          }
+        />
+
+        <div className="px-5 py-4">
+          <p className="max-w-2xl text-[14.5px] leading-relaxed text-murekkep-2">
             {liste.aciklama}
           </p>
-          <button
-            onClick={() => sifirla(liste.id)}
-            className="etiket text-murekkep-3 transition-colors hover:text-kiremit-koyu"
-          >
-            Sifirla
-          </button>
-        </div>
-
-        <div className="mt-4 mb-2 h-px w-full bg-cizgi">
-          <div
-            className="h-px bg-mor transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-            style={{ width: `${yuzde}%` }}
-          />
+          <div className="mt-4 h-[3px] w-full overflow-hidden rounded-full bg-cizgi">
+            <div
+              className="h-full rounded-full bg-mor transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              style={{ width: `${yuzde}%` }}
+            />
+          </div>
         </div>
 
         <ul className="border-t border-cizgi">
           {liste.maddeler.map((m, i) => {
             const isaretli = Boolean(durum[m.id])
             return (
-              <li key={m.id} className="border-b border-cizgi">
-                <label className="flex cursor-pointer items-start gap-4 py-4">
-                  <span className="sayi w-6 shrink-0 pt-[3px] text-[12.5px] text-murekkep-3">
+              <li key={m.id} className="border-b border-cizgi/70 last:border-0">
+                <label className="flex cursor-pointer items-start gap-3.5 px-5 py-3.5 transition-colors hover:bg-kagit-2/60">
+                  <span className="sayi w-5 shrink-0 pt-[3px] text-[12.5px] text-murekkep-3">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <input
                     type="checkbox"
                     checked={isaretli}
                     onChange={() => degistir(m.id)}
-                    className="mt-[3px] h-3.5 w-3.5 shrink-0 accent-[#5c5992]"
+                    className="mt-[3px] h-4 w-4 shrink-0 rounded-[3px] accent-[#6d6a8f]"
                   />
                   <div className="min-w-0 flex-1">
                     <div
-                      className={`text-[16.5px] leading-snug transition-colors duration-300 ${
+                      className={`text-[15.5px] leading-snug transition-colors duration-300 ${
                         isaretli ? 'text-murekkep-3 line-through' : 'text-murekkep'
                       }`}
                     >
                       {m.metin}
                     </div>
                     {m.aciklama && !isaretli && (
-                      <p className="mt-1.5 text-[14px] leading-relaxed text-murekkep-2">
+                      <p className="mt-1.5 text-[13.5px] leading-relaxed text-murekkep-2">
                         {m.aciklama}
                       </p>
                     )}
-                    {m.kaynak && !isaretli && (
-                      <p className="etiket mt-1.5 text-murekkep-3">{m.kaynak}</p>
-                    )}
+                    {m.kaynak && !isaretli && <p className="etiket mt-1.5">{m.kaynak}</p>}
                   </div>
                 </label>
               </li>
             )
           })}
         </ul>
-      </section>
+      </Panel>
     </div>
   )
 }

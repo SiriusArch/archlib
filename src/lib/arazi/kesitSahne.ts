@@ -40,6 +40,7 @@ export interface KesitAgac {
 export interface KesitSahnesi {
   readonly uzunluk: number
   readonly bant: number
+  readonly taraf: KesitTarafi
   readonly profil: readonly { mesafe: number; kot: number }[]
   readonly binalar: readonly KesitBina[]
   readonly agaclar: readonly KesitAgac[]
@@ -73,9 +74,21 @@ function yansit(e: Eksen, p: Nokta): { d: number; t: number } {
   return { d: vx * e.u.x + vy * e.u.y, t: vx * e.n.x + vy * e.n.y }
 }
 
+/**
+ * Bakis yonu. Mimari kesitte hat bir bakis dogrultusu tasir; cizim o
+ * dogrultudaki dokuyu gosterir.
+ *  'on'   — hattin ok yonundeki (sol el normali, +n) tarafi
+ *  'arka' — ters taraf
+ *  'iki'  — iki taraf birden
+ * Hattin uzerinden gecen kutleler yondan bagimsiz her zaman kesite girer.
+ */
+export type KesitTarafi = 'on' | 'arka' | 'iki'
+
 export interface KesitSecenek {
-  /** Bant genisligi (m). Hattin her iki yanina yarisi kadar uzanir. */
+  /** Bant genisligi (m). Bakis yonundeki taraf(lar)a uzanir. */
   bant: number
+  /** Hangi taraf cizime dahil olacak */
+  taraf?: KesitTarafi
   /** Zemin profili ornek sayisi */
   ornek?: number
   /** Agac yuksekligi varsayimi (m) */
@@ -92,7 +105,12 @@ export function kesitSahnesiKur(
 ): KesitSahnesi {
   const e = eksenKur(a, b)
   const bant = Math.max(1, secenek.bant)
-  const yariBant = bant / 2
+  const taraf = secenek.taraf ?? 'iki'
+  // Tek taraf secildiginde bant tamami o tarafa uzanir; boylece "80 m bant"
+  // hangi yonde olursa olsun ayni derinligi verir.
+  const ustSinir = taraf === 'arka' ? 0 : taraf === 'on' ? bant : bant / 2
+  const altSinir = taraf === 'on' ? 0 : taraf === 'arka' ? -bant : -bant / 2
+  const yariBant = Math.max(Math.abs(ustSinir), Math.abs(altSinir))
   const ornek = secenek.ornek ?? 320
   const agacYuk = secenek.agacYuksekligi ?? 7
 
@@ -126,8 +144,10 @@ export function kesitSahnesiKur(
       if (t > tMax) tMax = t
     }
 
+    // Hattin uzerinden gecen kutle yondan bagimsiz kesite girer.
+    const hattiKesiyor = tMin <= 0 && tMax >= 0
     // Bant ve hat uzunlugu ile kesisme testi (eksene hizali kutu yaklasimi)
-    if (tMax < -yariBant || tMin > yariBant) continue
+    if (!hattiKesiyor && (tMax < altSinir || tMin > ustSinir)) continue
     if (dMax < 0 || dMin > e.uzunluk) continue
 
     const d0 = Math.max(0, dMin)
@@ -141,7 +161,7 @@ export function kesitSahnesiKur(
 
     const tepe = zemin + (c.yukseklik ?? 6.2)
     // Hat govdenin icinden geciyorsa bina KESITE girer; degilse gorunuse.
-    const kesiliyor = tMin <= 0 && tMax >= 0
+    const kesiliyor = hattiKesiyor
     const derinlik = kesiliyor ? 0 : Math.min(Math.abs(tMin), Math.abs(tMax))
 
     binalar.push({ d0, d1, zemin, tepe, derinlik, kesiliyor, katSayisi: c.katSayisi, ad: c.ad })
@@ -155,7 +175,7 @@ export function kesitSahnesiKur(
   const kesitAgaclar: KesitAgac[] = []
   for (const p of agaclar) {
     const { d, t } = yansit(e, p)
-    if (Math.abs(t) > yariBant || d < 0 || d > e.uzunluk) continue
+    if (t < altSinir || t > ustSinir || d < 0 || d > e.uzunluk) continue
     const zemin = kotOku(izgara, p.x, p.y)
     // Ayni konumdan tureyen sabit bir cesitlilik: agaclar birbirinin kopyasi olmasin
     const tohum = Math.abs(Math.sin(p.x * 12.9898 + p.y * 78.233) * 43758.5453) % 1
@@ -174,6 +194,7 @@ export function kesitSahnesiKur(
   return {
     uzunluk: e.uzunluk,
     bant,
+    taraf,
     profil,
     binalar,
     agaclar: kesitAgaclar,
@@ -274,7 +295,7 @@ export function kesitSahnesiSvg(s: KesitSahnesi, secenek: KesitCizimSecenek = {}
   // --- kunye
   p.push(
     `<text x="${solPay}" y="${Y - 18}" font-family="monospace" font-size="11.5" fill="#262320">` +
-      `UZUNLUK ${s.uzunluk.toFixed(0)} m · BANT ${s.bant.toFixed(0)} m · KOT ${s.enDusuk.toFixed(1)}–${s.enYuksek.toFixed(1)} m` +
+      `UZUNLUK ${s.uzunluk.toFixed(0)} m · BANT ${s.bant.toFixed(0)} m ${tarafAdi(s.taraf)} · KOT ${s.enDusuk.toFixed(1)}–${s.enYuksek.toFixed(1)} m` +
       `${abartma !== 1 ? ` · DUSEY ABARTMA ${abartma}x` : ''} · ${s.binalar.length} yapi, ${s.agaclar.length} agac</text>`,
   )
   p.push(
@@ -290,4 +311,8 @@ function kotAdimi(fark: number): number {
   const hedef = fark / 7 || 1
   for (const a of adaylar) if (a >= hedef) return a
   return 200
+}
+
+function tarafAdi(t: KesitTarafi): string {
+  return t === 'on' ? '(on)' : t === 'arka' ? '(arka)' : '(iki taraf)'
 }

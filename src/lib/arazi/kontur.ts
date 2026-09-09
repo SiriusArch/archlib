@@ -39,11 +39,13 @@ function aradeger(
 }
 
 function seviyeParcalari(izgara: YukseklikIzgarasi, seviye: number): Parca[] {
-  const { satir, sutun, veri, yaricap, adim } = izgara
+  const { satir, sutun, veri, yariGenislik, yariYukseklik } = izgara
   const parcalar: Parca[] = []
 
-  const konumX = (j: number) => -yaricap + j * adim
-  const konumY = (i: number) => yaricap - i * adim
+  const adimX = (2 * yariGenislik) / Math.max(1, sutun - 1)
+  const adimY = (2 * yariYukseklik) / Math.max(1, satir - 1)
+  const konumX = (j: number) => -yariGenislik + j * adimX
+  const konumY = (i: number) => yariYukseklik - i * adimY
 
   for (let i = 0; i < satir - 1; i++) {
     for (let j = 0; j < sutun - 1; j++) {

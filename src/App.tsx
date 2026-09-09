@@ -1,8 +1,18 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import type { Saglayici } from './types'
 import { aktifSaglayiciOku, anahtarlariOku } from './lib/storage'
 import { saglayiciBul } from './lib/llm'
 import { BOLUMLER, bolumBul, type Sekme } from './ui/bolumler'
+import {
+  IkonKritik,
+  IkonArazi,
+  IkonKitaplik,
+  IkonBilgi,
+  IkonListe,
+  IkonKaynak,
+  IkonAnahtar,
+  IkonOk,
+} from './ui/Ikonlar'
 import Katalog from './components/Katalog'
 import Analiz from './components/Analiz'
 import BilgiBankasi from './components/BilgiBankasi'
@@ -10,12 +20,19 @@ import Listeler from './components/Listeler'
 import Kaynaklar from './components/Kaynaklar'
 import AnahtarPaneli from './components/AnahtarPaneli'
 
-// Intro tum WebGPU yigini cekiyor; Arazi harita ve cografi veri kodunu.
-// Ikisi de tembel yuklenirse ana paket ince kaliyor.
 const Intro = lazy(() => import('./intro/Intro'))
 const Arazi = lazy(() => import('./components/Arazi'))
 
 const INTRO_ANAHTARI = 'archlib.intro.v1'
+
+const IKONLAR: Record<Sekme, (p: { className?: string }) => ReactNode> = {
+  analiz: IkonKritik,
+  arazi: IkonArazi,
+  katalog: IkonKitaplik,
+  bilgi: IkonBilgi,
+  liste: IkonListe,
+  kaynak: IkonKaynak,
+}
 
 export default function App() {
   const [sekme, setSekme] = useState<Sekme>('analiz')
@@ -35,9 +52,9 @@ export default function App() {
     setSaglayici(aktifSaglayiciOku())
   }, [])
 
-  // Sekme degisince yukari don — uzun sayfalarda ortada kalmayi onler.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    setMenuAcik(false)
   }, [sekme])
 
   function introyuGec() {
@@ -62,103 +79,127 @@ export default function App() {
   }
 
   return (
-    <div className="kagit-doku relative min-h-full">
-      <div className="animasyon-acilis relative z-[1]">
-        {/* ---------------------------------------------------------- kunye */}
-        <header className="sticky top-0 z-40 border-b border-cizgi bg-kagit/92 backdrop-blur-[6px]">
-          <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
-            <div className="flex items-center justify-between gap-6 py-4">
-              <div className="flex items-baseline gap-3">
-                <span className="font-baslik text-[22px] leading-none tracking-[-0.015em] text-murekkep">
-                  ArchLib
-                </span>
-                <span className="hidden h-3 w-px bg-cizgi-2 sm:block" />
-                <span className="etiket hidden text-murekkep-3 sm:block">
-                  Mimarlik Kitapligi
-                </span>
-              </div>
+    <div className="animasyon-acilis flex min-h-full">
+      {/* ================================================== kenar cubugu */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-cizgi bg-yan transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+          menuAcik ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="px-5 pt-7 pb-5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[7px] border border-kiremit/35 bg-kiremit-soft">
+              <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" aria-hidden="true">
+                <path
+                  d="M4 20V10.5L12 4l8 6.5V20"
+                  fill="none"
+                  stroke="#b9573e"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+                <path d="M9.5 20v-5.5h5V20" fill="none" stroke="#b9573e" strokeWidth="1.6" />
+              </svg>
+            </span>
+            <span className="font-baslik text-[21px] font-semibold tracking-[-0.03em] text-murekkep">
+              ArchLib<span className="text-kiremit">.</span>
+            </span>
+          </div>
+          <p className="etiket-buyuk mt-3 leading-relaxed">Mimarligin dijital kutuphanesi</p>
+        </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPanelAcik(true)}
-                  className="etiket hidden items-center gap-2 border border-cizgi px-3 py-2 text-murekkep-2 transition-colors duration-300 hover:border-murekkep hover:text-murekkep sm:flex"
-                >
-                  <span
-                    className={`inline-block h-[5px] w-[5px] rounded-full ${
-                      anahtarVar ? 'bg-adacayi' : 'bg-kiremit'
-                    }`}
-                  />
-                  {anahtarVar ? saglayiciBul(saglayici).ad.split(' ')[0] : 'Anahtar yok'}
-                </button>
-                <button
-                  onClick={() => setMenuAcik((m) => !m)}
-                  className="etiket border border-cizgi px-3 py-2 text-murekkep-2 lg:hidden"
-                >
-                  {menuAcik ? 'Kapat' : 'Bolumler'}
-                </button>
-              </div>
-            </div>
-
-            {/* ------------------------------------------------------- nav */}
-            <nav className={`${menuAcik ? 'block' : 'hidden'} pb-1 lg:block`}>
-              <ul className="flex flex-col lg:flex-row lg:gap-8">
-                {BOLUMLER.map((b) => {
-                  const secili = b.id === sekme
-                  return (
-                    <li key={b.id} className="lg:py-0">
-                      <button
-                        onClick={() => {
-                          setSekme(b.id)
-                          setMenuAcik(false)
-                        }}
-                        className="group relative block w-full py-2.5 text-left lg:w-auto lg:py-3"
-                      >
-                        <span className="flex items-baseline gap-2">
-                          <span
-                            className={`sayi text-[10px] transition-colors duration-300 ${
-                              secili ? b.metin : 'text-murekkep-3/60'
-                            }`}
-                          >
-                            {b.no}
-                          </span>
-                          <span
-                            className={`font-baslik text-[15px] leading-none transition-colors duration-300 ${
-                              secili ? 'text-murekkep' : 'text-murekkep-2 group-hover:text-murekkep'
-                            }`}
-                          >
-                            {b.ad}
-                          </span>
-                          <span className="etiket ml-1 text-murekkep-3/70 lg:hidden">{b.alt}</span>
-                        </span>
-                        <span
-                          className={`absolute -bottom-px left-0 h-[2px] w-full origin-left transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                            b.dolgu
-                          } ${secili ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
-                        />
-                      </button>
-                    </li>
-                  )
-                })}
-                <li className="sm:hidden">
+        <nav className="flex-1 overflow-y-auto px-3">
+          <ul className="space-y-0.5">
+            {BOLUMLER.map((b) => {
+              const Ikon = IKONLAR[b.id]
+              const secili = b.id === sekme
+              return (
+                <li key={b.id}>
                   <button
-                    onClick={() => {
-                      setPanelAcik(true)
-                      setMenuAcik(false)
-                    }}
-                    className="etiket block w-full py-3 text-left text-murekkep-2"
+                    onClick={() => setSekme(b.id)}
+                    className={`group flex w-full items-center gap-3 rounded-[7px] px-3 py-2.5 text-left transition-colors duration-200 ${
+                      secili
+                        ? 'bg-kiremit-soft text-kiremit-koyu'
+                        : 'text-murekkep-2 hover:bg-kagit-2 hover:text-murekkep'
+                    }`}
                   >
-                    API Anahtari
+                    <Ikon className={`h-[18px] w-[18px] shrink-0 ${secili ? '' : 'opacity-70'}`} />
+                    <span className="flex-1 text-[15px] font-medium">{b.ad}</span>
+                    {secili && <span className="h-1.5 w-1.5 rounded-full bg-kiremit" />}
                   </button>
                 </li>
-              </ul>
-            </nav>
+              )
+            })}
+          </ul>
+
+          <div className="mt-7 px-3">
+            <div className="etiket-buyuk mb-2.5">Bolum</div>
+            <p className="text-[13.5px] leading-relaxed text-murekkep-3">{aktif.alt}</p>
+          </div>
+        </nav>
+
+        <div className="p-3">
+          <div className="rounded-[8px] border border-cizgi bg-kart p-4">
+            <div className="flex items-center gap-2">
+              <IkonAnahtar className="h-[15px] w-[15px] text-murekkep-3" />
+              <span className="text-[14px] font-medium text-murekkep">API anahtari</span>
+            </div>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-murekkep-3">
+              {anahtarVar
+                ? `${saglayiciBul(saglayici).ad.split(' ')[0]} bagli. Tokeni kendi hesabin harciyor.`
+                : 'Kritik almak icin kendi anahtarini gir. Tarayicidan cikmaz.'}
+            </p>
+            <button
+              onClick={() => setPanelAcik(true)}
+              className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-kiremit-koyu transition-colors hover:text-kiremit"
+            >
+              {anahtarVar ? 'Degistir' : 'Anahtar gir'}
+              <IkonOk className="h-[13px] w-[13px]" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {menuAcik && (
+        <button
+          onClick={() => setMenuAcik(false)}
+          aria-label="Menuyu kapat"
+          className="fixed inset-0 z-40 bg-murekkep/25 lg:hidden"
+        />
+      )}
+
+      {/* ======================================================== icerik */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 border-b border-cizgi bg-kagit/90 backdrop-blur-[6px]">
+          <div className="flex items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMenuAcik(true)}
+                aria-label="Bolumler"
+                className="rounded-[6px] border border-cizgi p-2 text-murekkep-2 lg:hidden"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </button>
+              <span className="etiket">Kutuphane</span>
+              <span className="text-murekkep-3">/</span>
+              <span className="text-[14px] font-medium text-murekkep">{aktif.ad}</span>
+            </div>
+
+            <button
+              onClick={() => setPanelAcik(true)}
+              className="flex items-center gap-2 rounded-[6px] border border-cizgi bg-kart px-3 py-2 text-[13.5px] text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${anahtarVar ? 'bg-adacayi' : 'bg-kiremit'}`}
+              />
+              {anahtarVar ? saglayiciBul(saglayici).ad.split(' ')[0] : 'Anahtar yok'}
+            </button>
           </div>
         </header>
 
-        {/* --------------------------------------------------------- icerik */}
-        <main className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8 sm:py-14">
-          {/* key: sekme degisince animasyon bastan oynasin */}
-          <div key={sekme} className="animasyon-sayfa">
+        <main className="flex-1 px-5 py-8 sm:px-8 sm:py-10">
+          <div key={sekme} className="animasyon-sayfa mx-auto max-w-[1180px]">
             {sekme === 'analiz' && (
               <Analiz
                 saglayici={saglayici}
@@ -169,9 +210,7 @@ export default function App() {
             {sekme === 'arazi' && (
               <Suspense
                 fallback={
-                  <div className="etiket py-24 text-center text-murekkep-3">
-                    Arazi araci yukleniyor
-                  </div>
+                  <div className="etiket py-24 text-center">Arazi araci yukleniyor</div>
                 }
               >
                 <Arazi />
@@ -184,29 +223,19 @@ export default function App() {
           </div>
         </main>
 
-        {/* --------------------------------------------------------- kolofon */}
-        <footer className="mt-16 border-t border-cizgi">
-          <div className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8">
-            <div className="grid gap-8 sm:grid-cols-[1fr_auto]">
-              <div className="max-w-2xl">
-                <div className="etiket text-murekkep-3">Kolofon</div>
-                <p className="mt-3 text-[13px] leading-relaxed text-murekkep-2">
-                  ArchLib sunucusuz calisir; API anahtarin ve verilerin yalnizca bu tarayicida
-                  saklanir. Bilgi tabani{' '}
-                  <span className="font-baslik italic">Temel Tasar</span> (I. Hulusi Gungor),{' '}
-                  <span className="font-baslik italic">Yapi Tasarim Bilgisi</span> (Neufert), MIM 153
-                  Yapi Bilgisi ve MIM 244 Yapi Elemanlari Tasarimi ders notlari basta olmak uzere
-                  16 kaynaktan cikarilmistir. Yapay zeka kritigi bir on degerlendirmedir;
-                  danismanin ve jurinin yerine gecmez.
-                </p>
-              </div>
-              <div className="flex items-end">
-                <div className="flex w-full min-w-[180px] sm:w-[180px]">
-                  {BOLUMLER.filter((b) => b.renk !== 'murekkep').map((b) => (
-                    <span key={b.id} className={`h-[3px] flex-1 ${b.dolgu}`} />
-                  ))}
-                </div>
-              </div>
+        <footer className="border-t border-cizgi px-5 py-7 sm:px-8">
+          <div className="mx-auto flex max-w-[1180px] flex-wrap items-end justify-between gap-6">
+            <p className="max-w-2xl text-[13px] leading-relaxed text-murekkep-3">
+              Sunucusuz calisir; anahtarin ve verilerin yalnizca bu tarayicida saklanir. Bilgi
+              tabani <span className="text-murekkep-2">Temel Tasar</span> (I. Hulusi Gungor),{' '}
+              <span className="text-murekkep-2">Yapi Tasarim Bilgisi</span> (Neufert), MIM 153 ve
+              MIM 244 ders notlari basta olmak uzere 16 kaynaktan cikarilmistir. Yapay zeka kritigi
+              on degerlendirmedir; danismanin ve jurinin yerine gecmez.
+            </p>
+            <div className="flex w-[170px] overflow-hidden rounded-full">
+              {BOLUMLER.filter((b) => b.id !== 'kaynak').map((b) => (
+                <span key={b.id} className={`h-[3px] flex-1 ${b.dolgu}`} />
+              ))}
             </div>
           </div>
         </footer>
