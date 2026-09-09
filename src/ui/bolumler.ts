@@ -1,4 +1,4 @@
-export type Sekme = 'analiz' | 'arazi' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
+export type Sekme = 'analiz' | 'cizim' | 'arazi' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
 
 export interface BolumTanimi {
   id: Sekme
@@ -20,6 +20,15 @@ export const BOLUMLER: readonly BolumTanimi[] = [
     zemin: 'bg-kiremit-soft',
     kenar: 'border-kiremit',
     dolgu: 'bg-kiremit',
+  },
+  {
+    id: 'cizim',
+    ad: 'Cizim',
+    alt: '2B plan ve 3B kutle',
+    metin: 'text-mor-koyu',
+    zemin: 'bg-mor-soft',
+    kenar: 'border-mor',
+    dolgu: 'bg-mor',
   },
   {
     id: 'arazi',

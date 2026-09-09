@@ -24,6 +24,17 @@ export function IkonKritik({ className = 'h-[18px] w-[18px]' }: Props) {
   )
 }
 
+export function IkonCizim({ className = 'h-[18px] w-[18px]' }: Props) {
+  return (
+    <svg {...ortak} className={className} aria-hidden="true">
+      <path d="M4 20V8.5L12 4l8 4.5V20" />
+      <path d="M4 20h16" />
+      <path d="M9.5 20v-6h5v6" />
+      <path d="M4 12.5h16" />
+    </svg>
+  )
+}
+
 export function IkonArazi({ className = 'h-[18px] w-[18px]' }: Props) {
   return (
     <svg {...ortak} className={className} aria-hidden="true">

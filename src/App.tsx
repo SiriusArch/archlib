@@ -5,6 +5,7 @@ import { saglayiciBul } from './lib/llm'
 import { BOLUMLER, bolumBul, type Sekme } from './ui/bolumler'
 import {
   IkonKritik,
+  IkonCizim,
   IkonArazi,
   IkonKitaplik,
   IkonBilgi,
@@ -22,11 +23,13 @@ import AnahtarPaneli from './components/AnahtarPaneli'
 
 const Intro = lazy(() => import('./intro/Intro'))
 const Arazi = lazy(() => import('./components/Arazi'))
+const Cizim = lazy(() => import('./cizim/Cizim'))
 
 const INTRO_ANAHTARI = 'archlib.intro.v1'
 
 const IKONLAR: Record<Sekme, (p: { className?: string }) => ReactNode> = {
   analiz: IkonKritik,
+  cizim: IkonCizim,
   arazi: IkonArazi,
   katalog: IkonKitaplik,
   bilgi: IkonBilgi,
@@ -198,6 +201,17 @@ export default function App() {
           </div>
         </header>
 
+        {/* Cizim modulu tam genislikte calisir: tuval kenar boslugu istemez. */}
+        {sekme === 'cizim' ? (
+          <main className="flex-1">
+            <Suspense
+              fallback={<div className="etiket py-24 text-center">Cizim stuyosu yukleniyor</div>}
+            >
+              <Cizim saglayici={saglayici} anahtarPaneliniAc={() => setPanelAcik(true)} />
+            </Suspense>
+          </main>
+        ) : (
+          <>
         <main className="flex-1 px-5 py-8 sm:px-8 sm:py-10">
           <div key={sekme} className="animasyon-sayfa mx-auto max-w-[1180px]">
             {sekme === 'analiz' && (
@@ -239,6 +253,8 @@ export default function App() {
             </div>
           </div>
         </footer>
+          </>
+        )}
       </div>
 
       <AnahtarPaneli
