@@ -388,3 +388,69 @@ input[type='checkbox'] {
 .archlib-olcu-kucuk::before {
   display: none !important;
 }
+
+/*
+ * Secim tutamaklari. Ikonun kendisi 30x30 saydam bir kare; gorunen sekil
+ * icindeki <i>. Boylece yakalama alani parmakla bile rahat, cizim ise ince
+ * kalir. Olcu balonlari ve bant tutamagi da bu blokta.
+ */
+.archlib-tutamak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  touch-action: none;
+}
+
+.archlib-tutamak i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.archlib-tutamak:hover i {
+  transform: scale(1.22);
+}
+
+.archlib-tutamak:active i,
+.leaflet-dragging .archlib-tutamak i {
+  transform: scale(1.08);
+}
+
+/* Leaflet kendi .leaflet-interactive imlecini basiyor; iki sinifla asiyoruz. */
+.leaflet-container .archlib-kose-nwse {
+  cursor: nwse-resize;
+}
+.leaflet-container .archlib-kose-nesw {
+  cursor: nesw-resize;
+}
+.leaflet-container .archlib-kenar-ns {
+  cursor: ns-resize;
+}
+.leaflet-container .archlib-kenar-ew {
+  cursor: ew-resize;
+}
+.leaflet-container .archlib-uc {
+  cursor: grab;
+}
+.leaflet-container .archlib-uc:active {
+  cursor: grabbing;
+}
+.leaflet-container .archlib-tasi {
+  cursor: move;
+}
+
+/* Surukleme sirasinda gecis animasyonu olmasin: her kare tam konumda ciz. */
+.leaflet-drag-target {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archlib-tutamak i {
+    transition: none;
+  }
+}

@@ -32,6 +32,7 @@ type Konum = { enlem: number; boylam: number }
 
 const BASLANGIC: Konum = { enlem: 41.6771, boylam: 26.5557 }
 const MAKS_ALAN_KM2 = 4
+const EN_KUCUK_ADIM = 0.00008
 const KONTUR_ARALIKLARI = [1, 2, 5, 10] as const
 const AG_COZUNURLUKLARI = [4, 6, 10, 20] as const
 const BANTLAR = [30, 60, 120, 250] as const
@@ -51,34 +52,135 @@ const KATMAN_LISTESI: { id: KatmanTuru | 'kontur'; ad: string; renk: string }[] 
   { id: 'kontur', ad: 'Kontur cizgileri', renk: 'bg-kehribar' },
 ]
 
-function kutuKur(merkez: Konum, genislik: number, yukseklik: number): Kutu {
-  const p = new Projeksiyon(merkez)
-  const [guney, bati, kuzey, dogu] = p.sinirKutusu(genislik / 2, yukseklik / 2)
-  return { guney, bati, kuzey, dogu }
+// --------------------------------------------------------------- tutamaklar
+
+type TutamakTuru = 'kose-nwse' | 'kose-nesw' | 'kenar-ns' | 'kenar-ew' | 'uc' | 'tasi'
+
+/**
+ * Tutamak ikonu 30x30 saydam bir kare; icindeki <i> gorunen kucuk sekildir.
+ * Boylece hedef alani parmakla bile rahat yakalanirken cizim ince kalir.
+ */
+const TUTAMAK_BOYUT = 30
+const TUTAMAK_GORSELI: Record<TutamakTuru, string> = {
+  'kose-nwse': 'width:13px;height:13px;background:#fffefa;border:2px solid #30332d;border-radius:3px',
+  'kose-nesw': 'width:13px;height:13px;background:#fffefa;border:2px solid #30332d;border-radius:3px',
+  'kenar-ns': 'width:24px;height:8px;background:#fffefa;border:2px solid #5f6259;border-radius:4px',
+  'kenar-ew': 'width:8px;height:24px;background:#fffefa;border:2px solid #5f6259;border-radius:4px',
+  uc: 'width:15px;height:15px;background:#b9573e;border:2.5px solid #fffefa;border-radius:50%',
+  tasi: 'width:26px;height:26px;background:#fffefa;border:1px solid #cfcdc2;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5f6259;font-size:13px;line-height:1',
 }
 
-function kutuOlcu(k: Kutu): { merkez: Konum; genislik: number; yukseklik: number } {
-  const merkez = { enlem: (k.guney + k.kuzey) / 2, boylam: (k.bati + k.dogu) / 2 }
-  const p = new Projeksiyon(merkez)
-  const sw = p.ileri(k.guney, k.bati)
-  const ne = p.ileri(k.kuzey, k.dogu)
-  return { merkez, genislik: Math.abs(ne.x - sw.x), yukseklik: Math.abs(ne.y - sw.y) }
-}
-
-function tutamak(tip: 'kose' | 'kenar' | 'uc' | 'tasi'): L.DivIcon {
-  const stil: Record<string, string> = {
-    kose: 'width:12px;height:12px;background:#30332d;border:2px solid #fffefa;border-radius:3px',
-    kenar: 'width:10px;height:10px;background:#fffefa;border:2px solid #30332d;border-radius:2px',
-    uc: 'width:14px;height:14px;background:#b9573e;border:2.5px solid #fffefa;border-radius:50%',
-    tasi: 'width:26px;height:26px;background:#fffefa;border:1px solid #dcdad0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5f6259;font-size:12px;line-height:1',
-  }
-  const boyut = tip === 'tasi' ? 26 : tip === 'uc' ? 14 : tip === 'kose' ? 12 : 10
+function tutamak(tur: TutamakTuru): L.DivIcon {
   return L.divIcon({
-    className: '',
-    iconSize: [boyut, boyut],
-    iconAnchor: [boyut / 2, boyut / 2],
-    html: `<div style="${stil[tip]};box-shadow:0 1px 4px rgba(48,51,45,.18)">${tip === 'tasi' ? '✥' : ''}</div>`,
+    className: `archlib-tutamak archlib-${tur}`,
+    iconSize: [TUTAMAK_BOYUT, TUTAMAK_BOYUT],
+    iconAnchor: [TUTAMAK_BOYUT / 2, TUTAMAK_BOYUT / 2],
+    html: `<i style="${TUTAMAK_GORSELI[tur]};box-shadow:0 1px 5px rgba(48,51,45,.22)">${
+      tur === 'tasi' ? '✥' : ''
+    }</i>`,
   })
+}
+
+function tutamakKur(
+  grup: L.LayerGroup,
+  konum: [number, number],
+  tur: TutamakTuru,
+): L.Marker {
+  return L.marker(konum, {
+    icon: tutamak(tur),
+    draggable: true,
+    // Kenara yaklasinca harita kendiliginden kayar; secim cerceveden tasmaz.
+    autoPan: true,
+    autoPanPadding: [48, 48],
+    autoPanSpeed: 12,
+    keyboard: false,
+    zIndexOffset: tur === 'tasi' ? 400 : 600,
+  }).addTo(grup)
+}
+
+/**
+ * Bir SVG govdesini (dikdortgenin ici, kesit hatti) dogrudan surukletir.
+ * Pointer olaylari kullanildigi icin fare, kalem ve dokunma ayni yoldan gecer;
+ * pointer capture sayesinde imlec sekilden cikinca da surukleme kopmaz.
+ */
+function govdeSurukleBagla(
+  harita: L.Map,
+  el: Element | null | undefined,
+  basla: () => void,
+  hareket: (dEnlem: number, dBoylam: number) => void,
+  bitir: () => void,
+  imlec = 'move',
+): () => void {
+  if (!el) return () => {}
+  const hedef = el as SVGElement
+  hedef.style.cursor = imlec
+  hedef.style.touchAction = 'none'
+  hedef.style.pointerEvents = 'all'
+  let onceki: L.LatLng | null = null
+
+  const bas = (e: PointerEvent) => {
+    if (e.button !== 0) return
+    onceki = harita.mouseEventToLatLng(e as unknown as MouseEvent)
+    harita.dragging.disable()
+    try {
+      hedef.setPointerCapture(e.pointerId)
+    } catch {
+      /* yakalama desteklenmiyorsa olaylar yine de belgeye dusuyor */
+    }
+    basla()
+    e.preventDefault()
+    e.stopPropagation()
+  }
+  const git = (e: PointerEvent) => {
+    if (!onceki) return
+    const su = harita.mouseEventToLatLng(e as unknown as MouseEvent)
+    hareket(su.lat - onceki.lat, su.lng - onceki.lng)
+    onceki = su
+    e.preventDefault()
+  }
+  const bit = (e: PointerEvent) => {
+    if (!onceki) return
+    onceki = null
+    harita.dragging.enable()
+    try {
+      hedef.releasePointerCapture(e.pointerId)
+    } catch {
+      /* zaten birakilmis */
+    }
+    bitir()
+  }
+
+  hedef.addEventListener('pointerdown', bas)
+  hedef.addEventListener('pointermove', git)
+  hedef.addEventListener('pointerup', bit)
+  hedef.addEventListener('pointercancel', bit)
+  return () => {
+    hedef.removeEventListener('pointerdown', bas)
+    hedef.removeEventListener('pointermove', git)
+    hedef.removeEventListener('pointerup', bit)
+    hedef.removeEventListener('pointercancel', bit)
+  }
+}
+
+interface Sekiller {
+  dikdortgen?: L.Rectangle
+  koseler: L.Marker[]
+  kenarlar: L.Marker[]
+  merkez?: L.Marker
+  olcuG?: L.Tooltip
+  olcuY?: L.Tooltip
+  bant?: L.Polygon
+  hat?: L.Polyline
+  hatTut?: L.Polyline
+  ok?: L.Polyline
+  okUc?: L.Marker
+  uclar: L.Marker[]
+  hatOlcu?: L.Tooltip
+  cozumler: (() => void)[]
+}
+
+function bosSekiller(): Sekiller {
+  return { koseler: [], kenarlar: [], uclar: [], cozumler: [] }
 }
 
 export default function Arazi() {
@@ -86,6 +188,7 @@ export default function Arazi() {
   const haritaRef = useRef<L.Map | null>(null)
   const grupRef = useRef<L.LayerGroup | null>(null)
   const iptalRef = useRef<AbortController | null>(null)
+  const sekilRef = useRef<Sekiller>(bosSekiller())
 
   const [mod, setMod] = useState<Mod>('plan')
   const [kutu, setKutu] = useState<Kutu>(() => kutuKur(BASLANGIC, 500, 500))
@@ -97,6 +200,15 @@ export default function Arazi() {
   const [taraf, setTaraf] = useState<KesitTarafi>('on')
   const [abartma, setAbartma] = useState<number>(1)
   const [agCozunurluk, setAgCozunurluk] = useState<number>(6)
+
+  // Surukleme sirasinda gecerli geometri React'ten degil bu referanslardan
+  // okunur; React durumu her karede degil, animasyon karesinde tazelenir.
+  const anlikKutu = useRef(kutu)
+  const anlikKesit = useRef(kesitUc)
+  const anlikBant = useRef(bant)
+  const anlikTaraf = useRef(taraf)
+  const surukluyor = useRef(false)
+  const kareRef = useRef(0)
 
   const [durum, setDurum] = useState<Durum>('bos')
   const [ilerleme, setIlerleme] = useState('')
@@ -124,6 +236,125 @@ export default function Arazi() {
   const alanAsiyor = alanKm2 > MAKS_ALAN_KM2
   const hatOlcu = useMemo(() => hattiOlc(kesitUc), [kesitUc])
 
+  anlikBant.current = bant
+  anlikTaraf.current = taraf
+
+  // -------------------------------------------------------- durum tazeleme
+  const tazele = useCallback(() => {
+    if (kareRef.current) return
+    kareRef.current = requestAnimationFrame(() => {
+      kareRef.current = 0
+      setKutu(anlikKutu.current)
+      setKesitUc(anlikKesit.current)
+    })
+  }, [])
+
+  const surukleBitti = useCallback(() => {
+    surukluyor.current = false
+    if (kareRef.current) {
+      cancelAnimationFrame(kareRef.current)
+      kareRef.current = 0
+    }
+    setKutu(anlikKutu.current)
+    setKesitUc(anlikKesit.current)
+  }, [])
+
+  // --------------------------------------------------------- senkronizasyon
+  const planSenkron = useCallback((k: Kutu, haric?: L.Layer) => {
+    const s = sekilRef.current
+    if (!s.dikdortgen) return
+    s.dikdortgen.setBounds([
+      [k.guney, k.bati],
+      [k.kuzey, k.dogu],
+    ])
+    const oy = (k.guney + k.kuzey) / 2
+    const ox = (k.bati + k.dogu) / 2
+
+    const koseKonum: [number, number][] = [
+      [k.guney, k.bati],
+      [k.guney, k.dogu],
+      [k.kuzey, k.dogu],
+      [k.kuzey, k.bati],
+    ]
+    s.koseler.forEach((m, i) => {
+      if (m !== haric) m.setLatLng(koseKonum[i])
+    })
+
+    const kenarKonum: [number, number][] = [
+      [k.guney, ox],
+      [k.kuzey, ox],
+      [oy, k.bati],
+      [oy, k.dogu],
+    ]
+    s.kenarlar.forEach((m, i) => {
+      if (m !== haric) m.setLatLng(kenarKonum[i])
+    })
+
+    if (s.merkez && s.merkez !== haric) s.merkez.setLatLng([oy, ox])
+
+    const o = kutuOlcu(k)
+    s.olcuG?.setLatLng([k.kuzey, ox]).setContent(`${o.genislik.toFixed(0)} m`)
+    s.olcuY?.setLatLng([oy, k.bati]).setContent(`${o.yukseklik.toFixed(0)} m`)
+
+    const asti = (o.genislik * o.yukseklik) / 1_000_000 > MAKS_ALAN_KM2
+    s.dikdortgen.setStyle({
+      color: asti ? '#b9573e' : '#30332d',
+      fillColor: asti ? '#b9573e' : '#5c7c92',
+    })
+  }, [])
+
+  const kesitSenkron = useCallback(
+    (u: [Konum, Konum], bantD: number, tarafD: KesitTarafi, haric?: L.Layer) => {
+      const s = sekilRef.current
+      if (!s.hat) return
+      const [A, B] = u
+      const orta = { enlem: (A.enlem + B.enlem) / 2, boylam: (A.boylam + B.boylam) / 2 }
+      const proj = new Projeksiyon(orta)
+      const a = proj.ileri(A.enlem, A.boylam)
+      const b = proj.ileri(B.enlem, B.boylam)
+      const uz = Math.hypot(b.x - a.x, b.y - a.y) || 1
+      const nx = -(b.y - a.y) / uz
+      const ny = (b.x - a.x) / uz
+
+      const ust = tarafD === 'arka' ? 0 : tarafD === 'on' ? bantD : bantD / 2
+      const alt = tarafD === 'on' ? 0 : tarafD === 'arka' ? -bantD : -bantD / 2
+      const kaydir = (p: Nokta, m: number): [number, number] => {
+        const q = proj.geri(p.x + nx * m, p.y + ny * m)
+        return [q.enlem, q.boylam]
+      }
+
+      s.bant?.setLatLngs([kaydir(a, ust), kaydir(b, ust), kaydir(b, alt), kaydir(a, alt)])
+
+      const hatNokta: [number, number][] = [
+        [A.enlem, A.boylam],
+        [B.enlem, B.boylam],
+      ]
+      s.hat.setLatLngs(hatNokta)
+      s.hatTut?.setLatLngs(hatNokta)
+
+      // Bakis oku hattin %28'inde durur; ortadaki tasima tutamagiyla cakismaz.
+      const okKok: Nokta = { x: a.x + (b.x - a.x) * 0.28, y: a.y + (b.y - a.y) * 0.28 }
+      if (tarafD === 'iki') {
+        s.ok?.setStyle({ opacity: 0 })
+        s.okUc?.setOpacity(0)
+      } else {
+        const yon = tarafD === 'on' ? 1 : -1
+        const boy = Math.min(64, Math.max(24, bantD * 0.45))
+        s.ok?.setStyle({ opacity: 1 })
+        s.ok?.setLatLngs([kaydir(okKok, 0), kaydir(okKok, boy * yon)])
+        s.okUc?.setOpacity(1)
+        s.okUc?.setLatLng(kaydir(okKok, boy * yon))
+      }
+
+      s.uclar.forEach((m, i) => {
+        if (m !== haric) m.setLatLng(hatNokta[i])
+      })
+      if (s.merkez && s.merkez !== haric) s.merkez.setLatLng([orta.enlem, orta.boylam])
+      s.hatOlcu?.setLatLng([orta.enlem, orta.boylam]).setContent(`${uz.toFixed(0)} m`)
+    },
+    [],
+  )
+
   // ------------------------------------------------------------ harita kur
   useEffect(() => {
     if (!kutuRef.current || haritaRef.current) return
@@ -131,6 +362,15 @@ export default function Arazi() {
       center: [BASLANGIC.enlem, BASLANGIC.boylam],
       zoom: 15,
       zoomControl: true,
+      // Yumusak tekerlek yakinlastirmasi; CAD altligi secerken kadraj kacmaz.
+      scrollWheelZoom: true,
+      wheelPxPerZoomLevel: 120,
+      zoomSnap: 0.25,
+      zoomDelta: 0.5,
+      // Hizli birakislarda kadraj firlamasin: sinirli hiz, kisa sonumleme.
+      inertia: true,
+      inertiaDeceleration: 3400,
+      inertiaMaxSpeed: 1200,
     })
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -146,160 +386,257 @@ export default function Arazi() {
     }
   }, [])
 
-  // --------------------------------------------------- secimi haritaya ciz
+  // ------------------------------------------- katmanlari bir kez insa et
   useEffect(() => {
+    const harita = haritaRef.current
     const grup = grupRef.current
-    if (!grup) return
-    grup.clearLayers()
+    if (!harita || !grup) return
+
+    const s = bosSekiller()
+    sekilRef.current = s
 
     if (mod === 'plan') {
-      const { guney, bati, kuzey, dogu } = kutu
-      L.rectangle(
+      const k = anlikKutu.current
+      s.dikdortgen = L.rectangle(
         [
-          [guney, bati],
-          [kuzey, dogu],
+          [k.guney, k.bati],
+          [k.kuzey, k.dogu],
         ],
-        {
-          color: alanAsiyor ? '#b9573e' : '#30332d',
-          weight: 1.5,
-          fillColor: '#5c7c92',
-          fillOpacity: 0.07,
-        },
+        { color: '#30332d', weight: 1.5, fillColor: '#5c7c92', fillOpacity: 0.07 },
       ).addTo(grup)
 
-      // Kose tutamaklari: karsi kose sabit kalir, en ve boy serbest degisir
-      const koseler: [number, number, 'guney' | 'kuzey', 'bati' | 'dogu'][] = [
-        [guney, bati, 'guney', 'bati'],
-        [guney, dogu, 'guney', 'dogu'],
-        [kuzey, dogu, 'kuzey', 'dogu'],
-        [kuzey, bati, 'kuzey', 'bati'],
-      ]
-      for (const [e, b, dikey, yatay] of koseler) {
-        L.marker([e, b], { icon: tutamak('kose'), draggable: true })
-          .addTo(grup)
-          .on('drag', (ev) => {
-            const ll = (ev.target as L.Marker).getLatLng()
-            setKutu((k) => duzelt({ ...k, [dikey]: ll.lat, [yatay]: ll.lng }))
-          })
-      }
+      s.olcuG = olcuBalonu(grup)
+      s.olcuY = olcuBalonu(grup)
 
-      // Kenar tutamaklari: tek eksende boyutlandirir
-      const kenarlar: [number, number, 'guney' | 'kuzey' | 'bati' | 'dogu', 'e' | 'b'][] = [
-        [guney, (bati + dogu) / 2, 'guney', 'e'],
-        [kuzey, (bati + dogu) / 2, 'kuzey', 'e'],
-        [(guney + kuzey) / 2, bati, 'bati', 'b'],
-        [(guney + kuzey) / 2, dogu, 'dogu', 'b'],
+      // Kose: karsi kose sabit, en ve boy birlikte degisir.
+      const koseAlan: [('guney' | 'kuzey'), ('bati' | 'dogu'), TutamakTuru][] = [
+        ['guney', 'bati', 'kose-nesw'],
+        ['guney', 'dogu', 'kose-nwse'],
+        ['kuzey', 'dogu', 'kose-nesw'],
+        ['kuzey', 'bati', 'kose-nwse'],
       ]
-      for (const [e, b, alan, eksen] of kenarlar) {
-        L.marker([e, b], { icon: tutamak('kenar'), draggable: true })
-          .addTo(grup)
-          .on('drag', (ev) => {
-            const ll = (ev.target as L.Marker).getLatLng()
-            setKutu((k) => duzelt({ ...k, [alan]: eksen === 'e' ? ll.lat : ll.lng }))
-          })
-      }
-
-      L.marker([(guney + kuzey) / 2, (bati + dogu) / 2], {
-        icon: tutamak('tasi'),
-        draggable: true,
-      })
-        .addTo(grup)
-        .on('dragend', (ev) => {
-          const ll = (ev.target as L.Marker).getLatLng()
-          setKutu((k) => {
-            const de = ll.lat - (k.guney + k.kuzey) / 2
-            const db = ll.lng - (k.bati + k.dogu) / 2
-            return { guney: k.guney + de, kuzey: k.kuzey + de, bati: k.bati + db, dogu: k.dogu + db }
-          })
+      s.koseler = koseAlan.map(([dikey, yatay, tur]) => {
+        const m = tutamakKur(grup, [k[dikey], k[yatay]], tur)
+        m.on('dragstart', () => {
+          surukluyor.current = true
         })
+        m.on('drag', () => {
+          const ll = m.getLatLng()
+          const yeni = duzelt({ ...anlikKutu.current, [dikey]: ll.lat, [yatay]: ll.lng })
+          anlikKutu.current = yeni
+          planSenkron(yeni, m)
+          tazele()
+        })
+        m.on('dragend', () => {
+          planSenkron(anlikKutu.current)
+          surukleBitti()
+        })
+        return m
+      })
 
-      olcuBalonu(grup, [kuzey, (bati + dogu) / 2], `${olcu.genislik.toFixed(0)} m`)
-      olcuBalonu(grup, [(guney + kuzey) / 2, bati], `${olcu.yukseklik.toFixed(0)} m`)
-    } else {
-      const [A, B] = kesitUc
-      const orta = hatOlcu.orta
-      const proj = new Projeksiyon(orta)
-      const a = proj.ileri(A.enlem, A.boylam)
-      const b = proj.ileri(B.enlem, B.boylam)
-      const uz = Math.hypot(b.x - a.x, b.y - a.y) || 1
-      const nx = -(b.y - a.y) / uz
-      const ny = (b.x - a.x) / uz
+      // Kenar: tek eksende boyutlandirir.
+      const kenarAlan: [('guney' | 'kuzey' | 'bati' | 'dogu'), 'e' | 'b', TutamakTuru][] = [
+        ['guney', 'e', 'kenar-ns'],
+        ['kuzey', 'e', 'kenar-ns'],
+        ['bati', 'b', 'kenar-ew'],
+        ['dogu', 'b', 'kenar-ew'],
+      ]
+      const kenarBaslangic: [number, number][] = [
+        [k.guney, (k.bati + k.dogu) / 2],
+        [k.kuzey, (k.bati + k.dogu) / 2],
+        [(k.guney + k.kuzey) / 2, k.bati],
+        [(k.guney + k.kuzey) / 2, k.dogu],
+      ]
+      s.kenarlar = kenarAlan.map(([alan, eksen, tur], i) => {
+        const m = tutamakKur(grup, kenarBaslangic[i], tur)
+        m.on('dragstart', () => {
+          surukluyor.current = true
+        })
+        m.on('drag', () => {
+          const ll = m.getLatLng()
+          const yeni = duzelt({
+            ...anlikKutu.current,
+            [alan]: eksen === 'e' ? ll.lat : ll.lng,
+          })
+          anlikKutu.current = yeni
+          planSenkron(yeni, m)
+          tazele()
+        })
+        m.on('dragend', () => {
+          planSenkron(anlikKutu.current)
+          surukleBitti()
+        })
+        return m
+      })
 
-      // Bant secilen tarafa uzanir; haritadaki gosterim de oyle
-      const ust = taraf === 'arka' ? 0 : taraf === 'on' ? bant : bant / 2
-      const alt = taraf === 'on' ? 0 : taraf === 'arka' ? -bant : -bant / 2
-      const kaydir = (p: Nokta, s: number): [number, number] => {
-        const q = proj.geri(p.x + nx * s, p.y + ny * s)
-        return [q.enlem, q.boylam]
+      const tasiKutu = (dEnlem: number, dBoylam: number) => {
+        const o = anlikKutu.current
+        anlikKutu.current = {
+          guney: o.guney + dEnlem,
+          kuzey: o.kuzey + dEnlem,
+          bati: o.bati + dBoylam,
+          dogu: o.dogu + dBoylam,
+        }
       }
 
-      L.polygon([kaydir(a, ust), kaydir(b, ust), kaydir(b, alt), kaydir(a, alt)], {
+      s.merkez = tutamakKur(grup, [(k.guney + k.kuzey) / 2, (k.bati + k.dogu) / 2], 'tasi')
+      s.merkez.on('dragstart', () => {
+        surukluyor.current = true
+      })
+      s.merkez.on('drag', () => {
+        const ll = s.merkez!.getLatLng()
+        const o = anlikKutu.current
+        tasiKutu(ll.lat - (o.guney + o.kuzey) / 2, ll.lng - (o.bati + o.dogu) / 2)
+        planSenkron(anlikKutu.current, s.merkez)
+        tazele()
+      })
+      s.merkez.on('dragend', () => {
+        planSenkron(anlikKutu.current)
+        surukleBitti()
+      })
+
+      // Dikdortgenin ici de suruklenir: hedefi tasimak icin tutamak aramak
+      // gerekmez, kutunun herhangi bir yerinden cekmek yeter.
+      s.cozumler.push(
+        govdeSurukleBagla(
+          harita,
+          s.dikdortgen.getElement(),
+          () => {
+            surukluyor.current = true
+          },
+          (dEnlem, dBoylam) => {
+            tasiKutu(dEnlem, dBoylam)
+            planSenkron(anlikKutu.current)
+            tazele()
+          },
+          surukleBitti,
+        ),
+      )
+
+      planSenkron(anlikKutu.current)
+    } else {
+      const u = anlikKesit.current
+      s.bant = L.polygon([], {
         color: '#5c7c92',
         weight: 1,
         dashArray: '5 4',
         fillColor: '#5c7c92',
         fillOpacity: 0.1,
+        interactive: false,
       }).addTo(grup)
+      s.ok = L.polyline([], { color: '#b9573e', weight: 2.5, interactive: false }).addTo(grup)
+      s.okUc = L.marker([0, 0], {
+        icon: L.divIcon({
+          className: '',
+          iconSize: [11, 11],
+          iconAnchor: [5.5, 5.5],
+          html: '<div style="width:11px;height:11px;background:#b9573e;border-radius:50%;border:2px solid #fffefa"></div>',
+        }),
+        interactive: false,
+      }).addTo(grup)
+      s.hat = L.polyline([], { color: '#30332d', weight: 2.5, interactive: false }).addTo(grup)
+      // Gorunmez kalin es hat: 22 px'lik yakalama seridi.
+      s.hatTut = L.polyline([], {
+        color: '#30332d',
+        weight: 22,
+        opacity: 0.001,
+        lineCap: 'butt',
+      }).addTo(grup)
+      s.hatOlcu = olcuBalonu(grup, true)
 
-      L.polyline(
-        [
-          [A.enlem, A.boylam],
-          [B.enlem, B.boylam],
-        ],
-        { color: '#30332d', weight: 2.5 },
-      ).addTo(grup)
+      s.uclar = [0, 1].map((i) => {
+        const m = tutamakKur(grup, [u[i].enlem, u[i].boylam], 'uc')
+        m.on('dragstart', () => {
+          surukluyor.current = true
+        })
+        m.on('drag', () => {
+          const ll = m.getLatLng()
+          const y: [Konum, Konum] = [anlikKesit.current[0], anlikKesit.current[1]]
+          y[i] = { enlem: ll.lat, boylam: ll.lng }
+          anlikKesit.current = y
+          kesitSenkron(y, anlikBant.current, anlikTaraf.current, m)
+          tazele()
+        })
+        m.on('dragend', () => {
+          kesitSenkron(anlikKesit.current, anlikBant.current, anlikTaraf.current)
+          surukleBitti()
+        })
+        return m
+      })
 
-      // Bakis yonu oku: kesitin hangi tarafi gosterdigi tek bakista okunsun
-      if (taraf !== 'iki') {
-        const yon = taraf === 'on' ? 1 : -1
-        const m: Nokta = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
-        const uzunlukOk = Math.min(60, Math.max(22, bant * 0.45))
-        L.polyline([kaydir(m, 0), kaydir(m, uzunlukOk * yon)], {
-          color: '#b9573e',
-          weight: 2.5,
-        }).addTo(grup)
-        L.marker(kaydir(m, uzunlukOk * yon), {
-          icon: L.divIcon({
-            className: '',
-            iconSize: [11, 11],
-            iconAnchor: [5.5, 5.5],
-            html: '<div style="width:11px;height:11px;background:#b9573e;border-radius:50%;border:2px solid #fffefa"></div>',
-          }),
-          interactive: false,
-        }).addTo(grup)
+      const tasiHat = (dEnlem: number, dBoylam: number) => {
+        const [p, q] = anlikKesit.current
+        anlikKesit.current = [
+          { enlem: p.enlem + dEnlem, boylam: p.boylam + dBoylam },
+          { enlem: q.enlem + dEnlem, boylam: q.boylam + dBoylam },
+        ]
       }
 
-      const ucIsaret = (hangi: 0 | 1, konum: Konum) =>
-        L.marker([konum.enlem, konum.boylam], { icon: tutamak('uc'), draggable: true })
-          .addTo(grup)
-          .on('drag', (ev) => {
-            const ll = (ev.target as L.Marker).getLatLng()
-            setKesitUc((eski) => {
-              const y: [Konum, Konum] = [eski[0], eski[1]]
-              y[hangi] = { enlem: ll.lat, boylam: ll.lng }
-              return y
-            })
-          })
-      ucIsaret(0, A)
-      ucIsaret(1, B)
+      s.merkez = tutamakKur(
+        grup,
+        [(u[0].enlem + u[1].enlem) / 2, (u[0].boylam + u[1].boylam) / 2],
+        'tasi',
+      )
+      s.merkez.on('dragstart', () => {
+        surukluyor.current = true
+      })
+      s.merkez.on('drag', () => {
+        const ll = s.merkez!.getLatLng()
+        const [p, q] = anlikKesit.current
+        tasiHat(ll.lat - (p.enlem + q.enlem) / 2, ll.lng - (p.boylam + q.boylam) / 2)
+        kesitSenkron(anlikKesit.current, anlikBant.current, anlikTaraf.current, s.merkez)
+        tazele()
+      })
+      s.merkez.on('dragend', () => {
+        kesitSenkron(anlikKesit.current, anlikBant.current, anlikTaraf.current)
+        surukleBitti()
+      })
 
-      L.marker([orta.enlem, orta.boylam], { icon: tutamak('tasi'), draggable: true })
-        .addTo(grup)
-        .on('dragend', (ev) => {
-          const ll = (ev.target as L.Marker).getLatLng()
-          setKesitUc(([p, q]) => {
-            const de = ll.lat - (p.enlem + q.enlem) / 2
-            const db = ll.lng - (p.boylam + q.boylam) / 2
-            return [
-              { enlem: p.enlem + de, boylam: p.boylam + db },
-              { enlem: q.enlem + de, boylam: q.boylam + db },
-            ]
-          })
-        })
+      s.cozumler.push(
+        govdeSurukleBagla(
+          harita,
+          s.hatTut.getElement(),
+          () => {
+            surukluyor.current = true
+          },
+          (dEnlem, dBoylam) => {
+            tasiHat(dEnlem, dBoylam)
+            kesitSenkron(anlikKesit.current, anlikBant.current, anlikTaraf.current)
+            tazele()
+          },
+          surukleBitti,
+        ),
+      )
 
-      olcuBalonu(grup, [orta.enlem, orta.boylam], `${hatOlcu.uzunluk.toFixed(0)} m`, true)
+      kesitSenkron(anlikKesit.current, anlikBant.current, anlikTaraf.current)
     }
-  }, [mod, kutu, kesitUc, bant, taraf, olcu, alanAsiyor, hatOlcu])
+
+    return () => {
+      for (const coz of sekilRef.current.cozumler) coz()
+      sekilRef.current = bosSekiller()
+      grup.clearLayers()
+    }
+  }, [mod, planSenkron, kesitSenkron, tazele, surukleBitti])
+
+  // ------------------------- disaridan gelen degisiklikleri haritaya yansit
+  useEffect(() => {
+    anlikKutu.current = kutu
+    if (surukluyor.current || mod !== 'plan') return
+    planSenkron(kutu)
+  }, [kutu, mod, planSenkron])
+
+  useEffect(() => {
+    anlikKesit.current = kesitUc
+    if (surukluyor.current || mod !== 'kesit') return
+    kesitSenkron(kesitUc, bant, taraf)
+  }, [kesitUc, bant, taraf, mod, kesitSenkron])
+
+  useEffect(
+    () => () => {
+      if (kareRef.current) cancelAnimationFrame(kareRef.current)
+    },
+    [],
+  )
 
   // ------------------------------------------------------------ konum arama
   const konumAra = useCallback(async () => {
@@ -325,11 +662,12 @@ export default function Arazi() {
     if (mod === 'plan') setKutu(kutuKur(s, olcu.genislik, olcu.yukseklik))
     else {
       const p = new Projeksiyon(s)
-      setKesitUc([p.geri(-250, 0), p.geri(250, 0)])
+      const yari = Math.max(120, hatOlcu.uzunluk / 2)
+      setKesitUc([p.geri(-yari, 0), p.geri(yari, 0)])
     }
     setSonuclar([])
     setArama(s.ad.split(',')[0])
-    haritaRef.current?.setView([s.enlem, s.boylam], 16)
+    haritaRef.current?.flyTo([s.enlem, s.boylam], 16, { duration: 0.7 })
   }
 
   // ------------------------------------------------------------ veri cekimi
@@ -392,7 +730,7 @@ export default function Arazi() {
     }
   }
 
-  // Bant / taraf / abartma degisince veriyi yeniden cekmeden kesiti tazele
+  // Bant / taraf degisince veriyi yeniden cekmeden kesiti tazele
   useEffect(() => {
     if (mod !== 'kesit' || !izgara || !veri || !paket || durum !== 'hazir') return
     const proj = new Projeksiyon(paket.merkez)
@@ -510,8 +848,8 @@ export default function Arazi() {
 
           <p className="mt-2 text-[13.5px] leading-relaxed text-murekkep-3">
             {mod === 'plan'
-              ? 'Ortadaki tutamakla alani tasi; kose ve kenar tutamaklariyla en ve boyu ayri ayri ayarla.'
-              : 'Uclari surukleyerek uzunlugu ve yonu, ortadaki tutamakla hattin tamamini tasi. Kirmizi ok kesitin hangi tarafi gosterdigini belirtir.'}
+              ? 'Kutunun herhangi bir yerinden tutup tasi; kose tutamaklari en ve boyu birlikte, kenar tutamaklari tek yonde ayarlar.'
+              : 'Hattin uzerinden tutup tasi, uclarindan uzunluk ve yonu ayarla. Kirmizi ok kesitin hangi tarafi gosterdigini belirtir.'}
           </p>
 
           {durum === 'hazir' && (
@@ -856,24 +1194,39 @@ function IndirSatiri({ ad, alt, onClick }: { ad: string; alt: string; onClick: (
 
 // ------------------------------------------------------------ yardimcilar
 
-function olcuBalonu(grup: L.LayerGroup, konum: [number, number], metin: string, buyuk = false): void {
-  L.tooltip({
+function kutuKur(merkez: Konum, genislik: number, yukseklik: number): Kutu {
+  const p = new Projeksiyon(merkez)
+  const [guney, bati, kuzey, dogu] = p.sinirKutusu(genislik / 2, yukseklik / 2)
+  return { guney, bati, kuzey, dogu }
+}
+
+function kutuOlcu(k: Kutu): { merkez: Konum; genislik: number; yukseklik: number } {
+  const merkez = { enlem: (k.guney + k.kuzey) / 2, boylam: (k.bati + k.dogu) / 2 }
+  const p = new Projeksiyon(merkez)
+  const sw = p.ileri(k.guney, k.bati)
+  const ne = p.ileri(k.kuzey, k.dogu)
+  return { merkez, genislik: Math.abs(ne.x - sw.x), yukseklik: Math.abs(ne.y - sw.y) }
+}
+
+function olcuBalonu(grup: L.LayerGroup, buyuk = false): L.Tooltip {
+  return L.tooltip({
     permanent: true,
     direction: buyuk ? 'top' : 'center',
     className: buyuk ? 'archlib-olcu' : 'archlib-olcu-kucuk',
+    offset: buyuk ? [0, -16] : [0, 0],
+    interactive: false,
   })
-    .setLatLng(konum)
-    .setContent(metin)
+    .setLatLng([0, 0])
+    .setContent('')
     .addTo(grup)
 }
 
 /** Kenarlar ters donmesin ve alan sifirlanmasin diye kutuyu duzeltir. */
 function duzelt(k: Kutu): Kutu {
-  const enAz = 0.0006
-  const guney = Math.min(k.guney, k.kuzey - enAz)
-  const kuzey = Math.max(k.kuzey, guney + enAz)
-  const bati = Math.min(k.bati, k.dogu - enAz)
-  const dogu = Math.max(k.dogu, bati + enAz)
+  const guney = Math.min(k.guney, k.kuzey - EN_KUCUK_ADIM)
+  const kuzey = Math.max(k.kuzey, guney + EN_KUCUK_ADIM)
+  const bati = Math.min(k.bati, k.dogu - EN_KUCUK_ADIM)
+  const dogu = Math.max(k.dogu, bati + EN_KUCUK_ADIM)
   return { guney, kuzey, bati, dogu }
 }
 
