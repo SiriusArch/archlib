@@ -330,3 +330,54 @@ textarea.alan:focus {
   background: #b03e3e;
   color: #f7f4ee;
 }
+
+/* --- Leaflet: varsayilan gorunumu kendi dilimize cek --------------------- */
+
+.leaflet-container {
+  font-family: var(--font-govde);
+  background: var(--color-kagit-3);
+}
+
+.leaflet-control-zoom a {
+  border-radius: 0 !important;
+  border-color: var(--color-cizgi) !important;
+  color: var(--color-murekkep) !important;
+  background: var(--color-kagit) !important;
+  font-weight: 400;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--color-kagit-2) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(247, 244, 238, 0.85) !important;
+  font-family: var(--font-mono);
+  font-size: 10px !important;
+  color: var(--color-murekkep-3) !important;
+}
+.leaflet-control-attribution a {
+  color: var(--color-murekkep-2) !important;
+}
+
+/* Olcu balonlari: CAD kotasi gibi, kutu degil etiket */
+.archlib-olcu,
+.archlib-olcu-kucuk {
+  background: var(--color-kagit);
+  border: 1px solid var(--color-cizgi-2);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-murekkep);
+  white-space: nowrap;
+}
+.archlib-olcu-kucuk {
+  font-size: 10px;
+  color: var(--color-murekkep-3);
+}
+.archlib-olcu::before,
+.archlib-olcu-kucuk::before {
+  display: none !important;
+}

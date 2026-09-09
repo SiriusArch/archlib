@@ -13,6 +13,7 @@ import type { Cizgi, KatmanTuru } from './osm'
 import { yolGenisligi } from './osm'
 import type { KonturCizgisi } from './kontur'
 import type { YukseklikIzgarasi } from './yukseklik'
+import type { KesitSahnesi } from './kesitSahne'
 import { kotOku } from './yukseklik'
 
 export interface AraziPaketi {
@@ -35,7 +36,18 @@ interface KatmanTanimi {
   kalinlik: number
 }
 
-export const KATMANLAR: Record<KatmanTuru | 'kontur' | 'konturAna' | 'sinir' | 'kesit', KatmanTanimi> = {
+export const KATMANLAR: Record<
+  | KatmanTuru
+  | 'kontur'
+  | 'konturAna'
+  | 'sinir'
+  | 'kesit'
+  | 'kesitZemin'
+  | 'kesitBina'
+  | 'kesitBinaGorunus'
+  | 'kesitAgac',
+  KatmanTanimi
+> = {
   bina: { ad: 'A-BINA', aci: 1, svg: '#b03e3e', kalinlik: 0.6 },
   yol: { ad: 'C-YOL', aci: 8, svg: '#7d7568', kalinlik: 0.4 },
   su: { ad: 'C-SU', aci: 5, svg: '#517a95', kalinlik: 0.4 },
@@ -46,6 +58,10 @@ export const KATMANLAR: Record<KatmanTuru | 'kontur' | 'konturAna' | 'sinir' | '
   konturAna: { ad: 'T-KONTUR-ANA', aci: 32, svg: '#be8144', kalinlik: 0.5 },
   sinir: { ad: 'G-SINIR', aci: 7, svg: '#262320', kalinlik: 0.5 },
   kesit: { ad: 'S-KESIT', aci: 1, svg: '#b03e3e', kalinlik: 0.6 },
+  kesitZemin: { ad: 'S-ZEMIN', aci: 7, svg: '#262320', kalinlik: 0.6 },
+  kesitBina: { ad: 'S-BINA-KESIT', aci: 1, svg: '#262320', kalinlik: 0.6 },
+  kesitBinaGorunus: { ad: 'S-BINA-GORUNUS', aci: 8, svg: '#4c463e', kalinlik: 0.35 },
+  kesitAgac: { ad: 'S-AGAC', aci: 3, svg: '#519976', kalinlik: 0.3 },
 }
 
 // ---------------------------------------------------------------------- DXF
@@ -534,4 +550,82 @@ export function dosyaIndir(icerik: string, ad: string, mime: string): void {
   a.click()
   a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 2000)
+}
+
+
+/**
+ * Kesit sahnesini (zemin + binalar + agaclar) katmanli DXF olarak yazar.
+ * Kesite giren kutleler ile gorunuse girenler AYRI KATMANDA: CAD tarafinda
+ * cizgi kalinligi hiyerarsisi kurulabilsin diye.
+ */
+export function kesitSahnesiDxf(s: KesitSahnesi): string {
+  const katmanlar = [
+    KATMANLAR.kesitZemin,
+    KATMANLAR.kesitBina,
+    KATMANLAR.kesitBinaGorunus,
+    KATMANLAR.kesitAgac,
+    KATMANLAR.sinir,
+  ]
+
+  let d = ''
+  d += dxfCift(0, 'SECTION') + dxfCift(2, 'HEADER')
+  d += dxfCift(9, '$ACADVER') + dxfCift(1, 'AC1009')
+  d += dxfCift(9, '$INSUNITS') + dxfCift(70, 6)
+  d += dxfCift(0, 'ENDSEC')
+
+  d += dxfCift(0, 'SECTION') + dxfCift(2, 'TABLES')
+  d += dxfCift(0, 'TABLE') + dxfCift(2, 'LAYER') + dxfCift(70, katmanlar.length)
+  for (const k of katmanlar) {
+    d += dxfCift(0, 'LAYER') + dxfCift(2, k.ad) + dxfCift(70, 0) + dxfCift(62, k.aci) + dxfCift(6, 'CONTINUOUS')
+  }
+  d += dxfCift(0, 'ENDTAB') + dxfCift(0, 'ENDSEC')
+
+  d += dxfCift(0, 'SECTION') + dxfCift(2, 'ENTITIES')
+
+  // zemin cizgisi (gercek olcu, dusey abartma yok — CAD'de olculebilsin)
+  d += dxfPolyline(
+    KATMANLAR.kesitZemin.ad,
+    s.profil.map((n) => ({ x: n.mesafe, y: n.kot })),
+    false,
+  )
+
+  // binalar
+  for (const b of s.binalar) {
+    d += dxfPolyline(
+      b.kesiliyor ? KATMANLAR.kesitBina.ad : KATMANLAR.kesitBinaGorunus.ad,
+      [
+        { x: b.d0, y: b.zemin },
+        { x: b.d1, y: b.zemin },
+        { x: b.d1, y: b.tepe },
+        { x: b.d0, y: b.tepe },
+      ],
+      true,
+    )
+  }
+
+  // agaclar: govde + taç
+  for (const a of s.agaclar) {
+    const tacMerkez = a.zemin + a.yukseklik * 0.72
+    const yaricap = a.yukseklik * a.capOran * 0.5
+    d += dxfPolyline(
+      KATMANLAR.kesitAgac.ad,
+      [
+        { x: a.d, y: a.zemin },
+        { x: a.d, y: tacMerkez },
+      ],
+      false,
+    )
+    d += dxfDaire(KATMANLAR.kesitAgac.ad, { x: a.d, y: tacMerkez }, Math.max(0.6, yaricap))
+  }
+
+  d += dxfMetin(
+    KATMANLAR.sinir.ad,
+    { x: 0, y: s.enDusuk - Math.max(4, (s.tavan - s.enDusuk) * 0.2) },
+    Math.max(1.5, s.uzunluk / 110),
+    `KESIT  UZUNLUK=${s.uzunluk.toFixed(1)}m  BANT=${s.bant.toFixed(0)}m  ` +
+      `KOT=${s.enDusuk.toFixed(1)}-${s.enYuksek.toFixed(1)}m  ${s.binalar.length} YAPI  BIRIM=METRE`,
+  )
+
+  d += dxfCift(0, 'ENDSEC') + dxfCift(0, 'EOF')
+  return d
 }
