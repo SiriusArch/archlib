@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Saglayici } from '../types'
 import { SAGLAYICILAR, saglayiciBul } from '../lib/llm'
 import { anahtarlariOku, anahtarYaz, anahtarSil, aktifSaglayiciYaz } from '../lib/storage'
+import { Dugme } from '../ui/Parcalar'
 
 interface Props {
   acik: boolean
@@ -19,17 +20,17 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
   const [mesaj, setMesaj] = useState('')
 
   useEffect(() => {
+    if (acik) setSecili(aktif)
+  }, [acik, aktif])
+
+  useEffect(() => {
     if (!acik) return
-    const kayitlar = anahtarlariOku()
-    const k = kayitlar[secili]
+    const k = anahtarlariOku()[secili]
     setAnahtar(k?.anahtar ?? '')
     setModel(k?.model ?? saglayiciBul(secili).varsayilanModel)
     setMesaj('')
+    setGoster(false)
   }, [acik, secili])
-
-  useEffect(() => {
-    if (acik) setSecili(aktif)
-  }, [acik, aktif])
 
   if (!acik) return null
 
@@ -41,83 +42,88 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
       setMesaj('Anahtar bos olamaz.')
       return
     }
-    anahtarYaz({ saglayici: secili, anahtar: anahtar.trim(), model: model.trim() || bilgi.varsayilanModel })
+    anahtarYaz({
+      saglayici: secili,
+      anahtar: anahtar.trim(),
+      model: model.trim() || bilgi.varsayilanModel,
+    })
     aktifSaglayiciYaz(secili)
     aktifDegisti(secili)
     guncellendi()
     setMesaj('Kaydedildi. Anahtar yalnizca bu tarayicida saklanir.')
   }
 
-  function sil() {
-    anahtarSil(secili)
-    setAnahtar('')
-    guncellendi()
-    setMesaj('Anahtar silindi.')
-  }
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#14181f]/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/45 p-4 backdrop-blur-[3px]"
       onClick={kapat}
     >
       <div
-        className="my-8 w-full max-w-2xl border border-[#cfc9bc] bg-[#f6f4ef] shadow-2xl"
+        className="animasyon-sayfa my-10 w-full max-w-2xl border border-cizgi bg-kagit"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#cfc9bc] px-6 py-4">
-          <h2 className="mono text-sm font-bold tracking-[0.14em] uppercase">API Anahtari</h2>
+        <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
+          <div>
+            <div className="etiket text-murekkep-3">Baglanti</div>
+            <h2 className="font-baslik mt-1.5 text-[24px] leading-tight text-murekkep">
+              API anahtari
+            </h2>
+          </div>
           <button
             onClick={kapat}
-            className="mono px-2 text-lg leading-none text-[#2c333d] hover:text-[#b4472a]"
-            aria-label="Kapat"
+            className="etiket pt-1 text-murekkep-3 transition-colors hover:text-kiremit"
           >
-            X
+            Kapat
           </button>
         </div>
 
-        <div className="space-y-5 px-6 py-5">
-          <p className="text-sm leading-relaxed text-[#2c333d]">
+        <div className="space-y-7 px-7 py-6">
+          <p className="max-w-xl text-[13.5px] leading-relaxed text-murekkep-2">
             ArchLib in sunucusu yoktur. Analiz istegi tarayicindan dogrudan sectigin saglayiciya
-            gider; anahtarin yalnizca bu tarayicinin <span className="mono">localStorage</span>{' '}
-            alaninda saklanir, hicbir yere gonderilmez. Token maliyetini kendi hesabin karsilar.
+            gider; anahtarin yalnizca bu tarayicinin{' '}
+            <code className="bg-kagit-3 px-1 py-0.5 text-[12px]">localStorage</code> alaninda
+            saklanir, hicbir yere gonderilmez. Token maliyetini kendi hesabin karsilar.
           </p>
 
           <div>
-            <div className="mono mb-2 text-[11px] font-bold tracking-[0.14em] text-[#2c333d] uppercase">
-              Saglayici
-            </div>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="etiket mb-3 text-murekkep-3">Saglayici</div>
+            <div className="grid gap-0 sm:grid-cols-3">
               {SAGLAYICILAR.map((s) => {
                 const varMi = Boolean(kayitli[s.id]?.anahtar)
+                const seciliMi = secili === s.id
                 return (
                   <button
                     key={s.id}
                     onClick={() => setSecili(s.id)}
-                    className={`border px-3 py-2.5 text-left text-sm transition ${
-                      secili === s.id
-                        ? 'border-[#b4472a] bg-[#b4472a]/10'
-                        : 'border-[#cfc9bc] bg-white/50 hover:border-[#a89f8c]'
-                    }`}
+                    className="group relative border-t border-cizgi py-3 pr-4 text-left sm:border-t-0"
                   >
-                    <div className="font-semibold">{s.ad}</div>
-                    <div className="mono mt-0.5 text-[10px] tracking-wider text-[#2c333d]/70">
-                      {varMi ? 'ANAHTAR KAYITLI' : 'ANAHTAR YOK'}
-                    </div>
+                    <span
+                      className={`font-baslik block text-[16px] transition-colors duration-300 ${
+                        seciliMi ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
+                      }`}
+                    >
+                      {s.ad}
+                    </span>
+                    <span className="etiket mt-1 block text-murekkep-3">
+                      {varMi ? 'kayitli' : 'bos'}
+                    </span>
+                    <span
+                      className={`absolute -top-px left-0 h-[2px] w-[calc(100%-1rem)] origin-left bg-kiremit transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] sm:top-auto sm:-bottom-1 ${
+                        seciliMi ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
                   </button>
                 )
               })}
             </div>
+            <p className="mt-4 border-l-2 border-cizgi pl-3 text-[12.5px] leading-relaxed text-murekkep-2">
+              {bilgi.not}
+            </p>
           </div>
 
-          <p className="border-l-2 border-[#cfc9bc] pl-3 text-xs leading-relaxed text-[#2c333d]/85">
-            {bilgi.not}
-          </p>
-
           <div>
-            <label className="mono mb-1.5 block text-[11px] font-bold tracking-[0.14em] uppercase">
-              API Anahtari
-            </label>
-            <div className="flex gap-2">
+            <label className="etiket mb-2 block text-murekkep-3">Anahtar</label>
+            <div className="flex items-end gap-3">
               <input
                 type={goster ? 'text' : 'password'}
                 value={anahtar}
@@ -125,63 +131,59 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
                 placeholder={bilgi.anahtarOnEk ? `${bilgi.anahtarOnEk}...` : 'AIza...'}
                 autoComplete="off"
                 spellCheck={false}
-                className="mono w-full border border-[#cfc9bc] bg-white px-3 py-2 text-sm outline-none focus:border-[#b4472a]"
+                className="alan sayi"
               />
               <button
                 onClick={() => setGoster((g) => !g)}
-                className="mono border border-[#cfc9bc] px-3 text-[11px] tracking-wider whitespace-nowrap hover:border-[#a89f8c]"
+                className="etiket shrink-0 pb-2 text-murekkep-3 transition-colors hover:text-murekkep"
               >
-                {goster ? 'GIZLE' : 'GOSTER'}
+                {goster ? 'gizle' : 'goster'}
               </button>
             </div>
             <a
               href={bilgi.anahtarAdresi}
               target="_blank"
               rel="noreferrer noopener"
-              className="mt-1.5 inline-block text-xs text-[#b4472a] underline underline-offset-2"
+              className="etiket mt-2 inline-block text-kiremit-koyu underline decoration-kiremit/40 underline-offset-4"
             >
               Anahtari buradan al
             </a>
           </div>
 
           <div>
-            <label className="mono mb-1.5 block text-[11px] font-bold tracking-[0.14em] uppercase">
-              Model
-            </label>
+            <label className="etiket mb-2 block text-murekkep-3">Model</label>
             <input
               list={`modeller-${secili}`}
               value={model}
               onChange={(e) => setModel(e.target.value)}
               spellCheck={false}
-              className="mono w-full border border-[#cfc9bc] bg-white px-3 py-2 text-sm outline-none focus:border-[#b4472a]"
+              className="alan sayi"
             />
             <datalist id={`modeller-${secili}`}>
               {bilgi.modeller.map((m) => (
                 <option key={m} value={m} />
               ))}
             </datalist>
-            <p className="mt-1.5 text-xs text-[#2c333d]/70">
-              Listeden secebilir ya da elle yazabilirsin. Model adlari saglayici tarafinda
-              degisebilir; "model bulunamadi" hatasi alirsan buradan guncelle.
+            <p className="mt-2 text-[12.5px] leading-relaxed text-murekkep-3">
+              Listeden secebilir ya da elle yazabilirsin. "Model bulunamadi (404)" hatasi alirsan
+              buradan guncelle.
             </p>
           </div>
 
-          {mesaj && (
-            <div className="border border-[#cfc9bc] bg-white/70 px-3 py-2 text-xs text-[#2c333d]">
-              {mesaj}
-            </div>
-          )}
+          {mesaj && <p className="text-[13px] text-adacayi-koyu">{mesaj}</p>}
 
-          <div className="flex flex-wrap gap-2 border-t border-[#cfc9bc] pt-4">
+          <div className="flex flex-wrap items-center gap-4 border-t border-cizgi pt-5">
+            <Dugme onClick={kaydet} dolgu="bg-kiremit">
+              Kaydet ve kullan
+            </Dugme>
             <button
-              onClick={kaydet}
-              className="mono bg-[#14181f] px-5 py-2.5 text-[11px] font-bold tracking-[0.14em] text-[#f6f4ef] uppercase hover:bg-[#b4472a]"
-            >
-              Kaydet ve Kullan
-            </button>
-            <button
-              onClick={sil}
-              className="mono border border-[#cfc9bc] px-4 py-2.5 text-[11px] tracking-[0.14em] uppercase hover:border-[#b4472a] hover:text-[#b4472a]"
+              onClick={() => {
+                anahtarSil(secili)
+                setAnahtar('')
+                guncellendi()
+                setMesaj('Anahtar silindi.')
+              }}
+              className="etiket text-murekkep-3 transition-colors hover:text-kiremit-koyu"
             >
               Sil
             </button>

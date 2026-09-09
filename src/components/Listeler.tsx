@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { KONTROL_LISTELERI } from '../data/kritik'
 import { listeDurumuOku, listeDurumuYaz } from '../lib/storage'
+import { SayfaBasligi } from '../ui/Parcalar'
 
 export default function Listeler() {
   const [durum, setDurum] = useState<Record<string, boolean>>({})
@@ -34,90 +35,92 @@ export default function Listeler() {
   const yuzde = Math.round((tamam / liste.maddeler.length) * 100)
 
   return (
-    <div>
-      <header className="mb-5">
-        <h1 className="text-2xl font-bold">Kontrol Listeleri</h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#2c333d]">
-          Teslimden once tek tek isaretle. Isaretler bu tarayicida saklanir. Cogu pafta, tasarim
-          kotu oldugu icin degil, bu maddelerden birkaci atlandigi icin puan kaybeder.
-        </p>
-      </header>
+    <div className="kademe">
+      <SayfaBasligi
+        etiket="05 — Kontrol Listeleri"
+        renk="text-mor-koyu"
+        baslik="Teslimden once tek tek isaretle"
+        aciklama="Cogu pafta, tasarim kotu oldugu icin degil, bu maddelerden birkaci atlandigi icin puan kaybeder. Isaretler bu tarayicida saklanir."
+        sag={
+          <div className="text-right">
+            <div className="sayi text-[26px] leading-none text-murekkep">
+              {tamam}
+              <span className="text-murekkep-3">/{liste.maddeler.length}</span>
+            </div>
+            <div className="etiket mt-1 text-murekkep-3">tamamlandi</div>
+          </div>
+        }
+      />
 
-      <div className="mb-5 flex flex-wrap gap-1.5">
+      <div className="mb-8 flex flex-wrap gap-x-8 gap-y-2">
         {KONTROL_LISTELERI.map((l) => (
-          <button
-            key={l.id}
-            onClick={() => setAktif(l.id)}
-            className={`mono border px-4 py-2 text-[11px] font-bold tracking-[0.12em] uppercase transition ${
-              aktif === l.id
-                ? 'border-[#14181f] bg-[#14181f] text-[#f6f4ef]'
-                : 'border-[#cfc9bc] bg-white/50 hover:border-[#a89f8c]'
-            }`}
-          >
-            {l.baslik}
+          <button key={l.id} onClick={() => setAktif(l.id)} className="group relative py-1">
+            <span
+              className={`font-baslik text-[17px] transition-colors duration-300 ${
+                aktif === l.id ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
+              }`}
+            >
+              {l.baslik}
+            </span>
+            <span
+              className={`absolute -bottom-0.5 left-0 h-[2px] w-full origin-left bg-mor transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                aktif === l.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+              }`}
+            />
           </button>
         ))}
       </div>
 
-      <section className="border border-[#cfc9bc] bg-white/60">
-        <div className="border-b border-[#cfc9bc] bg-[#ebe7de] px-5 py-3.5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-[15px] font-bold">{liste.baslik}</h2>
-              <p className="mt-0.5 max-w-xl text-[13px] text-[#2c333d]/85">{liste.aciklama}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="mono text-[12px] tracking-wider">
-                {tamam} / {liste.maddeler.length}
-              </span>
-              <button
-                onClick={() => sifirla(liste.id)}
-                className="mono border border-[#cfc9bc] px-3 py-1.5 text-[10px] tracking-[0.12em] uppercase hover:border-[#b4472a] hover:text-[#b4472a]"
-              >
-                Sifirla
-              </button>
-            </div>
-          </div>
-          <div className="mt-3 h-1 w-full bg-[#cfc9bc]">
-            <div
-              className="h-full bg-[#b4472a] transition-all"
-              style={{ width: `${yuzde}%` }}
-            />
-          </div>
+      <section>
+        <div className="mb-1 flex flex-wrap items-end justify-between gap-4">
+          <p className="max-w-2xl text-[13.5px] leading-relaxed text-murekkep-2">
+            {liste.aciklama}
+          </p>
+          <button
+            onClick={() => sifirla(liste.id)}
+            className="etiket text-murekkep-3 transition-colors hover:text-kiremit-koyu"
+          >
+            Sifirla
+          </button>
         </div>
 
-        <ul>
+        <div className="mt-4 mb-2 h-px w-full bg-cizgi">
+          <div
+            className="h-px bg-mor transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{ width: `${yuzde}%` }}
+          />
+        </div>
+
+        <ul className="border-t border-cizgi">
           {liste.maddeler.map((m, i) => {
             const isaretli = Boolean(durum[m.id])
             return (
-              <li key={m.id} className="border-b border-[#cfc9bc]/60 last:border-0">
-                <label className="flex cursor-pointer items-start gap-3 px-5 py-3.5 hover:bg-white/70">
+              <li key={m.id} className="border-b border-cizgi">
+                <label className="flex cursor-pointer items-start gap-4 py-4">
+                  <span className="sayi w-6 shrink-0 pt-[3px] text-[11px] text-murekkep-3">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   <input
                     type="checkbox"
                     checked={isaretli}
                     onChange={() => degistir(m.id)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-[#b4472a]"
+                    className="mt-[3px] h-3.5 w-3.5 shrink-0 accent-[#5c5992]"
                   />
                   <div className="min-w-0 flex-1">
                     <div
-                      className={`text-[14px] leading-snug ${
-                        isaretli ? 'text-[#2c333d]/45 line-through' : 'font-medium'
+                      className={`text-[14.5px] leading-snug transition-colors duration-300 ${
+                        isaretli ? 'text-murekkep-3 line-through' : 'text-murekkep'
                       }`}
                     >
-                      <span className="mono mr-2 text-[11px] text-[#2c333d]/45">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
                       {m.metin}
                     </div>
                     {m.aciklama && !isaretli && (
-                      <p className="mt-1 text-[12.5px] leading-relaxed text-[#2c333d]/75">
+                      <p className="mt-1.5 text-[12.5px] leading-relaxed text-murekkep-2">
                         {m.aciklama}
                       </p>
                     )}
                     {m.kaynak && !isaretli && (
-                      <p className="mono mt-1 text-[10px] tracking-wider text-[#2c333d]/50 uppercase">
-                        {m.kaynak}
-                      </p>
+                      <p className="etiket mt-1.5 text-murekkep-3">{m.kaynak}</p>
                     )}
                   </div>
                 </label>

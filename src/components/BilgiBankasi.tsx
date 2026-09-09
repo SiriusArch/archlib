@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { BILGI_BOLUMLERI } from '../data/bilgi'
 import { OLCU_TABLOLARI } from '../data/olculer'
+import { SayfaBasligi } from '../ui/Parcalar'
 
 function Metin({ icerik }: { icerik: string }) {
   return (
-    <div className="space-y-2 text-[13.5px] leading-relaxed text-[#2c333d]">
+    <div className="space-y-2 text-[13.5px] leading-[1.75] text-murekkep-2">
       {icerik.split('\n').map((satir, i) => {
         const k = satir.trim()
-        if (!k) return <div key={i} className="h-1.5" />
+        if (!k) return <div key={i} className="h-2" />
         if (/^[A-ZÇĞİÖŞÜ0-9 ()./-]+:$/.test(k) || /^[0-9]+\.\s/.test(k)) {
           return (
-            <p key={i} className="font-semibold">
+            <p key={i} className="font-medium text-murekkep">
               {k}
             </p>
           )
@@ -56,17 +57,16 @@ export default function BilgiBankasi() {
   }, [q])
 
   return (
-    <div>
-      <header className="mb-5">
-        <h1 className="text-2xl font-bold">Bilgi Bankasi</h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#2c333d]">
-          Analiz motorunun beslendigi kaynak. Temel Tasar (I. Hulusi Gungor), Neufert ve MIM 153 /
-          MIM 244 ders notlarindan cikarilmis kavramlar, standartlar ve olculer.
-        </p>
-      </header>
+    <div className="kademe">
+      <SayfaBasligi
+        etiket="04 — Bilgi Bankasi"
+        renk="text-kehribar-koyu"
+        baslik="Analiz motorunun besledigi kaynak"
+        aciklama="Temel Tasar (I. Hulusi Gungor), Neufert ve MIM 153 / MIM 244 ders notlarindan cikarilmis kavramlar, standartlar ve olculer."
+      />
 
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="flex border border-[#cfc9bc]">
+      <div className="mb-10 flex flex-wrap items-end gap-x-8 gap-y-4">
+        <div className="flex gap-6">
           {(
             [
               ['kavram', 'Kavram ve Standart'],
@@ -76,11 +76,20 @@ export default function BilgiBankasi() {
             <button
               key={k}
               onClick={() => setSekme(k)}
-              className={`mono px-4 py-2 text-[11px] font-bold tracking-[0.14em] uppercase transition ${
-                sekme === k ? 'bg-[#14181f] text-[#f6f4ef]' : 'bg-white/50 hover:bg-white'
-              }`}
+              className="group relative py-1"
             >
-              {ad}
+              <span
+                className={`font-baslik text-[17px] transition-colors duration-300 ${
+                  sekme === k ? 'text-murekkep' : 'text-murekkep-3 group-hover:text-murekkep-2'
+                }`}
+              >
+                {ad}
+              </span>
+              <span
+                className={`absolute -bottom-0.5 left-0 h-[2px] w-full origin-left bg-kehribar transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  sekme === k ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                }`}
+              />
             </button>
           ))}
         </div>
@@ -88,45 +97,56 @@ export default function BilgiBankasi() {
           value={arama}
           onChange={(e) => setArama(e.target.value)}
           placeholder="Ara: merdiven, doku, kot, aks, banyo, olcek..."
-          className="min-w-[240px] flex-1 border border-[#cfc9bc] bg-white px-3 py-2 text-sm outline-none focus:border-[#b4472a]"
+          className="alan min-w-[240px] flex-1"
         />
       </div>
 
       {sekme === 'kavram' && (
-        <div className="space-y-7">
+        <div className="space-y-14">
           {bolumler.length === 0 && (
-            <p className="border border-[#cfc9bc] bg-white/50 p-6 text-center text-sm">
+            <p className="border-t border-cizgi py-16 text-center text-[14px] text-murekkep-3">
               Eslesen kayit yok.
             </p>
           )}
           {bolumler.map((b) => (
             <section key={b.id}>
-              <h2 className="mono border-b border-[#cfc9bc] pb-1.5 text-[12px] font-bold tracking-[0.14em] uppercase">
-                {b.baslik}
-              </h2>
-              <p className="mt-1.5 mb-1 max-w-2xl text-[13px] text-[#2c333d]/85">{b.aciklama}</p>
-              <p className="mono mb-3 text-[10px] tracking-wider text-[#2c333d]/55 uppercase">
-                Kaynak: {b.kaynak}
+              <div className="mb-4 border-b border-cizgi pb-2">
+                <h2 className="font-baslik text-[22px] leading-tight text-murekkep">{b.baslik}</h2>
+              </div>
+              <p className="mb-2 max-w-2xl text-[13.5px] leading-relaxed text-murekkep-2">
+                {b.aciklama}
               </p>
-              <div className="space-y-2">
+              <p className="etiket mb-6 text-murekkep-3">{b.kaynak}</p>
+
+              <div className="border-t border-cizgi">
                 {b.maddeler.map((m) => {
                   const secili = acik === m.id
                   return (
-                    <div key={m.id} className="border border-[#cfc9bc] bg-white/60">
+                    <div key={m.id} className="border-b border-cizgi">
                       <button
                         onClick={() => setAcik(secili ? null : m.id)}
-                        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-white"
+                        className="group flex w-full items-baseline justify-between gap-4 py-3.5 text-left"
                       >
-                        <span className="text-[14px] font-semibold">{m.baslik}</span>
-                        <span className="mono text-[13px] text-[#b4472a]">{secili ? '−' : '+'}</span>
+                        <span
+                          className={`font-baslik text-[16px] transition-colors duration-300 ${
+                            secili ? 'text-kehribar-koyu' : 'text-murekkep group-hover:text-kehribar-koyu'
+                          }`}
+                        >
+                          {m.baslik}
+                        </span>
+                        <span className="etiket shrink-0 text-murekkep-3">
+                          {secili ? 'kapat' : 'ac'}
+                        </span>
                       </button>
                       {secili && (
-                        <div className="border-t border-[#cfc9bc] px-4 py-3.5">
+                        <div className="animasyon-sayfa pb-5">
                           <Metin icerik={m.icerik} />
-                          <div className="mono mt-3 flex flex-wrap items-center gap-2 border-t border-[#cfc9bc] pt-2.5 text-[10px] tracking-wider text-[#2c333d]/55">
-                            <span className="uppercase">{m.kaynak}</span>
+                          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-cizgi pt-3">
+                            <span className="etiket text-murekkep-3">{m.kaynak}</span>
                             {m.etiketler.map((e) => (
-                              <span key={e}>#{e}</span>
+                              <span key={e} className="etiket text-murekkep-3/70">
+                                {e}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -141,29 +161,29 @@ export default function BilgiBankasi() {
       )}
 
       {sekme === 'olcu' && (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
           {tablolar.length === 0 && (
-            <p className="border border-[#cfc9bc] bg-white/50 p-6 text-center text-sm lg:col-span-2">
+            <p className="border-t border-cizgi py-16 text-center text-[14px] text-murekkep-3 lg:col-span-2">
               Eslesen olcu yok.
             </p>
           )}
           {tablolar.map((t) => (
-            <section key={t.id} className="border border-[#cfc9bc] bg-white/60">
-              <div className="border-b border-[#cfc9bc] bg-[#ebe7de] px-4 py-2.5">
-                <h2 className="text-[14px] font-bold">{t.baslik}</h2>
-                <div className="mono mt-0.5 text-[10px] tracking-wider text-[#2c333d]/60 uppercase">
-                  {t.kaynak}
-                </div>
+            <section key={t.id}>
+              <div className="mb-1 border-b border-cizgi pb-2">
+                <h2 className="font-baslik text-[18px] leading-tight text-murekkep">{t.baslik}</h2>
               </div>
+              <p className="etiket mb-3 text-murekkep-3">{t.kaynak}</p>
               <table className="w-full text-[13px]">
                 <tbody>
                   {t.satirlar.map((s, i) => (
-                    <tr key={i} className="border-b border-[#cfc9bc]/60 last:border-0">
-                      <td className="w-[42%] px-4 py-2 align-top font-medium">{s.ad}</td>
-                      <td className="px-4 py-2 align-top">
-                        <span className="mono">{s.deger}</span>
+                    <tr key={i} className="border-b border-cizgi align-top">
+                      <td className="w-[44%] py-2 pr-4 text-murekkep-2">{s.ad}</td>
+                      <td className="py-2">
+                        <span className="sayi text-murekkep">{s.deger}</span>
                         {s.not && (
-                          <div className="mt-0.5 text-[12px] text-[#2c333d]/70 italic">{s.not}</div>
+                          <div className="mt-0.5 text-[12px] leading-relaxed text-murekkep-3">
+                            {s.not}
+                          </div>
                         )}
                       </td>
                     </tr>

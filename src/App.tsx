@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { Saglayici } from './types'
 import { aktifSaglayiciOku, anahtarlariOku } from './lib/storage'
 import { saglayiciBul } from './lib/llm'
-import { SITELER } from './data/sites'
+import { BOLUMLER, bolumBul, type Sekme } from './ui/bolumler'
 import Katalog from './components/Katalog'
 import Analiz from './components/Analiz'
 import BilgiBankasi from './components/BilgiBankasi'
@@ -10,15 +10,12 @@ import Listeler from './components/Listeler'
 import Kaynaklar from './components/Kaynaklar'
 import AnahtarPaneli from './components/AnahtarPaneli'
 
-type Sekme = 'analiz' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
+// Intro tum WebGPU yigini cekiyor; Arazi harita ve cografi veri kodunu.
+// Ikisi de tembel yuklenirse ana paket ince kaliyor.
+const Intro = lazy(() => import('./intro/Intro'))
+const Arazi = lazy(() => import('./components/Arazi'))
 
-const SEKMELER: { id: Sekme; ad: string; alt: string }[] = [
-  { id: 'analiz', ad: 'Kritik Masasi', alt: 'Pafta ve maket analizi' },
-  { id: 'katalog', ad: 'Arac Kitapligi', alt: `${SITELER.length} arac` },
-  { id: 'bilgi', ad: 'Bilgi Bankasi', alt: 'Kavram, standart, olcu' },
-  { id: 'liste', ad: 'Kontrol Listeleri', alt: 'Teslim oncesi' },
-  { id: 'kaynak', ad: 'Kaynaklar', alt: 'Seffaflik' },
-]
+const INTRO_ANAHTARI = 'archlib.intro.v1'
 
 export default function App() {
   const [sekme, setSekme] = useState<Sekme>('analiz')
@@ -26,127 +23,194 @@ export default function App() {
   const [panelAcik, setPanelAcik] = useState(false)
   const [anahtarSurumu, setAnahtarSurumu] = useState(0)
   const [menuAcik, setMenuAcik] = useState(false)
+  const [introBitti, setIntroBitti] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(INTRO_ANAHTARI) === 'gecildi'
+    } catch {
+      return false
+    }
+  })
 
   useEffect(() => {
     setSaglayici(aktifSaglayiciOku())
   }, [])
 
+  // Sekme degisince yukari don — uzun sayfalarda ortada kalmayi onler.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [sekme])
+
+  function introyuGec() {
+    try {
+      sessionStorage.setItem(INTRO_ANAHTARI, 'gecildi')
+    } catch {
+      /* depolama kapali olabilir */
+    }
+    setIntroBitti(true)
+  }
+
   const kayit = anahtarlariOku()[saglayici]
   const anahtarVar = Boolean(kayit?.anahtar)
+  const aktif = bolumBul(sekme)
+
+  if (!introBitti) {
+    return (
+      <Suspense fallback={<div className="fixed inset-0 z-[60] bg-[#0d0f13]" />}>
+        <Intro gir={introyuGec} />
+      </Suspense>
+    )
+  }
 
   return (
-    <div className="izgara-zemin min-h-full">
-      <header className="sticky top-0 z-40 border-b border-[#cfc9bc] bg-[#f6f4ef]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <svg viewBox="0 0 100 100" className="h-8 w-8 shrink-0" aria-hidden="true">
-              <rect width="100" height="100" fill="#14181f" />
-              <path
-                d="M20 75 L50 25 L80 75 M32 55 L68 55"
-                stroke="#f6f4ef"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="square"
+    <div className="kagit-doku relative min-h-full">
+      <div className="animasyon-acilis relative z-[1]">
+        {/* ---------------------------------------------------------- kunye */}
+        <header className="sticky top-0 z-40 border-b border-cizgi bg-kagit/92 backdrop-blur-[6px]">
+          <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
+            <div className="flex items-center justify-between gap-6 py-4">
+              <div className="flex items-baseline gap-3">
+                <span className="font-baslik text-[22px] leading-none tracking-[-0.015em] text-murekkep">
+                  ArchLib
+                </span>
+                <span className="hidden h-3 w-px bg-cizgi-2 sm:block" />
+                <span className="etiket hidden text-murekkep-3 sm:block">
+                  Mimarlik Kitapligi
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPanelAcik(true)}
+                  className="etiket hidden items-center gap-2 border border-cizgi px-3 py-2 text-murekkep-2 transition-colors duration-300 hover:border-murekkep hover:text-murekkep sm:flex"
+                >
+                  <span
+                    className={`inline-block h-[5px] w-[5px] rounded-full ${
+                      anahtarVar ? 'bg-adacayi' : 'bg-kiremit'
+                    }`}
+                  />
+                  {anahtarVar ? saglayiciBul(saglayici).ad.split(' ')[0] : 'Anahtar yok'}
+                </button>
+                <button
+                  onClick={() => setMenuAcik((m) => !m)}
+                  className="etiket border border-cizgi px-3 py-2 text-murekkep-2 lg:hidden"
+                >
+                  {menuAcik ? 'Kapat' : 'Bolumler'}
+                </button>
+              </div>
+            </div>
+
+            {/* ------------------------------------------------------- nav */}
+            <nav className={`${menuAcik ? 'block' : 'hidden'} pb-1 lg:block`}>
+              <ul className="flex flex-col lg:flex-row lg:gap-8">
+                {BOLUMLER.map((b) => {
+                  const secili = b.id === sekme
+                  return (
+                    <li key={b.id} className="lg:py-0">
+                      <button
+                        onClick={() => {
+                          setSekme(b.id)
+                          setMenuAcik(false)
+                        }}
+                        className="group relative block w-full py-2.5 text-left lg:w-auto lg:py-3"
+                      >
+                        <span className="flex items-baseline gap-2">
+                          <span
+                            className={`sayi text-[10px] transition-colors duration-300 ${
+                              secili ? b.metin : 'text-murekkep-3/60'
+                            }`}
+                          >
+                            {b.no}
+                          </span>
+                          <span
+                            className={`font-baslik text-[15px] leading-none transition-colors duration-300 ${
+                              secili ? 'text-murekkep' : 'text-murekkep-2 group-hover:text-murekkep'
+                            }`}
+                          >
+                            {b.ad}
+                          </span>
+                          <span className="etiket ml-1 text-murekkep-3/70 lg:hidden">{b.alt}</span>
+                        </span>
+                        <span
+                          className={`absolute -bottom-px left-0 h-[2px] w-full origin-left transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                            b.dolgu
+                          } ${secili ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}
+                        />
+                      </button>
+                    </li>
+                  )
+                })}
+                <li className="sm:hidden">
+                  <button
+                    onClick={() => {
+                      setPanelAcik(true)
+                      setMenuAcik(false)
+                    }}
+                    className="etiket block w-full py-3 text-left text-murekkep-2"
+                  >
+                    API Anahtari
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </header>
+
+        {/* --------------------------------------------------------- icerik */}
+        <main className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8 sm:py-14">
+          {/* key: sekme degisince animasyon bastan oynasin */}
+          <div key={sekme} className="animasyon-sayfa">
+            {sekme === 'analiz' && (
+              <Analiz
+                saglayici={saglayici}
+                anahtarPaneliniAc={() => setPanelAcik(true)}
+                anahtarSurumu={anahtarSurumu}
               />
-            </svg>
-            <div className="leading-tight">
-              <div className="text-[17px] font-bold tracking-tight">ArchLib</div>
-              <div className="mono hidden text-[10px] tracking-[0.16em] text-[#2c333d]/60 uppercase sm:block">
-                Mimarlik arac kitapligi ve kritik sistemi
+            )}
+            {sekme === 'arazi' && (
+              <Suspense
+                fallback={
+                  <div className="etiket py-24 text-center text-murekkep-3">
+                    Arazi araci yukleniyor
+                  </div>
+                }
+              >
+                <Arazi />
+              </Suspense>
+            )}
+            {sekme === 'katalog' && <Katalog />}
+            {sekme === 'bilgi' && <BilgiBankasi />}
+            {sekme === 'liste' && <Listeler />}
+            {sekme === 'kaynak' && <Kaynaklar />}
+          </div>
+        </main>
+
+        {/* --------------------------------------------------------- kolofon */}
+        <footer className="mt-16 border-t border-cizgi">
+          <div className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8">
+            <div className="grid gap-8 sm:grid-cols-[1fr_auto]">
+              <div className="max-w-2xl">
+                <div className="etiket text-murekkep-3">Kolofon</div>
+                <p className="mt-3 text-[13px] leading-relaxed text-murekkep-2">
+                  ArchLib sunucusuz calisir; API anahtarin ve verilerin yalnizca bu tarayicida
+                  saklanir. Bilgi tabani{' '}
+                  <span className="font-baslik italic">Temel Tasar</span> (I. Hulusi Gungor),{' '}
+                  <span className="font-baslik italic">Yapi Tasarim Bilgisi</span> (Neufert), MIM 153
+                  Yapi Bilgisi ve MIM 244 Yapi Elemanlari Tasarimi ders notlari basta olmak uzere
+                  16 kaynaktan cikarilmistir. Yapay zeka kritigi bir on degerlendirmedir;
+                  danismanin ve jurinin yerine gecmez.
+                </p>
+              </div>
+              <div className="flex items-end">
+                <div className="flex w-full min-w-[180px] sm:w-[180px]">
+                  {BOLUMLER.filter((b) => b.renk !== 'murekkep').map((b) => (
+                    <span key={b.id} className={`h-[3px] flex-1 ${b.dolgu}`} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPanelAcik(true)}
-              className={`mono hidden items-center gap-2 border px-3 py-2 text-[10px] tracking-[0.12em] uppercase transition sm:flex ${
-                anahtarVar
-                  ? 'border-[#1f6f4a]/45 text-[#1f6f4a] hover:bg-[#1f6f4a]/8'
-                  : 'border-[#b4472a] bg-[#b4472a]/10 text-[#b4472a]'
-              }`}
-            >
-              <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${
-                  anahtarVar ? 'bg-[#1f6f4a]' : 'bg-[#b4472a]'
-                }`}
-              />
-              {anahtarVar ? saglayiciBul(saglayici).ad.split(' ')[0] : 'Anahtar gerekli'}
-            </button>
-            <button
-              onClick={() => setMenuAcik((m) => !m)}
-              className="mono border border-[#cfc9bc] px-3 py-2 text-[11px] tracking-[0.12em] uppercase lg:hidden"
-            >
-              Menu
-            </button>
-          </div>
-        </div>
-
-        <nav
-          className={`border-t border-[#cfc9bc] ${menuAcik ? 'block' : 'hidden'} lg:block`}
-        >
-          <div className="mx-auto flex max-w-[1400px] flex-col px-5 lg:flex-row lg:gap-1">
-            {SEKMELER.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => {
-                  setSekme(s.id)
-                  setMenuAcik(false)
-                }}
-                className={`border-b-2 px-3 py-2.5 text-left transition lg:border-b-2 ${
-                  sekme === s.id
-                    ? 'border-[#b4472a] text-[#b4472a]'
-                    : 'border-transparent hover:text-[#2c333d]'
-                }`}
-              >
-                <span className="mono text-[11px] font-bold tracking-[0.12em] uppercase">
-                  {s.ad}
-                </span>
-                <span className="mono ml-2 text-[10px] tracking-wider text-[#2c333d]/45">
-                  {s.alt}
-                </span>
-              </button>
-            ))}
-            <button
-              onClick={() => {
-                setPanelAcik(true)
-                setMenuAcik(false)
-              }}
-              className="border-b-2 border-transparent px-3 py-2.5 text-left sm:hidden"
-            >
-              <span className="mono text-[11px] font-bold tracking-[0.12em] uppercase">
-                API Anahtari
-              </span>
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      <main className="mx-auto max-w-[1400px] px-5 py-7">
-        {sekme === 'analiz' && (
-          <Analiz
-            saglayici={saglayici}
-            anahtarPaneliniAc={() => setPanelAcik(true)}
-            anahtarSurumu={anahtarSurumu}
-          />
-        )}
-        {sekme === 'katalog' && <Katalog />}
-        {sekme === 'bilgi' && <BilgiBankasi />}
-        {sekme === 'liste' && <Listeler />}
-        {sekme === 'kaynak' && <Kaynaklar />}
-      </main>
-
-      <footer className="mt-10 border-t border-[#cfc9bc] bg-white/40">
-        <div className="mx-auto max-w-[1400px] px-5 py-6">
-          <p className="max-w-3xl text-[12.5px] leading-relaxed text-[#2c333d]/75">
-            ArchLib sunucusuz calisir. API anahtarin ve verilerin yalnizca bu tarayicida saklanir.
-            Bilgi tabani; I. Hulusi Gungor <em>Temel Tasar</em>, Ernst Neufert{' '}
-            <em>Yapi Tasarim Bilgisi</em>, MIM 153 Yapi Bilgisi ve MIM 244 Yapi Elemanlari Tasarimi
-            ders notlari basta olmak uzere 16 kaynaktan cikarilmistir. Yapay zeka kritigi bir on
-            degerlendirmedir; danismanin ve jurinin yerine gecmez.
-          </p>
-        </div>
-      </footer>
+        </footer>
+      </div>
 
       <AnahtarPaneli
         acik={panelAcik}
