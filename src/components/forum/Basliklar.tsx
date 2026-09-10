@@ -41,7 +41,7 @@ function YeniBaslikFormu({
       onClick={kapat}
     >
       <div
-        className="animasyon-sayfa my-10 w-full max-w-xl overflow-hidden rounded-[10px] border border-cizgi bg-kart"
+        className="animasyon-sayfa my-6 max-h-[calc(100vh-3rem)] w-full max-w-xl overflow-y-auto rounded-[10px] border border-cizgi bg-kart"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-6 py-4">
@@ -146,7 +146,7 @@ function BaslikDetayi({
       onClick={kapat}
     >
       <div
-        className="animasyon-sayfa my-10 w-full max-w-2xl overflow-hidden rounded-[10px] border border-cizgi bg-kart"
+        className="animasyon-sayfa my-6 max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-[10px] border border-cizgi bg-kart"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">

@@ -94,6 +94,20 @@ Spark plani).
 1. [console.firebase.google.com](https://console.firebase.google.com) adresinde yeni bir proje ac.
 2. Sol menudan **Build > Authentication > Get started**, **Sign-in method** sekmesinden
    **Email/Password** saglayicisini etkinlestir.
+2b. Ayni ekrandan **Google**'i da etkinlestirebilirsin: sadece bir destek e-postasi secip
+   **Save** demen yeterli, ekstra kurulum gerekmez.
+2c. **Microsoft** (Hotmail/Outlook) icin ekstra bir adim var: Firebase, Microsoft saglayicisi icin
+   senin kendi Azure uygulamani ister.
+   - [portal.azure.com](https://portal.azure.com) > **Microsoft Entra ID** > **App registrations** >
+     **New registration**. Isim ver, **Accounts in any organizational directory and personal
+     Microsoft accounts** secenegini isaretle (Hotmail/kisisel hesaplar icin sart).
+   - **Redirect URI** olarak Firebase'in Authentication > Sign-in method > Microsoft ekraninda
+     sana verdigi `https://<proje-id>.firebaseapp.com/__/auth/handler` adresini **Web** turunde ekle.
+   - Kayittan sonra **Application (client) ID**'yi kopyala; **Certificates & secrets** > **New
+     client secret** ile bir sir olustur ve onu da kopyala.
+   - Firebase konsoluna don, Microsoft saglayicisini ac, Application ID ve secret'i yapistir, **Save**.
+   - Bu adim seni zorluyorsa simdilik atlayabilirsin — Email/Password ve Google tek basina da
+     calisir; Microsoft'u istedigin zaman sonra ekleyebilirsin.
 3. Sol menudan **Build > Firestore Database > Create database**, **production mode** ile olustur
    (bolge olarak sana yakin birini sec, sonradan degistirilemez).
 4. Firestore ekraninda **Rules** sekmesine gec, bu depodaki `firestore.rules` dosyasinin tum
@@ -115,6 +129,9 @@ Spark plani).
 8. **Netlify/Vercel'e yayinlarken**: ayni degiskenleri Site settings > Environment variables
    (Netlify) ya da Project settings > Environment Variables (Vercel) kismina tek tek ekle, sonra
    yeniden deploy et. `VITE_` on eki olmadan Vite bu degiskenleri derlemeye dahil etmez.
+9. **Google/Microsoft ile giris canli sitede acilmiyorsa**: Firebase konsolunda Authentication >
+   Settings > **Authorized domains** listesine yayinladigin gercek adresi (or.
+   `archlib.vercel.app`) ekle — `localhost` zaten otomatik ekli, ama kendi alan adin degil.
 
 **Beklenen bir uyari**: kategori filtreli forum listesini ya da sohbet listesini ilk kez
 kullandiginda, tarayici konsolunda Firestore'dan "The query requires an index" hatasi ve bir

@@ -1,20 +1,25 @@
 /**
  * Kimlik dogrulama — forum, arkadaslik ve sohbet icin.
- * Kullanicilar tamamen anonimdir: e-posta yalnizca girisi/hesabi yonetmek icin
- * Firebase Authentication icinde tutulur ve BASKA HICBIR YERDE gorunmez.
- * Firestore'daki profil belgesi (kullanicilar/{uid}) yalnizca takma ad icerir.
+ * Kullanicilar tamamen anonimdir: e-posta (ve Google/Microsoft ile girince
+ * gelen gercek ad/e-posta) yalnizca Firebase Authentication icinde tutulur ve
+ * BASKA HICBIR YERDE gorunmez. Firestore'daki profil belgesi
+ * (kullanicilar/{uid}) yalnizca kullanicinin kendi sectigi takma adi icerir —
+ * Google/Microsoft'tan gelen gercek ad ASLA bu belgeye yazilmaz.
  */
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  OAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseCikisYap,
-  updateProfile,
   type User,
 } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db, forumYapilandirilmis } from './firebase'
+import { agirIcerikVarMi } from './moderasyon'
 import type { KullaniciProfili } from '../types'
 
 function hataMetni(kod: string): string {
@@ -31,6 +36,8 @@ function hataMetni(kod: string): string {
       return 'E-posta ya da şifre hatalı.'
     case 'auth/too-many-requests':
       return 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.'
+    case 'auth/account-exists-with-different-credential':
+      return 'Bu e-posta başka bir giriş yöntemiyle zaten kayıtlı.'
     default:
       return 'Bir şeyler ters gitti. Tekrar dene.'
   }
@@ -41,33 +48,22 @@ function takmaAdDogrula(ad: string): string | null {
   if (t.length < 3) return 'Takma ad en az 3 karakter olmalı.'
   if (t.length > 24) return 'Takma ad en fazla 24 karakter olabilir.'
   if (!/^[\p{L}0-9 _.-]+$/u.test(t)) return 'Takma adda yalnızca harf, rakam, boşluk, . _ - kullanılabilir.'
+  if (agirIcerikVarMi(t)) return 'Bu takma ad uygun değil. Başka bir tane seç.'
   return null
 }
 
-/**
- * kayitOl(), createUserWithEmailAndPassword sonrasi Firebase'in kendi
- * onAuthStateChanged olayini da tetikler; bu olay bazen kayitOl'un kendi
- * devamindan ONCE calisabilir (SDK'nin dahili sirasi garantili degil). Iki
- * ayri yerden ayni profil belgesini olusturmaya calismak yerine, secilen
- * takma adi burada gecici olarak tutup profili YALNIZCA tek bir yerden
- * (profilGetirYaOlustur, onAuthStateChanged icinden) olusturuyoruz.
- */
-let bekleyenTakmaAd: string | null = null
-
-async function profilGetirYaOlustur(kullanici: User): Promise<KullaniciProfili> {
+async function profilGetir(uid: string): Promise<KullaniciProfili | null> {
   if (!db) throw new Error('Forum yapılandırılmamış.')
-  const ref = doc(db, 'kullanicilar', kullanici.uid)
-  const mevcut = await getDoc(ref)
-  if (mevcut.exists()) return mevcut.data() as KullaniciProfili
+  const anlik = await getDoc(doc(db, 'kullanicilar', uid))
+  return anlik.exists() ? (anlik.data() as KullaniciProfili) : null
+}
 
-  const takmaAd = bekleyenTakmaAd
-  bekleyenTakmaAd = null
-  const profil: KullaniciProfili = {
-    uid: kullanici.uid,
-    takmaAd: takmaAd?.trim() || kullanici.displayName?.trim() || `Mimar${kullanici.uid.slice(0, 5)}`,
-    olusturulma: Date.now(),
-  }
-  await setDoc(ref, {
+async function profilOlustur(uid: string, takmaAd: string): Promise<KullaniciProfili> {
+  if (!db) throw new Error('Forum yapılandırılmamış.')
+  const hata = takmaAdDogrula(takmaAd)
+  if (hata) throw new Error(hata)
+  const profil: KullaniciProfili = { uid, takmaAd: takmaAd.trim(), olusturulma: Date.now() }
+  await setDoc(doc(db, 'kullanicilar', uid), {
     ...profil,
     takmaAdKucuk: profil.takmaAd.toLocaleLowerCase('tr-TR'),
     olusturulma: serverTimestamp(),
@@ -81,9 +77,15 @@ export interface KimlikDurumu {
   profil: KullaniciProfili | null
   /** Kullanici girisliyken profil belgesi (agdan/izinden) yuklenemediyse true. */
   profilHatasi: boolean
+  /** Google/Microsoft ile ilk kez girildi, henuz takma ad secilmedi. */
+  takmaAdGerekli: boolean
   yapilandirilmis: boolean
   kayitOl: (eposta: string, sifre: string, takmaAd: string) => Promise<void>
   girisYap: (eposta: string, sifre: string) => Promise<void>
+  googleIleGirisYap: () => Promise<void>
+  microsoftIleGirisYap: () => Promise<void>
+  /** Google/Microsoft ile ilk girişten sonra takma adi tamamlar. */
+  takmaAdBelirle: (takmaAd: string) => Promise<void>
   cikisYap: () => Promise<void>
   /** profilHatasi durumunda kullaniciya "tekrar dene" imkani verir. */
   profiliYenidenDene: () => void
@@ -94,6 +96,15 @@ export function useKimlik(): KimlikDurumu {
   const [kullanici, setKullanici] = useState<User | null>(null)
   const [profil, setProfil] = useState<KullaniciProfili | null>(null)
   const [profilHatasi, setProfilHatasi] = useState(false)
+  const [takmaAdGerekli, setTakmaAdGerekli] = useState(false)
+  /**
+   * kayitOl/takmaAdBelirle kendi yazdiklari profili doğrudan state'e
+   * islerken, ayni anda calisan onAuthStateChanged dinleyicisi de HENUZ
+   * yazilmamis eski veriyi okuyup (profil=null) uzerine yazabilir. Hangi
+   * uid icin profili biz zaten dogrulukla bildigimizi burada tutup, o uid
+   * icin gelen gecikmeli/yaris halindeki okumayi yoksayiyoruz.
+   */
+  const bilinenProfilUid = useRef<string | null>(null)
 
   useEffect(() => {
     if (!auth) {
@@ -104,8 +115,14 @@ export function useKimlik(): KimlikDurumu {
       setKullanici(u)
       setProfilHatasi(false)
       if (u) {
+        if (bilinenProfilUid.current === u.uid) {
+          setYukleniyor(false)
+          return
+        }
         try {
-          setProfil(await profilGetirYaOlustur(u))
+          const p = await profilGetir(u.uid)
+          setProfil(p)
+          setTakmaAdGerekli(p === null)
         } catch (e) {
           console.error('Forum profili yüklenemedi:', e)
           setProfil(null)
@@ -113,6 +130,8 @@ export function useKimlik(): KimlikDurumu {
         }
       } else {
         setProfil(null)
+        setTakmaAdGerekli(false)
+        bilinenProfilUid.current = null
       }
       setYukleniyor(false)
     })
@@ -122,8 +141,12 @@ export function useKimlik(): KimlikDurumu {
   const profiliYenidenDene = useCallback(() => {
     if (!kullanici) return
     setProfilHatasi(false)
-    profilGetirYaOlustur(kullanici)
-      .then(setProfil)
+    profilGetir(kullanici.uid)
+      .then((p) => {
+        bilinenProfilUid.current = kullanici.uid
+        setProfil(p)
+        setTakmaAdGerekli(p === null)
+      })
       .catch((e) => {
         console.error('Forum profili yeniden denemesi başarısız:', e)
         setProfilHatasi(true)
@@ -135,13 +158,12 @@ export function useKimlik(): KimlikDurumu {
     const hata = takmaAdDogrula(takmaAd)
     if (hata) throw new Error(hata)
     try {
-      bekleyenTakmaAd = takmaAd
       const sonuc = await createUserWithEmailAndPassword(auth, eposta.trim(), sifre)
-      await updateProfile(sonuc.user, { displayName: takmaAd.trim() })
-      // Profil belgesi onAuthStateChanged icinden, bekleyenTakmaAd kullanilarak
-      // olusturulur — bkz. yukaridaki not.
+      const profil = await profilOlustur(sonuc.user.uid, takmaAd)
+      bilinenProfilUid.current = sonuc.user.uid
+      setProfil(profil)
+      setTakmaAdGerekli(false)
     } catch (e) {
-      bekleyenTakmaAd = null
       const kod = (e as { code?: string })?.code
       throw new Error(kod ? hataMetni(kod) : 'Hesap oluşturulamadı.')
     }
@@ -157,6 +179,38 @@ export function useKimlik(): KimlikDurumu {
     }
   }, [])
 
+  const oauthIleGirisYap = useCallback(async (saglayici: GoogleAuthProvider | OAuthProvider) => {
+    if (!auth) throw new Error('Forum yapılandırılmamış.')
+    try {
+      await signInWithPopup(auth, saglayici)
+    } catch (e) {
+      const kod = (e as { code?: string })?.code
+      if (kod === 'auth/popup-closed-by-user' || kod === 'auth/cancelled-popup-request') return
+      throw new Error(kod ? hataMetni(kod) : 'Giriş yapılamadı.')
+    }
+  }, [])
+
+  const googleIleGirisYap = useCallback(
+    () => oauthIleGirisYap(new GoogleAuthProvider()),
+    [oauthIleGirisYap],
+  )
+
+  const microsoftIleGirisYap = useCallback(
+    () => oauthIleGirisYap(new OAuthProvider('microsoft.com')),
+    [oauthIleGirisYap],
+  )
+
+  const takmaAdBelirle = useCallback(
+    async (takmaAd: string) => {
+      if (!kullanici) throw new Error('Giriş yapılmamış.')
+      const profil = await profilOlustur(kullanici.uid, takmaAd)
+      bilinenProfilUid.current = kullanici.uid
+      setProfil(profil)
+      setTakmaAdGerekli(false)
+    },
+    [kullanici],
+  )
+
   const cikisYap = useCallback(async () => {
     if (!auth) return
     await firebaseCikisYap(auth)
@@ -167,9 +221,13 @@ export function useKimlik(): KimlikDurumu {
     kullanici,
     profil,
     profilHatasi,
+    takmaAdGerekli,
     yapilandirilmis: forumYapilandirilmis,
     kayitOl,
     girisYap,
+    googleIleGirisYap,
+    microsoftIleGirisYap,
+    takmaAdBelirle,
     cikisYap,
     profiliYenidenDene,
   }
