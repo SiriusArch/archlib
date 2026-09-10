@@ -3,8 +3,10 @@
 Mimarlik ogrencileri icin AI destekli **arac kitapligi**, **olcu bilgi bankasi** ve
 **pafta / maket kritik sistemi**.
 
-Sunucusuz calisir. Kullanici kendi API anahtarini girer (Anthropic / OpenAI / Google Gemini),
-token maliyetini kendi hesabi karsilar. Anahtar yalnizca tarayicinin `localStorage` alaninda tutulur.
+Cekirdek ozellikler sunucusuz calisir. Kullanici kendi API anahtarini girer (Anthropic / OpenAI /
+Google Gemini), token maliyetini kendi hesabi karsilar. Anahtar yalnizca tarayicinin `localStorage`
+alaninda tutulur. Tek istisna: **Forum** (hesap, arkadaslik, sohbet) opsiyonel bir Firebase
+backend'i gerektirir — bkz. asagidaki "Forum kurulumu" bolumu.
 
 ---
 
@@ -17,6 +19,7 @@ token maliyetini kendi hesabi karsilar. Anahtar yalnizca tarayicinin `localStora
 | **Bilgi Bankasi** | Temel tasar ilkeleri, mimari elestiri cercevesi, teknik cizim standartlari, yapi bilgisi + 15 olcu tablosu. |
 | **Kontrol Listeleri** | Pafta teslim listesi (18 madde), maket listesi (11 madde), proje kritigi 11 basligi. Isaretler tarayicida saklanir. |
 | **Kaynaklar** | Bilgi tabaninin geldigi 16 kaynak, guven duzeyleri ve sinirlar. |
+| **Forum** | Teknik basliklar, cevaplar, arkadaslik ve birebir sohbet. Tamamen anonim: e-posta yalnizca giris icindir, herkes birbirini takma adla gorur. Opsiyoneldir; calismasi icin kendi ucretsiz Firebase projeni kurman gerekir (asagida). |
 
 ## Bilgi tabaninin kaynagi
 
@@ -75,8 +78,52 @@ Olusan `dist` klasorunu [app.netlify.com/drop](https://app.netlify.com/drop) say
 
 ### Ortam degiskeni gerekmez
 
-Uygulamada gizli anahtar yoktur. Netlify tarafinda hicbir environment variable tanimlamana
-gerek yok; her kullanici kendi anahtarini tarayiciya girer.
+Uygulamanin geri kalaninda gizli anahtar yoktur. Netlify tarafinda hicbir environment variable
+tanimlamana gerek yok; her kullanici kendi AI anahtarini tarayiciya girer. Yalnizca **Forum**
+ozelligini acmak istersen asagidaki Firebase degiskenlerini eklemen gerekir.
+
+---
+
+## Forum kurulumu (opsiyonel)
+
+Forum, hesap, arkadaslik ve sohbet ozellikleri Firebase (Authentication + Firestore) uzerinde
+calisir. Bu tek gercek backend bagimliligimizdir; kurulmazsa Forum sekmesi "henuz kurulmadi"
+mesaji gosterir, uygulamanin geri kalani etkilenmez. Kurulum tamamen ucretsizdir (Firebase
+Spark plani).
+
+1. [console.firebase.google.com](https://console.firebase.google.com) adresinde yeni bir proje ac.
+2. Sol menudan **Build > Authentication > Get started**, **Sign-in method** sekmesinden
+   **Email/Password** saglayicisini etkinlestir.
+3. Sol menudan **Build > Firestore Database > Create database**, **production mode** ile olustur
+   (bolge olarak sana yakin birini sec, sonradan degistirilemez).
+4. Firestore ekraninda **Rules** sekmesine gec, bu depodaki `firestore.rules` dosyasinin tum
+   icerigini yapistir ve **Publish** de.
+5. Proje ayarlarina git (disli ikonu > **Project settings**), **Your apps** altinda **Web** (`</>`)
+   simgesiyle bir uygulama ekle. Sana verilen `firebaseConfig` nesnesindeki degerleri kopyala.
+6. Proje kokune bir `.env.local` dosyasi olustur (bu dosya `.gitignore` icinde, repoya gitmez):
+
+   ```
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   VITE_FIREBASE_PROJECT_ID=...
+   VITE_FIREBASE_STORAGE_BUCKET=...
+   VITE_FIREBASE_MESSAGING_SENDER_ID=...
+   VITE_FIREBASE_APP_ID=...
+   ```
+
+7. `npm run dev` ile yeniden baslat. Forum sekmesi artik giris/kayit ekranini gostermeli.
+8. **Netlify/Vercel'e yayinlarken**: ayni degiskenleri Site settings > Environment variables
+   (Netlify) ya da Project settings > Environment Variables (Vercel) kismina tek tek ekle, sonra
+   yeniden deploy et. `VITE_` on eki olmadan Vite bu degiskenleri derlemeye dahil etmez.
+
+**Beklenen bir uyari**: kategori filtreli forum listesini ya da sohbet listesini ilk kez
+kullandiginda, tarayici konsolunda Firestore'dan "The query requires an index" hatasi ve bir
+baglanti gorebilirsin. Bu normaldir — baglantiya tikla, Firebase konsolunda index'i olustur
+(birkaç dakika surer), sayfayi yenile.
+
+**Guvenlik notu**: `firebaseConfig` icindeki `apiKey` gizli bir sir DEGILDIR; Firebase bu deger
+tarayicida gorunecek sekilde tasarlanmistir, gercek erisim kontrolu `firestore.rules` dosyasiyla
+saglanir. Yine de `.env.local` dosyasini commitleme (zaten `.gitignore`'da).
 
 ---
 
@@ -108,6 +155,11 @@ src/
     llm.ts          cok saglayicili API katmani (akisli + vision)
     prompt.ts       profesor sistem promptu
     storage.ts      localStorage sarmalayicisi
+    firebase.ts     Firebase baglantisi (yalnizca forum icin, opsiyonel)
+    kimlik.ts       giris/kayit, anonim profil yonetimi
+    forum.ts        forum basliklari + cevaplar (Firestore)
+    sosyal.ts       arkadaslik istekleri + birebir sohbet (Firestore)
+    moderasyon.ts   basit kufur filtresi + rapor olusturma
   components/
     Analiz.tsx      kritik masasi
     Katalog.tsx     arac kitapligi
@@ -115,11 +167,18 @@ src/
     Listeler.tsx
     Kaynaklar.tsx
     AnahtarPaneli.tsx
+    Forum.tsx       forum sekmesinin kabugu (sekmeler + giris kapisi)
+    forum/
+      Kimlik.tsx      giris/kayit modali
+      Basliklar.tsx   baslik listesi + detay + cevaplar
+      Arkadaslar.tsx  arkadas arama, istekler, liste
+      Mesajlar.tsx    sohbet listesi + birebir yazisma
     Markdown.tsx
   App.tsx
   main.tsx
   types.ts
   index.css
+firestore.rules      Firebase konsoluna yapistirilacak guvenlik kurallari
 ```
 
 ## Sinirlar

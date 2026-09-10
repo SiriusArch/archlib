@@ -1,0 +1,113 @@
+rules_version = '2';
+
+// ArchLib Forum guvenlik kurallari.
+// Bunu Firebase konsolunda: Firestore Database > Rules sekmesine yapistir ve
+// "Yayinla" (Publish) de. Bkz. README.md "Forum kurulumu" bolumu.
+//
+// Tasarim ilkesi: kullanicilar tamamen anonimdir. E-posta bu veritabaninin
+// hicbir belgesinde tutulmaz (yalnizca Firebase Authentication icinde,
+// kullanicinin kendisine ozel olarak saklanir). Herkese acik tek kimlik
+// "takmaAd" alanidir.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function girisYapmis() {
+      return request.auth != null;
+    }
+
+    // ------------------------------------------------------------ profil
+    match /kullanicilar/{uid} {
+      allow read: if girisYapmis();
+      allow create: if girisYapmis() && request.auth.uid == uid;
+      allow update: if girisYapmis() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // -------------------------------------------------------------- forum
+    match /forumBasliklari/{basligId} {
+      allow read: if girisYapmis();
+      allow create: if girisYapmis() && request.resource.data.yazarId == request.auth.uid;
+      // Sahibi her seyi guncelleyebilir; baskalari yalnizca cevap eklerken
+      // cevapSayisi/sonAktivite alanlarini artirabilir.
+      allow update: if girisYapmis() && (
+        resource.data.yazarId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cevapSayisi', 'sonAktivite'])
+      );
+      allow delete: if girisYapmis() && resource.data.yazarId == request.auth.uid;
+
+      match /cevaplar/{cevapId} {
+        allow read: if girisYapmis();
+        allow create: if girisYapmis() && request.resource.data.yazarId == request.auth.uid;
+        allow update: if false;
+        allow delete: if girisYapmis() && resource.data.yazarId == request.auth.uid;
+      }
+    }
+
+    // --------------------------------------------------------- arkadaslik
+    // Belge id'si her zaman [uid1,uid2] siralanip '_' ile birlestirilmis
+    // deterministik anahtardir (bkz. src/lib/sosyal.ts: ikiliAnahtar).
+    match /arkadasIstekleri/{istekId} {
+      // "resource == null" sarti onemli: istek gonderirken once ayni id'nin
+      // var olup olmadigina getDoc ile bakiyoruz (bkz. sosyal.ts,
+      // arkadaslikIstegiGonder). Belge henuz yoksa resource null gelir; bu
+      // kosul olmadan kural resource.data'ya erisirken hata verip erisimi
+      // reddeder ve ilk kez istek gonderme tamamen calismaz.
+      allow read: if girisYapmis() && (
+        resource == null ||
+        resource.data.gonderenId == request.auth.uid || resource.data.alanId == request.auth.uid
+      );
+      allow create: if girisYapmis() &&
+        request.resource.data.gonderenId == request.auth.uid &&
+        request.resource.data.durum == 'bekliyor' &&
+        istekId == (request.auth.uid < request.resource.data.alanId
+          ? request.auth.uid + '_' + request.resource.data.alanId
+          : request.resource.data.alanId + '_' + request.auth.uid);
+      // Yalnizca istegi alan kisi, yalnizca bekliyor -> kabul yonunde, kimlik
+      // alanlarina dokunmadan guncelleyebilir.
+      allow update: if girisYapmis() &&
+        resource.data.alanId == request.auth.uid &&
+        resource.data.durum == 'bekliyor' &&
+        request.resource.data.durum == 'kabul' &&
+        request.resource.data.gonderenId == resource.data.gonderenId &&
+        request.resource.data.alanId == resource.data.alanId;
+      allow delete: if girisYapmis() && (
+        resource.data.gonderenId == request.auth.uid || resource.data.alanId == request.auth.uid
+      );
+    }
+
+    // ------------------------------------------------------------- sohbet
+    match /sohbetler/{sohbetId} {
+      // "resource == null": sohbetiBaslat once getDoc ile var olup olmadigina
+      // bakiyor (bkz. sosyal.ts) — belge henuz yoksa resource null gelir.
+      allow read: if girisYapmis() && (
+        resource == null || request.auth.uid in resource.data.katilimcilar
+      );
+      // Sohbet, ancak iki taraf arasinda kabul edilmis bir arkadaslik varsa
+      // baslatilabilir; bunu ayni deterministik id ile arkadasIstekleri
+      // belgesine bakarak dogruluyoruz.
+      allow create: if girisYapmis() &&
+        request.auth.uid in request.resource.data.katilimcilar &&
+        request.resource.data.katilimcilar.size() == 2 &&
+        exists(/databases/$(database)/documents/arkadasIstekleri/$(sohbetId)) &&
+        get(/databases/$(database)/documents/arkadasIstekleri/$(sohbetId)).data.durum == 'kabul';
+      allow update: if girisYapmis() && request.auth.uid in resource.data.katilimcilar;
+
+      match /mesajlar/{mesajId} {
+        allow read: if girisYapmis() &&
+          request.auth.uid in get(/databases/$(database)/documents/sohbetler/$(sohbetId)).data.katilimcilar;
+        allow create: if girisYapmis() &&
+          request.resource.data.gonderenId == request.auth.uid &&
+          request.auth.uid in get(/databases/$(database)/documents/sohbetler/$(sohbetId)).data.katilimcilar;
+        allow update, delete: if false;
+      }
+    }
+
+    // ------------------------------------------------------------- rapor
+    // Yalnizca olusturulabilir; okuma/degistirme sadece proje sahibine
+    // (Firebase konsolu uzerinden, admin erisimiyle) aciktir.
+    match /raporlar/{raporId} {
+      allow create: if girisYapmis() && request.resource.data.bildirenId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+  }
+}

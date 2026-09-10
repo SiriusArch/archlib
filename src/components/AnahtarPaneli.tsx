@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import type { Saglayici } from '../types'
-import { SAGLAYICILAR, saglayiciBul } from '../lib/llm'
+import type { ModelSeviyesi, Saglayici } from '../types'
+import { SAGLAYICILAR, SEVIYE_ADI, saglayiciBul } from '../lib/llm'
 import { anahtarlariOku, anahtarYaz, anahtarSil, aktifSaglayiciYaz } from '../lib/storage'
-import { Cip } from '../ui/Kontroller'
+import { Cip, Segment } from '../ui/Kontroller'
+
+const SEVIYELER: ModelSeviyesi[] = ['hizli', 'dengeli', 'guclu']
+const OZEL_MODEL = '__ozel__'
 
 interface Props {
   acik: boolean
@@ -15,7 +18,9 @@ interface Props {
 export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncellendi }: Props) {
   const [secili, setSecili] = useState<Saglayici>(aktif)
   const [anahtar, setAnahtar] = useState('')
+  const [otomatik, setOtomatik] = useState(true)
   const [model, setModel] = useState('')
+  const [ozelModel, setOzelModel] = useState('')
   const [goster, setGoster] = useState(false)
   const [mesaj, setMesaj] = useState('')
 
@@ -26,8 +31,17 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
   useEffect(() => {
     if (!acik) return
     const k = anahtarlariOku()[secili]
+    const bilgi = saglayiciBul(secili)
     setAnahtar(k?.anahtar ?? '')
-    setModel(k?.model ?? saglayiciBul(secili).varsayilanModel)
+    setOtomatik(k?.otomatik ?? true)
+    const kayitliModel = k?.model ?? bilgi.varsayilanModel
+    if (kayitliModel && !bilgi.modeller.includes(kayitliModel)) {
+      setModel(OZEL_MODEL)
+      setOzelModel(kayitliModel)
+    } else {
+      setModel(kayitliModel)
+      setOzelModel('')
+    }
     setMesaj('')
     setGoster(false)
   }, [acik, secili])
@@ -42,10 +56,12 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
       setMesaj('Anahtar boş olamaz.')
       return
     }
+    const secilenModel = model === OZEL_MODEL ? ozelModel.trim() : model
     anahtarYaz({
       saglayici: secili,
       anahtar: anahtar.trim(),
-      model: model.trim() || bilgi.varsayilanModel,
+      model: secilenModel || bilgi.varsayilanModel,
+      otomatik,
     })
     aktifSaglayiciYaz(secili)
     aktifDegisti(secili)
@@ -128,23 +144,61 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
           </div>
 
           <div>
-            <label className="etiket mb-1.5 block">Model</label>
-            <input
-              list={`modeller-${secili}`}
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              spellCheck={false}
-              className="alan sayi"
+            <label className="etiket mb-1.5 block">Model seçimi</label>
+            <Segment
+              secenekler={[
+                { deger: 'oto', ad: 'Otomatik', ipucu: 'Soru zorluğuna göre model seçilir' },
+                { deger: 'elle', ad: 'Elle seç', ipucu: 'Sabit bir model kullan' },
+              ]}
+              secili={otomatik ? 'oto' : 'elle'}
+              degistir={(v) => setOtomatik(v === 'oto')}
             />
-            <datalist id={`modeller-${secili}`}>
-              {bilgi.modeller.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-murekkep-3">
-              Listeden seçebilir ya da elle yazabilirsin. "Model bulunamadı (404)" hatası alırsan
-              buradan güncelle.
-            </p>
+
+            {otomatik ? (
+              <div className="mt-3 space-y-1.5 rounded-[7px] border border-cizgi bg-kagit px-3.5 py-3">
+                <p className="text-[13px] leading-relaxed text-murekkep-3">
+                  Her istekte görsel sayısı, metnin uzunluğu ve kritik türüne bakılarak üç
+                  kademeden biri otomatik seçilir:
+                </p>
+                <ul className="space-y-1 text-[13px] text-murekkep-2">
+                  {SEVIYELER.map((s) => (
+                    <li key={s} className="flex items-center justify-between gap-3">
+                      <span className="font-medium">{SEVIYE_ADI[s]}</span>
+                      <span className="sayi text-murekkep-3">{bilgi.seviyeler[s]}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="mt-3 space-y-2">
+                <select
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  className="alan sayi"
+                >
+                  {bilgi.modeller.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                  <option value={OZEL_MODEL}>Özel (elle yaz)…</option>
+                </select>
+                {model === OZEL_MODEL && (
+                  <input
+                    value={ozelModel}
+                    onChange={(e) => setOzelModel(e.target.value)}
+                    placeholder="ör. gpt-5.7-preview"
+                    spellCheck={false}
+                    autoFocus
+                    className="alan sayi"
+                  />
+                )}
+                <p className="text-[13px] leading-relaxed text-murekkep-3">
+                  Listede olmayan yeni bir model çıkarsa "Özel" ile elle yazabilirsin. "Model
+                  bulunamadı (404)" hatası alırsan buradan güncelle.
+                </p>
+              </div>
+            )}
           </div>
 
           {mesaj && (

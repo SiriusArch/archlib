@@ -125,10 +125,16 @@ export interface Kaynak {
 
 export type Saglayici = 'anthropic' | 'openai' | 'gemini'
 
+/** Model gucu kademesi: otomatik secimde soru zorlugu buna eslenir. */
+export type ModelSeviyesi = 'hizli' | 'dengeli' | 'guclu'
+
 export interface AnahtarKaydi {
   saglayici: Saglayici
   anahtar: string
+  /** Elle secim modunda kullanilacak model. Otomatik modda yalnizca "otomatik" kapatilinca devreye girer. */
   model: string
+  /** true (varsayilan): model, sorunun zorlugune gore otomatik secilir. false: yukaridaki "model" sabit kullanilir. */
+  otomatik: boolean
 }
 
 export type AnalizTuru =
@@ -148,4 +154,78 @@ export interface EkGorsel {
   /** base64, prefix yok */
   veri: string
   onizleme: string
+}
+
+/**
+ * Forum ve arkadaslik sistemi. Kullanicilar tamamen anonimdir: e-posta yalnizca
+ * giris icin kullanilir ve hicbir yerde baskasina gosterilmez; herkesin gordugu
+ * tek kimlik kendi sectigi takma addir.
+ */
+export interface KullaniciProfili {
+  uid: string
+  takmaAd: string
+  olusturulma: number
+}
+
+export type ForumKategori =
+  | 'cizim-yazilim'
+  | 'yapi-teknik'
+  | 'studyo-elestiri'
+  | 'kariyer-egitim'
+  | 'genel'
+
+export interface ForumBasligi {
+  id: string
+  baslik: string
+  icerik: string
+  kategori: ForumKategori
+  yazarId: string
+  yazarAdi: string
+  tarih: number
+  sonAktivite: number
+  cevapSayisi: number
+}
+
+export interface ForumCevap {
+  id: string
+  icerik: string
+  yazarId: string
+  yazarAdi: string
+  tarih: number
+}
+
+export type ArkadaslikDurumu = 'bekliyor' | 'kabul'
+
+export interface ArkadaslikIstegi {
+  id: string
+  gonderenId: string
+  gonderenAdi: string
+  alanId: string
+  alanAdi: string
+  durum: ArkadaslikDurumu
+  tarih: number
+}
+
+export interface ArkadasKaydi {
+  uid: string
+  takmaAd: string
+  beri: number
+  /** Bu arkadasligin kaynagi olan arkadasIstekleri belgesinin id'si (silmek icin). */
+  istekId: string
+}
+
+export interface SohbetOzeti {
+  id: string
+  katilimcilar: string[]
+  digerUid: string
+  digerAd: string
+  sonMesaj: string
+  sonMesajTarih: number
+}
+
+export interface SohbetMesaji {
+  id: string
+  gonderenId: string
+  icerik: string
+  tarih: number
 }

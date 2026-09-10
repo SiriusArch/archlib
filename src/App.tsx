@@ -9,6 +9,7 @@ import {
   IkonCizim,
   IkonArazi,
   IkonArsiv,
+  IkonForum,
   IkonKitaplik,
   IkonBilgi,
   IkonListe,
@@ -29,6 +30,9 @@ import AnahtarPaneli from './components/AnahtarPaneli'
 const Intro = lazy(() => import('./intro/Intro'))
 const Arazi = lazy(() => import('./components/Arazi'))
 const Cizim = lazy(() => import('./cizim/Cizim'))
+// Firebase (auth + forum) yalnizca bu sekmeye girildiginde indirilsin diye
+// tembel yukleniyor; boylece forumu hic kullanmayan ziyaretciler onu indirmez.
+const Forum = lazy(() => import('./components/Forum'))
 
 const INTRO_ANAHTARI = 'archlib.intro.v1'
 
@@ -37,6 +41,7 @@ const IKONLAR: Record<Sekme, (p: { className?: string }) => ReactNode> = {
   cizim: IkonCizim,
   arazi: IkonArazi,
   arsiv: IkonArsiv,
+  forum: IkonForum,
   katalog: IkonKitaplik,
   bilgi: IkonBilgi,
   liste: IkonListe,
@@ -248,6 +253,11 @@ export default function App() {
               </Suspense>
             )}
             {sekme === 'arsiv' && <Arsiv />}
+            {sekme === 'forum' && (
+              <Suspense fallback={<div className="etiket py-24 text-center">Forum yükleniyor</div>}>
+                <Forum />
+              </Suspense>
+            )}
             {sekme === 'katalog' && <Katalog />}
             {sekme === 'bilgi' && <BilgiBankasi />}
             {sekme === 'liste' && <Listeler />}
@@ -258,8 +268,10 @@ export default function App() {
         <footer className="border-t border-cizgi px-5 py-7 sm:px-8">
           <div className="mx-auto flex max-w-[1180px] flex-wrap items-end justify-between gap-6">
             <p className="max-w-2xl text-[13px] leading-relaxed text-murekkep-3">
-              Sunucusuz çalışır; anahtarın ve verilerin yalnızca bu tarayıcıda saklanır. Bilgi
-              tabanı <span className="text-murekkep-2">Temel Tasar</span> (İ. Hulûsi Güngör),{' '}
+              Kritik masası, çizim, arazi ve kitaplık sunucusuz çalışır; anahtarın ve verilerin
+              yalnızca bu tarayıcıda saklanır. Forum ise anonim bir hesap ve ortak bir veritabanı
+              kullanır. Bilgi tabanı{' '}
+              <span className="text-murekkep-2">Temel Tasar</span> (İ. Hulûsi Güngör),{' '}
               <span className="text-murekkep-2">Yapı Tasarım Bilgisi</span> (Neufert), MİM 153 ve
               MİM 244 ders notları başta olmak üzere 16 kaynaktan çıkarılmıştır. Yapay zekâ kritiği
               ön değerlendirmedir; danışmanın ve jürinin yerine geçmez.

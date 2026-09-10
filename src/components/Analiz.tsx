@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AnalizTuru, EkGorsel, Saglayici } from '../types'
+import type { AnalizTuru, EkGorsel, ModelSeviyesi, Saglayici } from '../types'
 import { ANALIZ_TURU_ADI, ANALIZ_TURU_ACIKLAMA } from '../data/kritik'
 import {
   analizCagir,
   dosyayiOku,
   saglayiciBul,
+  otomatikModelSec,
+  SEVIYE_ADI,
   IZINLI_GORSEL_TURLERI,
   MAKS_GORSEL_BOYUT,
 } from '../lib/llm'
+import { modelSeviyesiTahminiYap } from '../lib/zorluk'
 import { sistemPromptu, kullaniciPromptu } from '../lib/prompt'
 import {
   anahtarlariOku,
@@ -49,6 +52,8 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
   const [hata, setHata] = useState('')
   const [suruklenen, setSuruklenen] = useState(false)
   const [gecmis, setGecmis] = useState<GecmisKaydi[]>([])
+  const [kullanilanModel, setKullanilanModel] = useState('')
+  const [kullanilanSeviye, setKullanilanSeviye] = useState<ModelSeviyesi | null>(null)
   const iptalRef = useRef<AbortController | null>(null)
   const ciktiRef = useRef<HTMLDivElement>(null)
 
@@ -130,17 +135,26 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
       return
     }
 
+    const bilgi = saglayiciBul(saglayici)
+    const otomatik = aktifKayit.otomatik ?? true
+    const seviye = otomatik
+      ? modelSeviyesiTahminiYap({ soru, gorselSayisi: gorseller.length, tur, proje, olcek, ders })
+      : null
+    const model = seviye ? otomatikModelSec(bilgi, seviye) : aktifKayit.model || bilgi.varsayilanModel
+
     const kontrol = new AbortController()
     iptalRef.current = kontrol
     setCalisiyor(true)
     setCikti('')
+    setKullanilanModel(model)
+    setKullanilanSeviye(seviye)
 
     let biriken = ''
     try {
       await analizCagir({
         saglayici,
         anahtar: aktifKayit.anahtar,
-        model: aktifKayit.model || saglayiciBul(saglayici).varsayilanModel,
+        model,
         sistem: sistemPromptu(tur),
         kullanici: kullaniciPromptu({
           tur: ANALIZ_TURU_ADI[tur],
@@ -374,6 +388,12 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 ) : undefined
               }
             />
+            {kullanilanModel && (
+              <p className="border-b border-cizgi/70 px-4 py-1.5 text-[12.5px] text-murekkep-3">
+                {kullanilanSeviye ? `Otomatik seçim: ${SEVIYE_ADI[kullanilanSeviye]} · ` : 'Model: '}
+                <span className="sayi">{kullanilanModel}</span>
+              </p>
+            )}
             <div
               ref={ciktiRef}
               className="max-h-[calc(100vh-250px)] min-h-[520px] overflow-y-auto px-6 py-5"

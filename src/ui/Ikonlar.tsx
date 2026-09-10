@@ -55,6 +55,15 @@ export function IkonArsiv({ className = 'h-[18px] w-[18px]' }: Props) {
   )
 }
 
+export function IkonForum({ className = 'h-[18px] w-[18px]' }: Props) {
+  return (
+    <svg {...ortak} className={className} aria-hidden="true">
+      <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h9A2.5 2.5 0 0 1 18 6.5v5a2.5 2.5 0 0 1-2.5 2.5H9l-3.5 3v-3H6.5A2.5 2.5 0 0 1 4 11.5z" />
+      <path d="M9.5 20a3 3 0 0 0 3-3v-.2" />
+    </svg>
+  )
+}
+
 export function IkonKitaplik({ className = 'h-[18px] w-[18px]' }: Props) {
   return (
     <svg {...ortak} className={className} aria-hidden="true">

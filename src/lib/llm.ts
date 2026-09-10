@@ -1,4 +1,4 @@
-import type { Saglayici, EkGorsel } from '../types'
+import type { Saglayici, EkGorsel, ModelSeviyesi } from '../types'
 
 export interface SaglayiciBilgi {
   id: Saglayici
@@ -7,8 +7,16 @@ export interface SaglayiciBilgi {
   anahtarOnEk: string
   modeller: string[]
   varsayilanModel: string
+  /** Otomatik model seciminde soru zorlugune gore kullanilacak model. */
+  seviyeler: Record<ModelSeviyesi, string>
   gorselDestegi: boolean
   not: string
+}
+
+export const SEVIYE_ADI: Record<ModelSeviyesi, string> = {
+  hizli: 'Hızlı',
+  dengeli: 'Dengeli',
+  guclu: 'Güçlü',
 }
 
 export const SAGLAYICILAR: SaglayiciBilgi[] = [
@@ -17,8 +25,13 @@ export const SAGLAYICILAR: SaglayiciBilgi[] = [
     ad: 'Anthropic (Claude)',
     anahtarAdresi: 'https://console.anthropic.com/settings/keys',
     anahtarOnEk: 'sk-ant-',
-    modeller: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5-20251001'],
+    modeller: ['claude-opus-5', 'claude-sonnet-5', 'claude-haiku-4-5-20251001'],
     varsayilanModel: 'claude-sonnet-5',
+    seviyeler: {
+      hizli: 'claude-haiku-4-5-20251001',
+      dengeli: 'claude-sonnet-5',
+      guclu: 'claude-opus-5',
+    },
     gorselDestegi: true,
     not: 'Uzun ve yapılı metin kritiği ile görsel okumada güçlü. Tarayıcıdan çağrı için özel başlık otomatik ekleniyor.',
   },
@@ -27,18 +40,28 @@ export const SAGLAYICILAR: SaglayiciBilgi[] = [
     ad: 'OpenAI (GPT)',
     anahtarAdresi: 'https://platform.openai.com/api-keys',
     anahtarOnEk: 'sk-',
-    modeller: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini'],
-    varsayilanModel: 'gpt-4o',
+    modeller: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5-nano', 'o4-mini'],
+    varsayilanModel: 'gpt-5.6-terra',
+    seviyeler: {
+      hizli: 'gpt-5.6-luna',
+      dengeli: 'gpt-5.6-terra',
+      guclu: 'gpt-5.6-sol',
+    },
     gorselDestegi: true,
-    not: 'Model adı zamanla değişebilir; listeden seçebilir ya da elle yazabilirsin.',
+    not: 'Model adları zamanla değişir; listeden seçebilir ya da "Özel" ile elle yazabilirsin.',
   },
   {
     id: 'gemini',
     ad: 'Google (Gemini)',
     anahtarAdresi: 'https://aistudio.google.com/app/apikey',
     anahtarOnEk: '',
-    modeller: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'],
-    varsayilanModel: 'gemini-2.5-flash',
+    modeller: ['gemini-2.5-pro', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'],
+    varsayilanModel: 'gemini-3.5-flash',
+    seviyeler: {
+      hizli: 'gemini-3.5-flash-lite',
+      dengeli: 'gemini-3.5-flash',
+      guclu: 'gemini-2.5-pro',
+    },
     gorselDestegi: true,
     not: 'Ücretsiz kotası olan tek sağlayıcı. Yüksek çözünürlüklü pafta görsellerinde iyi çalışır.',
   },
@@ -48,6 +71,11 @@ export function saglayiciBul(id: Saglayici): SaglayiciBilgi {
   const s = SAGLAYICILAR.find((x) => x.id === id)
   if (!s) throw new Error(`Bilinmeyen sağlayıcı: ${id}`)
   return s
+}
+
+/** Verilen zorluk kademesi icin bu saglayicinin modelini dondurur. */
+export function otomatikModelSec(bilgi: SaglayiciBilgi, seviye: ModelSeviyesi): string {
+  return bilgi.seviyeler[seviye]
 }
 
 export interface IstekParam {

@@ -1,4 +1,13 @@
-export type Sekme = 'analiz' | 'cizim' | 'arazi' | 'arsiv' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
+export type Sekme =
+  | 'analiz'
+  | 'cizim'
+  | 'arazi'
+  | 'arsiv'
+  | 'forum'
+  | 'katalog'
+  | 'bilgi'
+  | 'liste'
+  | 'kaynak'
 
 export interface BolumTanimi {
   id: Sekme
@@ -47,6 +56,15 @@ export const BOLUMLER: readonly BolumTanimi[] = [
     zemin: 'bg-mor-soft',
     kenar: 'border-mor',
     dolgu: 'bg-mor',
+  },
+  {
+    id: 'forum',
+    ad: 'Forum',
+    alt: 'Soru, cevap, arkadaşlık',
+    metin: 'text-mavi-koyu',
+    zemin: 'bg-mavi-soft',
+    kenar: 'border-mavi',
+    dolgu: 'bg-mavi',
   },
   {
     id: 'katalog',
