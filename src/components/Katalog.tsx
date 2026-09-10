@@ -27,7 +27,7 @@ function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
         ))}
         {site.turkce && <span className="etiket text-adacayi-koyu">TR</span>}
         {site.dogrulama === 'dogrulanmadi' && (
-          <span className="etiket text-kiremit-koyu">dogrulanmadi</span>
+          <span className="etiket text-kiremit-koyu">doğrulanmadı</span>
         )}
       </div>
     </Kart>
@@ -69,12 +69,12 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
           </div>
 
           <section>
-            <h3 className="etiket mb-2 text-murekkep-3">Ne ise yarar</h3>
+            <h3 className="etiket mb-2 text-murekkep-3">Ne işe yarar</h3>
             <p className="text-[16px] leading-relaxed text-murekkep-2">{site.anlatim}</p>
           </section>
 
           <section>
-            <h3 className="etiket mb-2 text-murekkep-3">Projende nerede kullanirsin</h3>
+            <h3 className="etiket mb-2 text-murekkep-3">Projende nerede kullanırsın</h3>
             <p className="border-l-2 border-adacayi pl-4 text-[16px] leading-relaxed text-murekkep-2">
               {site.kullanim}
             </p>
@@ -113,10 +113,10 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
             </a>
             <span className="etiket text-murekkep-3">
               {site.dogrulama === 'dogrulandi'
-                ? 'Siteden dogrulandi'
+                ? 'Siteden doğrulandı'
                 : site.dogrulama === 'kismi'
-                  ? 'Kismen dogrulandi'
-                  : 'Dogrulanamadi'}
+                  ? 'Kısmen doğrulandı'
+                  : 'Doğrulanamadı'}
             </span>
           </div>
         </div>
@@ -164,10 +164,10 @@ export default function Katalog() {
   return (
     <div className="kademe">
       <SayfaBasligi
-        etiket="Kitaplik"
+        etiket="Kitaplık"
         renk="text-adacayi-koyu"
-        baslik="Ogrencinin isine yarayan 48 arac"
-        aciklama="Ucret, icerik ve proje asamasina gore siniflandirildi. Her kartta aracin ne ise yaradigi ve projende tam olarak nerede kullanilacagi yaziyor."
+        baslik="Öğrencinin işine yarayan 48 araç"
+        aciklama="Ücret, içerik ve proje aşamasına göre sınıflandırıldı. Her kartta aracın ne işe yaradığı ve projende tam olarak nerede kullanılacağı yazıyor."
         sag={
           <div className="sayi text-right text-[14.5px] text-murekkep-3">
             <div className="text-[29.5px] leading-none text-murekkep">{sonuclar.length}</div>
@@ -202,20 +202,20 @@ export default function Katalog() {
           </select>
         </div>
         <div>
-          <label className="etiket mb-1.5 block text-murekkep-3">Ucret</label>
+          <label className="etiket mb-1.5 block text-murekkep-3">Ücret</label>
           <select
             value={ucret}
             onChange={(e) => setUcret(e.target.value as Ucret | 'hepsi')}
             className="alan"
           >
             <option value="hepsi">Hepsi</option>
-            <option value="ucretsiz">Ucretsiz</option>
-            <option value="freemium">Ucretsiz + Ucretli</option>
-            <option value="ucretli">Ucretli</option>
+            <option value="ucretsiz">Ücretsiz</option>
+            <option value="freemium">Ücretsiz + Ücretli</option>
+            <option value="ucretli">Ücretli</option>
           </select>
         </div>
         <div>
-          <label className="etiket mb-1.5 block text-murekkep-3">Proje asamasi</label>
+          <label className="etiket mb-1.5 block text-murekkep-3">Proje aşaması</label>
           <select
             value={asama}
             onChange={(e) => setAsama(e.target.value as Asama | 'hepsi')}
@@ -233,7 +233,7 @@ export default function Katalog() {
 
       {gruplu.length === 0 && (
         <p className="border-t border-cizgi py-16 text-center text-[16px] text-murekkep-3">
-          Bu filtreyle eslesen arac yok.
+          Bu filtreyle eşleşen araç yok.
         </p>
       )}
 
@@ -242,7 +242,7 @@ export default function Katalog() {
           <section key={kat}>
             <div className="mb-1.5 flex items-baseline justify-between gap-6">
               <h2 className="text-[21px] leading-tight text-murekkep">{KATEGORI_ADI[kat]}</h2>
-              <span className="sayi text-[13px] text-murekkep-3">{liste.length} arac</span>
+              <span className="sayi text-[13px] text-murekkep-3">{liste.length} araç</span>
             </div>
             <p className="mb-5 max-w-2xl text-[15px] leading-relaxed text-murekkep-2">
               {KATEGORI_ACIKLAMA[kat]}

@@ -40,15 +40,15 @@ export default function Listeler() {
       <SayfaBasligi
         etiket="Listeler"
         renk="text-mor-koyu"
-        baslik="Teslimden once tek tek isaretle"
-        aciklama="Cogu pafta, tasarim kotu oldugu icin degil, bu maddelerden birkaci atlandigi icin puan kaybeder. Isaretler bu tarayicida saklanir."
+        baslik="Teslimden önce tek tek işaretle"
+        aciklama="Çoğu pafta, tasarım kötü olduğu için değil, bu maddelerden birkaçı atlandığı için puan kaybeder. İşaretler bu tarayıcıda saklanır."
         sag={
           <div className="text-right">
             <div className="sayi text-[28px] leading-none text-murekkep">
               {tamam}
               <span className="text-murekkep-3">/{liste.maddeler.length}</span>
             </div>
-            <div className="etiket mt-1">tamamlandi</div>
+            <div className="etiket mt-1">tamamlandı</div>
           </div>
         }
       />
@@ -70,7 +70,7 @@ export default function Listeler() {
               onClick={() => sifirla(liste.id)}
               className="text-[13px] font-medium text-murekkep-3 transition-colors hover:text-kiremit-koyu"
             >
-              Sifirla
+              Sıfırla
             </button>
           }
         />

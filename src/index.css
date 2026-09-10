@@ -7,43 +7,46 @@
    Kose yaricaplari kucuk (6-10px) — yumusak ama sisirilmis degil.
    ========================================================================== */
 
+/*
+ * Renk tokenlari iki katmanli: @theme'deki --color-* adlari sabit kalir
+ * (bg-kagit, text-murekkep gibi Tailwind siniflari bunlara baglanir), gercek
+ * deger ise --t-* araci degiskenlerinden gelir. Boylece ayni sinif adi acik
+ * ve koyu temada farkli renge cozulur. Varsayilan sistem tercihini izler;
+ * kullanici anahtari tikladiginda <html data-theme="..."> ile kilitlenir.
+ */
 @theme {
-  /* --- zemin ------------------------------------------------------------ */
-  --color-kagit: #fcfbf8;
-  --color-kart: #fffefa;
-  --color-yan: #f5f4ef;
-  --color-kagit-2: #f4f3ed;
-  --color-kagit-3: #edece4;
+  --color-kagit: var(--t-kagit);
+  --color-kart: var(--t-kart);
+  --color-yan: var(--t-yan);
+  --color-kagit-2: var(--t-kagit-2);
+  --color-kagit-3: var(--t-kagit-3);
 
-  /* --- metin ------------------------------------------------------------ */
-  --color-murekkep: #30332d;
-  --color-murekkep-2: #5f6259;
-  --color-murekkep-3: #85857b;
+  --color-murekkep: var(--t-murekkep);
+  --color-murekkep-2: var(--t-murekkep-2);
+  --color-murekkep-3: var(--t-murekkep-3);
 
-  /* --- cizgi ------------------------------------------------------------ */
-  --color-cizgi: #e8e7df;
-  --color-cizgi-2: #dcdad0;
+  --color-cizgi: var(--t-cizgi);
+  --color-cizgi-2: var(--t-cizgi-2);
 
-  /* --- vurgular --------------------------------------------------------- */
-  --color-kiremit: #b9573e;
-  --color-kiremit-koyu: #a54a34;
-  --color-kiremit-soft: #f4e9e2;
+  --color-kiremit: var(--t-kiremit);
+  --color-kiremit-koyu: var(--t-kiremit-koyu);
+  --color-kiremit-soft: var(--t-kiremit-soft);
 
-  --color-adacayi: #727d63;
-  --color-adacayi-koyu: #5f6a52;
-  --color-adacayi-soft: #eaece3;
+  --color-adacayi: var(--t-adacayi);
+  --color-adacayi-koyu: var(--t-adacayi-koyu);
+  --color-adacayi-soft: var(--t-adacayi-soft);
 
-  --color-kehribar: #a97b4c;
-  --color-kehribar-koyu: #8f6740;
-  --color-kehribar-soft: #f3ece2;
+  --color-kehribar: var(--t-kehribar);
+  --color-kehribar-koyu: var(--t-kehribar-koyu);
+  --color-kehribar-soft: var(--t-kehribar-soft);
 
-  --color-mavi: #5c7c92;
-  --color-mavi-koyu: #4c697c;
-  --color-mavi-soft: #e8eef1;
+  --color-mavi: var(--t-mavi);
+  --color-mavi-koyu: var(--t-mavi-koyu);
+  --color-mavi-soft: var(--t-mavi-soft);
 
-  --color-mor: #6d6a8f;
-  --color-mor-koyu: #5c5979;
-  --color-mor-soft: #ecebf1;
+  --color-mor: var(--t-mor);
+  --color-mor-koyu: var(--t-mor-koyu);
+  --color-mor-soft: var(--t-mor-soft);
 
   /* --- tipografi -------------------------------------------------------- */
   --font-baslik: 'Manrope', system-ui, sans-serif;
@@ -53,10 +56,141 @@
 
 :root {
   color-scheme: light;
+
+  /* --- zemin ------------------------------------------------------------ */
+  --t-kagit: #fcfbf8;
+  --t-kart: #fffefa;
+  --t-yan: #f5f4ef;
+  --t-kagit-2: #f4f3ed;
+  --t-kagit-3: #edece4;
+
+  /* --- metin ------------------------------------------------------------ */
+  --t-murekkep: #30332d;
+  --t-murekkep-2: #5f6259;
+  --t-murekkep-3: #85857b;
+
+  /* --- cizgi ------------------------------------------------------------ */
+  --t-cizgi: #e8e7df;
+  --t-cizgi-2: #dcdad0;
+
+  /* --- vurgular --------------------------------------------------------- */
+  --t-kiremit: #b9573e;
+  --t-kiremit-koyu: #a54a34;
+  --t-kiremit-soft: #f4e9e2;
+
+  --t-adacayi: #727d63;
+  --t-adacayi-koyu: #5f6a52;
+  --t-adacayi-soft: #eaece3;
+
+  --t-kehribar: #a97b4c;
+  --t-kehribar-koyu: #8f6740;
+  --t-kehribar-soft: #f3ece2;
+
+  --t-mavi: #5c7c92;
+  --t-mavi-koyu: #4c697c;
+  --t-mavi-soft: #e8eef1;
+
+  --t-mor: #6d6a8f;
+  --t-mor-koyu: #5c5979;
+  --t-mor-soft: #ecebf1;
+
+  --t-secim-bg: #f0e6dc;
+  --t-odak-bg: #ffffff;
+  --t-leaflet-attrib: rgba(252, 251, 248, 0.9);
+}
+
+/* Kullanici acik ac/kapa dugmesine hic dokunmadiysa sistem tercihi gecerli. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --t-kagit: #1a1917;
+    --t-kart: #232220;
+    --t-yan: #171614;
+    --t-kagit-2: #2a2925;
+    --t-kagit-3: #333029;
+
+    --t-murekkep: #ebe7de;
+    --t-murekkep-2: #b0aca0;
+    --t-murekkep-3: #8d8a78;
+
+    --t-cizgi: #37352f;
+    --t-cizgi-2: #46433a;
+
+    --t-kiremit: #cb6b4f;
+    --t-kiremit-koyu: #e6a184;
+    --t-kiremit-soft: #3c2a20;
+
+    --t-adacayi: #92a17c;
+    --t-adacayi-koyu: #b9c8a3;
+    --t-adacayi-soft: #2b3023;
+
+    --t-kehribar: #c99a67;
+    --t-kehribar-koyu: #dfb989;
+    --t-kehribar-soft: #362c1e;
+
+    --t-mavi: #7fa0b6;
+    --t-mavi-koyu: #a8c6d8;
+    --t-mavi-soft: #212e35;
+
+    --t-mor: #9490b8;
+    --t-mor-koyu: #b7b2d6;
+    --t-mor-soft: #292739;
+
+    --t-secim-bg: #4a3325;
+    --t-odak-bg: #29281f;
+    --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
+  }
+}
+
+/* Kullanici acikca "koyu" secti: sistem ne olursa olsun bu gecerli. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --t-kagit: #1a1917;
+  --t-kart: #232220;
+  --t-yan: #171614;
+  --t-kagit-2: #2a2925;
+  --t-kagit-3: #333029;
+
+  --t-murekkep: #ebe7de;
+  --t-murekkep-2: #b0aca0;
+  --t-murekkep-3: #8d8a78;
+
+  --t-cizgi: #37352f;
+  --t-cizgi-2: #46433a;
+
+  --t-kiremit: #cb6b4f;
+  --t-kiremit-koyu: #e6a184;
+  --t-kiremit-soft: #3c2a20;
+
+  --t-adacayi: #92a17c;
+  --t-adacayi-koyu: #b9c8a3;
+  --t-adacayi-soft: #2b3023;
+
+  --t-kehribar: #c99a67;
+  --t-kehribar-koyu: #dfb989;
+  --t-kehribar-soft: #362c1e;
+
+  --t-mavi: #7fa0b6;
+  --t-mavi-koyu: #a8c6d8;
+  --t-mavi-soft: #212e35;
+
+  --t-mor: #9490b8;
+  --t-mor-koyu: #b7b2d6;
+  --t-mor-soft: #292739;
+
+  --t-secim-bg: #4a3325;
+  --t-odak-bg: #29281f;
+  --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
+}
+
+/* Kullanici acikca "acik" secti: sistem koyuysa da bu gecerli olsun. */
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 html {
-  background-color: #fcfbf8;
+  background-color: var(--color-kagit);
+  transition: background-color 200ms ease;
 }
 
 html,
@@ -67,13 +201,14 @@ body,
 
 body {
   margin: 0;
-  color: #30332d;
+  color: var(--color-murekkep);
   font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: color 200ms ease;
 }
 
 h1,
@@ -202,7 +337,7 @@ h4 {
 }
 .alan:focus {
   border-color: var(--color-murekkep-3);
-  background: #fff;
+  background: var(--t-odak-bg);
 }
 .alan::placeholder {
   color: var(--color-murekkep-3);
@@ -227,7 +362,7 @@ textarea.alan {
 }
 
 input[type='checkbox'] {
-  accent-color: #b9573e;
+  accent-color: var(--color-kiremit);
 }
 
 /* --- analiz ciktisi ------------------------------------------------------ */
@@ -335,8 +470,8 @@ input[type='checkbox'] {
 }
 
 ::selection {
-  background: #f0e6dc;
-  color: #30332d;
+  background: var(--t-secim-bg);
+  color: var(--color-murekkep);
 }
 
 /* --- Leaflet -------------------------------------------------------------- */
@@ -358,7 +493,7 @@ input[type='checkbox'] {
 }
 
 .leaflet-control-attribution {
-  background: rgba(252, 251, 248, 0.9) !important;
+  background: var(--t-leaflet-attrib) !important;
   font-size: 10px !important;
   color: var(--color-murekkep-3) !important;
 }

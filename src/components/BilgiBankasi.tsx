@@ -62,13 +62,13 @@ export default function BilgiBankasi() {
       <SayfaBasligi
         etiket="Bilgi"
         renk="text-kehribar-koyu"
-        baslik="Analiz motorunun besledigi kaynak"
-        aciklama="Temel Tasar (I. Hulusi Gungor), Neufert ve MIM 153 / MIM 244 ders notlarindan cikarilmis kavramlar, standartlar ve olculer."
+        baslik="Analiz motorunun beslediği kaynak"
+        aciklama="Temel Tasar (İ. Hulûsi Güngör), Neufert ve MİM 153 / MİM 244 ders notlarından çıkarılmış kavramlar, standartlar ve ölçüler."
         sag={
           <Segment
             secenekler={[
               { deger: 'kavram', ad: 'Kavram' },
-              { deger: 'olcu', ad: 'Olcu bankasi' },
+              { deger: 'olcu', ad: 'Ölçü bankası' },
             ]}
             secili={sekme}
             degistir={setSekme}
@@ -81,7 +81,7 @@ export default function BilgiBankasi() {
         <input
           value={arama}
           onChange={(e) => setArama(e.target.value)}
-          placeholder="Ara: merdiven, doku, kot, aks, banyo, olcek..."
+          placeholder="Ara: merdiven, doku, kot, aks, banyo, ölçek..."
           className="alan max-w-md"
         />
       </div>
@@ -90,7 +90,7 @@ export default function BilgiBankasi() {
         <div className="space-y-3.5">
           {bolumler.length === 0 && (
             <p className="rounded-[8px] border border-dashed border-cizgi-2 py-16 text-center text-[15px] text-murekkep-3">
-              Eslesen kayit yok.
+              Eşleşen kayıt yok.
             </p>
           )}
           {bolumler.map((b) => (
@@ -153,7 +153,7 @@ export default function BilgiBankasi() {
         <div className="grid gap-3.5 lg:grid-cols-2">
           {tablolar.length === 0 && (
             <p className="rounded-[8px] border border-dashed border-cizgi-2 py-16 text-center text-[15px] text-murekkep-3 lg:col-span-2">
-              Eslesen olcu yok.
+              Eşleşen ölçü yok.
             </p>
           )}
           {tablolar.map((t) => (

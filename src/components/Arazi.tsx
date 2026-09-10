@@ -46,10 +46,10 @@ const KATMAN_LISTESI: { id: KatmanTuru | 'kontur'; ad: string; renk: string }[] 
   { id: 'bina', ad: 'Binalar', renk: 'bg-kiremit' },
   { id: 'yol', ad: 'Yollar', renk: 'bg-murekkep-3' },
   { id: 'demiryolu', ad: 'Demiryolu', renk: 'bg-mor' },
-  { id: 'su', ad: 'Su yollari', renk: 'bg-mavi' },
-  { id: 'yesil', ad: 'Yesil alanlar', renk: 'bg-adacayi' },
-  { id: 'agac', ad: 'Agaclar', renk: 'bg-adacayi' },
-  { id: 'kontur', ad: 'Kontur cizgileri', renk: 'bg-kehribar' },
+  { id: 'su', ad: 'Su yolları', renk: 'bg-mavi' },
+  { id: 'yesil', ad: 'Yeşil alanlar', renk: 'bg-adacayi' },
+  { id: 'agac', ad: 'Ağaçlar', renk: 'bg-adacayi' },
+  { id: 'kontur', ad: 'Kontur çizgileri', renk: 'bg-kehribar' },
 ]
 
 // --------------------------------------------------------------- tutamaklar
@@ -648,7 +648,7 @@ export default function Arazi() {
         'https://nominatim.openstreetmap.org/search?format=json&limit=6&q=' + encodeURIComponent(q),
         { headers: { Accept: 'application/json' } },
       )
-      if (!r.ok) throw new Error(`Arama basarisiz (${r.status})`)
+      if (!r.ok) throw new Error(`Arama başarısız (${r.status})`)
       const j = (await r.json()) as { display_name: string; lat: string; lon: string }[]
       setSonuclar(j.map((s) => ({ ad: s.display_name, enlem: +s.lat, boylam: +s.lon })))
     } catch (e) {
@@ -686,13 +686,13 @@ export default function Arazi() {
 
     const proj = new Projeksiyon(merkez)
     try {
-      setIlerleme('Yukseklik verisi indiriliyor')
+      setIlerleme('Yükseklik verisi indiriliyor')
       const g = await yukseklikGetir(proj, yariG, yariY, agCozunurluk, kontrol.signal)
 
       setIlerleme('OpenStreetMap verisi indiriliyor')
       const v = await araziVerisiGetir(proj, yariG, yariY, kontrol.signal)
 
-      setIlerleme('Kontur cizgileri hesaplaniyor')
+      setIlerleme('Kontur çizgileri hesaplanıyor')
       const aralik = otomatikAralik(g.enYuksek - g.enDusuk)
       const k = konturUret(g, { aralik })
 
@@ -723,7 +723,7 @@ export default function Arazi() {
         setDurum('bos')
         return
       }
-      setHata((e as Error).message || 'Veri alinamadi.')
+      setHata((e as Error).message || 'Veri alınamadı.')
       setDurum('hata')
     } finally {
       iptalRef.current = null
@@ -770,7 +770,7 @@ export default function Arazi() {
         etiket="Arazi"
         renk="text-mavi-koyu"
         baslik="Konumdan plan, model ve kesit"
-        aciklama="Haritadan bir alan sec ya da serbest bir kesit hatti ciz. Bina, yol, su, yesil alan ve kontur verisi CAD ve 3B programlarina goturebilecegin formatlarda iner. Islem tamamen tarayicinda calisir."
+        aciklama="Haritadan bir alan seç ya da serbest bir kesit hattı çiz. Bina, yol, su, yeşil alan ve kontur verisi CAD ve 3B programlarına götürebileceğin formatlarda iner. İşlem tamamen tarayıcında çalışır."
         sag={
           <Segment
             secenekler={[
@@ -848,8 +848,8 @@ export default function Arazi() {
 
           <p className="mt-2 text-[13.5px] leading-relaxed text-murekkep-3">
             {mod === 'plan'
-              ? 'Kutunun herhangi bir yerinden tutup tasi; kose tutamaklari en ve boyu birlikte, kenar tutamaklari tek yonde ayarlar.'
-              : 'Hattin uzerinden tutup tasi, uclarindan uzunluk ve yonu ayarla. Kirmizi ok kesitin hangi tarafi gosterdigini belirtir.'}
+              ? 'Kutunun herhangi bir yerinden tutup taşı; köşe tutamakları en ve boyu birlikte, kenar tutamakları tek yönde ayarlar.'
+              : 'Hattın üzerinden tutup taşı, uçlarından uzunluk ve yönü ayarla. Kırmızı ok kesitin hangi tarafı gösterdiğini belirtir.'}
           </p>
 
           {durum === 'hazir' && (
@@ -857,7 +857,7 @@ export default function Arazi() {
               {mod === 'plan' && planGorsel && (
                 <>
                   <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-[17px] text-murekkep">Plan onizleme</h2>
+                    <h2 className="text-[17px] text-murekkep">Plan önizleme</h2>
                     {sayim && (
                       <span className="sayi text-[13px] text-murekkep-3">
                         {sayim.bina} bina · {sayim.yol} yol · {konturlar.length} kontur
@@ -877,7 +877,7 @@ export default function Arazi() {
                     {sahne && (
                       <span className="sayi text-[13px] text-murekkep-3">
                         {sahne.binalar.filter((b) => b.kesiliyor).length} kesite giren ·{' '}
-                        {sahne.binalar.length} yapi · {sahne.agaclar.length} agac
+                        {sahne.binalar.length} yapı · {sahne.agaclar.length} ağaç
                       </span>
                     )}
                   </div>
@@ -907,7 +907,7 @@ export default function Arazi() {
                   }
                 />
                 <div className="px-4 py-3.5">
-                  <div className="etiket mb-2">Hazir boyutlar</div>
+                  <div className="etiket mb-2">Hazır boyutlar</div>
                   <div className="flex flex-wrap gap-1.5">
                     {HAZIR_BOYUTLAR.map((b) => (
                       <Cip
@@ -921,8 +921,8 @@ export default function Arazi() {
                   </div>
                   {alanAsiyor && (
                     <p className="mt-2.5 text-[13px] leading-relaxed text-kiremit-koyu">
-                      Alan {MAKS_ALAN_KM2} km² sinirini asiyor. Overpass ucretsiz bir servis;
-                      bu buyuklukte yanit vermiyor. Kucult.
+                      Alan {MAKS_ALAN_KM2} km² sınırını aşıyor. Overpass ücretsiz bir servis;
+                      bu büyüklükte yanıt vermiyor. Küçült.
                     </p>
                   )}
                 </div>
@@ -938,7 +938,7 @@ export default function Arazi() {
                       </Cip>
                     ))}
                     {['DWG', 'PDF'].map((f) => (
-                      <Cip key={f} secili={false} onClick={() => {}} pasif ipucu="Henuz desteklenmiyor">
+                      <Cip key={f} secili={false} onClick={() => {}} pasif ipucu="Henüz desteklenmiyor">
                         {f}
                       </Cip>
                     ))}
@@ -980,19 +980,19 @@ export default function Arazi() {
                       OBJ
                     </Cip>
                     {['STL', 'glTF', 'SKP', 'IFC'].map((f) => (
-                      <Cip key={f} secili={false} onClick={() => {}} pasif ipucu="Henuz desteklenmiyor">
+                      <Cip key={f} secili={false} onClick={() => {}} pasif ipucu="Henüz desteklenmiyor">
                         {f}
                       </Cip>
                     ))}
                   </div>
                   <KatmanSatiri
-                    ad="Bina kutleleri"
+                    ad="Bina kütleleri"
                     renk="bg-kiremit"
                     acik={binaKutle}
                     degistir={setBinaKutle}
                   />
                   <KatmanSatiri
-                    ad="Arazi yuzeyi"
+                    ad="Arazi yüzeyi"
                     renk="bg-kehribar"
                     acik
                     degistir={() => {}}
@@ -1013,24 +1013,24 @@ export default function Arazi() {
               <PanelBasligi baslik="Kesit hatti" />
               <div className="space-y-4 px-4 py-4">
                 <div>
-                  <div className="etiket mb-2">Kesit hangi tarafi gostersin</div>
+                  <div className="etiket mb-2">Kesit hangi tarafı göstersin</div>
                   <Segment
                     secenekler={[
-                      { deger: 'on', ad: 'On', ipucu: 'Okun gosterdigi taraf' },
+                      { deger: 'on', ad: 'Ön', ipucu: 'Okun gösterdiği taraf' },
                       { deger: 'arka', ad: 'Arka', ipucu: 'Okun tersi taraf' },
-                      { deger: 'iki', ad: 'Iki taraf', ipucu: 'Hattin iki yani' },
+                      { deger: 'iki', ad: 'İki taraf', ipucu: 'Hattın iki yanı' },
                     ]}
                     secili={taraf}
                     degistir={setTaraf}
                   />
                   <p className="mt-2 text-[13px] leading-relaxed text-murekkep-3">
-                    Hattin uzerinden gecen yapilar yon fark etmeksizin her zaman kesite girer.
-                    Secim, arkada gorunuse girecek dokuyu belirler.
+                    Hattın üzerinden geçen yapılar yön fark etmeksizin her zaman kesite girer.
+                    Seçim, arkada görünüşe girecek dokuyu belirler.
                   </p>
                 </div>
 
                 <div className="border-t border-cizgi pt-3.5">
-                  <div className="etiket mb-2">Bant derinligi</div>
+                  <div className="etiket mb-2">Bant derinliği</div>
                   <div className="flex flex-wrap gap-1.5">
                     {BANTLAR.map((b) => (
                       <Cip key={b} secili={bant === b} onClick={() => setBant(b)}>
@@ -1041,7 +1041,7 @@ export default function Arazi() {
                 </div>
 
                 <div className="border-t border-cizgi pt-3.5">
-                  <div className="etiket mb-2">Dusey abartma</div>
+                  <div className="etiket mb-2">Düşey abartma</div>
                   <div className="flex flex-wrap gap-1.5">
                     {ABARTMALAR.map((a) => (
                       <Cip key={a} secili={abartma === a} onClick={() => setAbartma(a)}>
@@ -1050,16 +1050,16 @@ export default function Arazi() {
                     ))}
                   </div>
                   <p className="mt-2 text-[13px] leading-relaxed text-murekkep-3">
-                    Yalnizca cizimi etkiler; DXF gercek olcude 1:1 uretilir.
+                    Yalnızca çizimi etkiler; DXF gerçek ölçüde 1:1 üretilir.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 border-t border-cizgi pt-3.5">
                   <Cip secili={false} onClick={() => setKesitUc(([a, b]) => [b, a])}>
-                    Yonu cevir
+                    Yönü çevir
                   </Cip>
                   <Cip secili={false} onClick={() => setKesitUc((u) => dondur(u, 90))}>
-                    90° dondur
+                    90° döndür
                   </Cip>
                 </div>
               </div>
@@ -1072,10 +1072,10 @@ export default function Arazi() {
             className="w-full rounded-[7px] bg-kiremit px-5 py-3.5 text-[15px] font-medium text-white transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {durum === 'yukleniyor'
-              ? 'Hazirlaniyor...'
+              ? 'Hazırlanıyor...'
               : mod === 'plan'
-                ? 'Araziyi olustur'
-                : 'Kesiti olustur'}
+                ? 'Araziyi oluştur'
+                : 'Kesiti oluştur'}
           </button>
 
           {durum === 'yukleniyor' && ilerleme && (
@@ -1089,14 +1089,14 @@ export default function Arazi() {
 
           {durum === 'hazir' && (
             <Panel>
-              <PanelBasligi baslik="Indir" />
+              <PanelBasligi baslik="İndir" />
               <div className="space-y-2 px-4 py-3.5">
                 {mod === 'plan' && suzulmusPaket ? (
                   <>
                     {ikiAcik && (
                       <IndirSatiri
                         ad={`2B Plan · ${ikiFormat}`}
-                        alt="Katmanli, metre biriminde"
+                        alt="Katmanlı, metre biriminde"
                         onClick={() => {
                           if (ikiFormat === 'DXF')
                             dosyaIndir(planDxf(suzulmusPaket), `archlib_plan_${damga}.dxf`, 'application/dxf')
@@ -1116,7 +1116,7 @@ export default function Arazi() {
                     {ucAcik && (
                       <IndirSatiri
                         ad="3B Model · OBJ"
-                        alt={`Arazi ${izgara ? izgara.adim.toFixed(0) + ' m ag' : 'yuzeyi'}${binaKutle ? ' + bina kutleleri' : ''}`}
+                        alt={`Arazi ${izgara ? izgara.adim.toFixed(0) + ' m ağ' : 'yüzeyi'}${binaKutle ? ' + bina kütleleri' : ''}`}
                         onClick={() =>
                           dosyaIndir(
                             modelObj(suzulmusPaket, binaKutle),
@@ -1132,14 +1132,14 @@ export default function Arazi() {
                     <>
                       <IndirSatiri
                         ad="Kesit · DXF"
-                        alt="Zemin, yapi ve agac ayri katmanda"
+                        alt="Zemin, yapı ve ağaç ayrı katmanda"
                         onClick={() =>
                           dosyaIndir(kesitSahnesiDxf(sahne), `archlib_kesit_${damga}.dxf`, 'application/dxf')
                         }
                       />
                       <IndirSatiri
                         ad="Kesit · SVG"
-                        alt="Paftaya dogrudan konabilir"
+                        alt="Paftaya doğrudan konabilir"
                         onClick={() =>
                           dosyaIndir(
                             kesitSahnesiSvg(sahne, { genislik: 2400, abartma }),
@@ -1152,8 +1152,8 @@ export default function Arazi() {
                   )
                 )}
                 <p className="pt-1 text-[12.5px] leading-relaxed text-murekkep-3">
-                  Veri: OpenStreetMap (ODbL) ve AWS Terrain Tiles. Kullandiginda kaynak belirt.
-                  Bina yuksekligi etiketli degilse iki kat varsayilir.
+                  Veri: OpenStreetMap (ODbL) ve AWS Terrain Tiles. Kullandığında kaynak belirt.
+                  Bina yüksekliği etiketli değilse iki kat varsayılır.
                 </p>
               </div>
             </Panel>

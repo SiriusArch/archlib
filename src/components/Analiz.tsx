@@ -70,11 +70,11 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
     const hatalar: string[] = []
     for (const d of Array.from(dosyalar)) {
       if (!IZINLI_GORSEL_TURLERI.includes(d.type)) {
-        hatalar.push(`${d.name}: desteklenmeyen tur`)
+        hatalar.push(`${d.name}: desteklenmeyen tür`)
         continue
       }
       if (d.size > MAKS_GORSEL_BOYUT) {
-        hatalar.push(`${d.name}: 3,5 MB sinirini asiyor (${(d.size / 1024 / 1024).toFixed(1)} MB)`)
+        hatalar.push(`${d.name}: 3,5 MB sınırını aşıyor (${(d.size / 1024 / 1024).toFixed(1)} MB)`)
         continue
       }
       try {
@@ -87,7 +87,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
           onizleme,
         })
       } catch {
-        hatalar.push(`${d.name}: okunamadi`)
+        hatalar.push(`${d.name}: okunamadı`)
       }
     }
     if (yeni.length) setGorseller((g) => [...g, ...yeni].slice(0, 6))
@@ -114,18 +114,18 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
   async function calistir() {
     setHata('')
     if (!anahtarVar) {
-      setHata('Once API anahtarini gir.')
+      setHata('Önce API anahtarını gir.')
       anahtarPaneliniAc()
       return
     }
     if (!soru.trim() && gorseller.length === 0) {
-      setHata('Bir gorsel yukle ya da sorunu yaz.')
+      setHata('Bir görsel yükle ya da sorunu yaz.')
       return
     }
 
     const aktifKayit = anahtarlariOku()[saglayici]
     if (!aktifKayit?.anahtar) {
-      setHata('API anahtari okunamadi. Paneli acip yeniden kaydet.')
+      setHata('API anahtarı okunamadı. Paneli açıp yeniden kaydet.')
       anahtarPaneliniAc()
       return
     }
@@ -168,7 +168,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
         setGecmis(gecmisOku())
       }
     } catch (e) {
-      if ((e as Error)?.name === 'AbortError') setHata('Istek iptal edildi.')
+      if ((e as Error)?.name === 'AbortError') setHata('İstek iptal edildi.')
       else setHata((e as Error)?.message || 'Bilinmeyen hata.')
     } finally {
       setCalisiyor(false)
@@ -191,8 +191,8 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
       <SayfaBasligi
         etiket="Kritik"
         renk="text-kiremit-koyu"
-        baslik="Paftani juri oncesi bir kez daha oku"
-        aciklama="Gorseli ya da soruyu birak. Degerlendirme, I. Hulusi Gungor un Temel Tasar kitabindaki mimari elestiri cercevesi (Bolum 14), Neufert olculeri ve TS/DIN cizim standartlari uzerinden yapilir."
+        baslik="Paftanı jüri öncesi bir kez daha oku"
+        aciklama="Görseli ya da soruyu bırak. Değerlendirme, İ. Hulûsi Güngör'ün Temel Tasar kitabındaki mimari eleştiri çerçevesi (Bölüm 14), Neufert ölçüleri ve TS/DIN çizim standartları üzerinden yapılır."
         sag={
           <button
             onClick={anahtarPaneliniAc}
@@ -202,7 +202,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 : 'border-kiremit/45 bg-kiremit-soft text-kiremit-koyu'
             }`}
           >
-            {anahtarVar ? `${saglayiciBul(saglayici).ad} bagli` : 'API anahtari gerekli'}
+            {anahtarVar ? `${saglayiciBul(saglayici).ad} bağlı` : 'API anahtarı gerekli'}
           </button>
         }
       />
@@ -211,7 +211,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
         {/* ------------------------------------------------------------ sol */}
         <div className="space-y-3.5">
           <Panel>
-            <PanelBasligi baslik="Kritik turu" />
+            <PanelBasligi baslik="Kritik türü" />
             <div className="px-4 py-3.5">
               <div className="flex flex-wrap gap-1.5">
                 {TURLER.map((t) => (
@@ -228,7 +228,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
 
           <Panel>
             <PanelBasligi
-              baslik="Gorsel"
+              baslik="Görsel"
               sag={
                 <span className="sayi text-[13px] text-murekkep-3">{gorseller.length} / 6</span>
               }
@@ -250,12 +250,12 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 }}
               >
                 <p className="mb-3 text-[13.5px] leading-relaxed text-murekkep-3">
-                  Surukle birak, yapistir (Ctrl+V) ya da sec.
+                  Sürükle bırak, yapıştır (Ctrl+V) ya da seç.
                   <br />
-                  En fazla 6 gorsel, her biri 3,5 MB.
+                  En fazla 6 görsel, her biri 3,5 MB.
                 </p>
                 <label className="inline-block cursor-pointer rounded-[6px] border border-cizgi bg-kart px-3.5 py-2 text-[13.5px] font-medium text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep">
-                  Dosya sec
+                  Dosya seç
                   <input
                     type="file"
                     accept={IZINLI_GORSEL_TURLERI.join(',')}
@@ -281,7 +281,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                         onClick={() => setGorseller((x) => x.filter((y) => y.id !== g.id))}
                         className="absolute inset-0 flex items-center justify-center bg-kart/88 text-[13px] font-medium text-kiremit-koyu opacity-0 transition-opacity group-hover:opacity-100"
                       >
-                        Kaldir
+                        Kaldır
                       </button>
                     </div>
                   ))}
@@ -291,19 +291,19 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
           </Panel>
 
           <Panel>
-            <PanelBasligi baslik="Baglam ve soru" />
+            <PanelBasligi baslik="Bağlam ve soru" />
             <div className="space-y-3 px-4 py-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <input
                   value={ders}
                   onChange={(e) => setDers(e.target.value)}
-                  placeholder="Ders / studyo"
+                  placeholder="Ders / stüdyo"
                   className="alan"
                 />
                 <input
                   value={olcek}
                   onChange={(e) => setOlcek(e.target.value)}
-                  placeholder="Olcek (1/100)"
+                  placeholder="Ölçek (1/100)"
                   className="alan"
                 />
               </div>
@@ -318,7 +318,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                 onChange={(e) => setSoru(e.target.value)}
                 rows={6}
                 placeholder={
-                  'Ornek: "Zemin kat plani. Islak hacimleri bir arada topladim ama koridor uzun oldu. Merdiven konumu dogru mu?"'
+                  'Örnek: "Zemin kat planı. Islak hacimleri bir arada topladım ama koridor uzun oldu. Merdiven konumu doğru mu?"'
                 }
                 className="alan"
               />
@@ -337,7 +337,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
               onClick={() => void calistir()}
               className="w-full rounded-[7px] bg-kiremit px-5 py-3.5 text-[15px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
             >
-              Kritigi al
+              Kritiği al
             </button>
           )}
 
@@ -370,7 +370,7 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
                     </button>
                   </span>
                 ) : calisiyor ? (
-                  <span className="text-[13px] font-medium text-kiremit-koyu">yaziliyor</span>
+                  <span className="text-[13px] font-medium text-kiremit-koyu">yazılıyor</span>
                 ) : undefined
               }
             />
@@ -380,11 +380,11 @@ export default function Analiz({ saglayici, anahtarPaneliniAc, anahtarSurumu }: 
             >
               {!cikti && !calisiyor && (
                 <Bos
-                  baslik="Kritik masasi bos"
-                  aciklama="Soldan kritik turunu sec, paftani ya da maket fotografini yukle ve Kritigi al de. Yanit; ne gordugu, guclu yonler, oncelikli sorunlar, olcu kontrolu, jurinin soracagi sorular ve teslime kadar yapilacaklar basliklariyla gelir."
+                  baslik="Kritik masası boş"
+                  aciklama="Soldan kritik türünü seç, paftanı ya da maket fotoğrafını yükle ve Kritiği al de. Yanıt; ne gördüğü, güçlü yönler, öncelikli sorunlar, ölçü kontrolü, jürinin soracağı sorular ve teslime kadar yapılacaklar başlıklarıyla gelir."
                 />
               )}
-              {calisiyor && !cikti && <Bos baslik="Model dusunuyor" />}
+              {calisiyor && !cikti && <Bos baslik="Model düşünüyor" />}
               {cikti && <Markdown metin={cikti} />}
             </div>
           </Panel>

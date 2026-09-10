@@ -472,7 +472,7 @@ function baslangic(): GecmisliDurum {
   } catch {
     proje = null
   }
-  const p = proje ?? yeniProje('Ilk plan')
+  const p = proje ?? yeniProje('İlk plan')
   return {
     simdi: { proje: p, aktifKatId: p.katlar[0].id, secim: [] },
     geri: [],

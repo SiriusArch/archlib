@@ -29,7 +29,7 @@ export default function Kaynaklar() {
       <SayfaBasligi
         etiket="Kaynaklar"
         baslik="Hangi bilgi nereden geliyor"
-        aciklama={`Bu uygulamanin bilgi tabani ${KAYNAKLAR.length} kaynaktan olusturuldu. Ana kaynaklar dogrudan okunup cikarildi; destek kaynaklar cerceve icin kullanildi. Nereden geldigini bilmen, o bilgiyi juri karsisinda savunabilmen icin gerekli.`}
+        aciklama={`Bu uygulamanın bilgi tabanı ${KAYNAKLAR.length} kaynaktan oluşturuldu. Ana kaynaklar doğrudan okunup çıkarıldı; destek kaynaklar çerçeve için kullanıldı. Nereden geldiğini bilmen, o bilgiyi jüri karşısında savunabilmen için gerekli.`}
       />
 
       <div className="space-y-3.5">
@@ -52,7 +52,7 @@ export default function Kaynaklar() {
         </Panel>
 
         <Panel>
-          <PanelBasligi baslik="Destek kaynaklar" sag={<span className="etiket">cerceve</span>} />
+          <PanelBasligi baslik="Destek kaynaklar" sag={<span className="etiket">çerçeve</span>} />
           {destek.map((k) => (
             <article key={k.id} className="border-b border-cizgi/70 px-5 py-3.5 last:border-0">
               <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-0.5">
@@ -68,35 +68,35 @@ export default function Kaynaklar() {
         </Panel>
 
         <section className="rounded-[8px] border border-kiremit/25 bg-kiremit-soft px-6 py-5">
-          <h2 className="mb-3 text-[16px] text-kiremit-koyu">Sinirlar — bunlari bilerek kullan</h2>
+          <h2 className="mb-3 text-[16px] text-kiremit-koyu">Sınırlar — bunları bilerek kullan</h2>
           <ul className="space-y-2.5 text-[14.5px] leading-relaxed text-murekkep-2">
             <li>
               Neufert{' '}
-              <strong className="font-medium text-murekkep">DIN (Alman) standartlarina</strong>{' '}
-              dayanir. Turkiye de ruhsat ve yonetmelik uyumu icin{' '}
+              <strong className="font-medium text-murekkep">DIN (Alman) standartlarına</strong>{' '}
+              dayanır. Türkiye’de ruhsat ve yönetmelik uyumu için{' '}
               <strong className="font-medium text-murekkep">
-                TS standartlari ve yerel imar yonetmeligi
+                TS standartları ve yerel imar yönetmeliği
               </strong>{' '}
-              esas alinmalidir. Buradaki olculer tasarim rehberidir, yasal dayanak degildir.
+              esas alınmalıdır. Buradaki ölçüler tasarım rehberidir, yasal dayanak değildir.
             </li>
             <li>
-              Yapay zeka kritigi bir{' '}
-              <strong className="font-medium text-murekkep">on degerlendirmedir</strong>.
-              Danismaninin ve jurinin yerine gecmez; onlarla konusmadan once fikrini toparlamana
+              Yapay zekâ kritiği bir{' '}
+              <strong className="font-medium text-murekkep">ön değerlendirmedir</strong>.
+              Danışmanının ve jürinin yerine geçmez; onlarla konuşmadan önce fikrini toparlamana
               yarar.
             </li>
             <li>
-              Model gorsel okumada hata yapabilir. Ozellikle olcu okumasi ve kucuk yazilar icin
-              ciktiyi kendi cizimin uzerinden dogrula.
+              Model görsel okumada hata yapabilir. Özellikle ölçü okuması ve küçük yazılar için
+              çıktıyı kendi çizimin üzerinden doğrula.
             </li>
             <li>
-              Arazi araci OpenStreetMap (ODbL) ve AWS Terrain Tiles verisi kullanir. Veri gonullu
-              katkiyla toplanir; eksik ya da guncel olmayabilir. Bina yuksekligi etiketli degilse
-              iki kat varsayilir. Kullandiginda kaynak belirtmen gerekir.
+              Arazi aracı OpenStreetMap (ODbL) ve AWS Terrain Tiles verisi kullanır. Veri gönüllü
+              katkıyla toplanır; eksik ya da güncel olmayabilir. Bina yüksekliği etiketli değilse
+              iki kat varsayılır. Kullandığında kaynak belirtmen gerekir.
             </li>
             <li>
-              Katalogdaki fiyat bilgileri derleme aninda gecerliydi; degisebilir. Karar vermeden
-              once siteden teyit et.
+              Katalogdaki fiyat bilgileri derleme anında geçerliydi; değişebilir. Karar vermeden
+              önce siteden teyit et.
             </li>
           </ul>
         </section>
@@ -104,12 +104,12 @@ export default function Kaynaklar() {
         {dogrulanmayan.length > 0 && (
           <Panel>
             <PanelBasligi
-              baslik="Katalogda dogrulanamayan siteler"
+              baslik="Katalogda doğrulanamayan siteler"
               sag={<span className="sayi text-[13px] text-murekkep-3">{dogrulanmayan.length}</span>}
             />
             <p className="px-5 pt-4 text-[14.5px] leading-relaxed text-murekkep-2">
-              Bu sitelerin icerigi erisim sirasinda teyit edilemedi (sunucu engeli ya da yanit
-              vermemesi). Aciklamalari temkinli yazildi; kullanmadan once kendin kontrol et.
+              Bu sitelerin içeriği erişim sırasında teyit edilemedi (sunucu engeli ya da yanıt
+              vermemesi). Açıklamaları temkinli yazıldı; kullanmadan önce kendin kontrol et.
             </p>
             <ul className="mt-3 border-t border-cizgi">
               {dogrulanmayan.map((s) => (
@@ -132,13 +132,13 @@ export default function Kaynaklar() {
         <Panel>
           <PanelBasligi baslik="Gizlilik" />
           <p className="max-w-3xl px-5 py-4 text-[14.5px] leading-relaxed text-murekkep-2">
-            ArchLib in sunucusu yoktur; tamamen statik bir sitedir. API anahtarin, kontrol listesi
-            isaretlerin ve kritik gecmisin yalnizca bu tarayicinin{' '}
+            ArchLib’in sunucusu yoktur; tamamen statik bir sitedir. API anahtarın, kontrol listesi
+            işaretlerin ve kritik geçmişin yalnızca bu tarayıcının{' '}
             <code className="rounded-[4px] bg-kagit-3 px-1 py-0.5 text-[13px]">localStorage</code>{' '}
-            alaninda tutulur. Yukledigin gorseller ve yazdigin metin, analiz sirasinda dogrudan
-            sectigin saglayiciya (Anthropic / OpenAI / Google) gonderilir — arada ArchLib e ait
-            hicbir sunucu yoktur. Arazi araci OpenStreetMap, Nominatim ve AWS Terrain Tiles
-            servislerine dogrudan istek atar. Tarayici verisini temizlersen her sey silinir.
+            alanında tutulur. Yüklediğin görseller ve yazdığın metin, analiz sırasında doğrudan
+            seçtiğin sağlayıcıya (Anthropic / OpenAI / Google) gönderilir — arada ArchLib’e ait
+            hiçbir sunucu yoktur. Arazi aracı OpenStreetMap, Nominatim ve AWS Terrain Tiles
+            servislerine doğrudan istek atar. Tarayıcı verisini temizlersen her şey silinir.
           </p>
         </Panel>
       </div>

@@ -364,7 +364,7 @@ export function kesitSvg(
 ${izgara.join('\n')}
 <path d="${dolgu}" fill="#be8144" fill-opacity="0.14"/>
 <path d="${d}" fill="none" stroke="#b03e3e" stroke-width="1.8" stroke-linejoin="round"/>
-<text x="60" y="${yukseklik - 18}" font-family="monospace" font-size="12" fill="#262320">Uzunluk ${uzunluk.toFixed(0)} m · Kot ${enDusuk.toFixed(1)}–${enYuksek.toFixed(1)} m · Dusey abartma ${abartma}x</text>
+<text x="60" y="${yukseklik - 18}" font-family="monospace" font-size="12" fill="#262320">Uzunluk ${uzunluk.toFixed(0)} m · Kot ${enDusuk.toFixed(1)}–${enYuksek.toFixed(1)} m · Düşey abartma ${abartma}x</text>
 </svg>`
 }
 

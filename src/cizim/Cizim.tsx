@@ -138,15 +138,15 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
         model: kayit.model || saglayiciBul(saglayici).varsayilanModel,
         sistem: sistemPromptu('plan'),
         kullanici: [
-          'KRITIK TURU: Kat plani (ArchLib Cizim modulunde cizildi)',
+          'KRİTİK TÜRÜ: Kat planı (ArchLib Çizim modülünde çizildi)',
           '',
-          'Asagida planin sayisal dokumu var; ekli gorsel ayni planin cizimidir.',
+          'Aşağıda planın sayısal dökümü var; ekli görsel aynı planın çizimidir.',
           '',
           planMetni(durum.proje, aktifKat),
           '',
-          'Bu plani Neufert olculeri, TS cizim standartlari ve Temel Tasar ilkeleri',
-          'uzerinden degerlendir. Olcu hatalarini, sirkulasyon ve islev sorunlarini',
-          'somut sayilarla soyle.',
+          'Bu planı Neufert ölçüleri, TS çizim standartları ve Temel Tasar ilkeleri',
+          'üzerinden değerlendir. Ölçü hatalarını, sirkülasyon ve işlev sorunlarını',
+          'somut sayılarla söyle.',
         ].join('\n'),
         gorseller: gorsel ? [gorsel] : [],
         signal: kontrol.signal,
@@ -156,7 +156,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
         },
       })
     } catch (e) {
-      if ((e as Error)?.name === 'AbortError') setKritikHata('Istek iptal edildi.')
+      if ((e as Error)?.name === 'AbortError') setKritikHata('İstek iptal edildi.')
       else setKritikHata((e as Error)?.message || 'Bilinmeyen hata.')
     } finally {
       setKritikCalisiyor(false)
@@ -219,7 +219,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           <path d="M4 9h9a4 4 0 010 8h-4" />
           <path d="M7 5L3 9l4 4" />
         </IkonDugme>
-        <IkonDugme ipucu="Ileri al (Ctrl+Shift+Z)" pasif={!ileriVar} onClick={ileriAl}>
+        <IkonDugme ipucu="İleri al (Ctrl+Shift+Z)" pasif={!ileriVar} onClick={ileriAl}>
           <path d="M20 9h-9a4 4 0 000 8h4" />
           <path d="M17 5l4 4-4 4" />
         </IkonDugme>
@@ -230,7 +230,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           secenekler={[
             { deger: '2b', ad: '2B' },
             { deger: '3b', ad: '3B' },
-            { deger: 'bolunmus', ad: 'Bolunmus' },
+            { deger: 'bolunmus', ad: 'Bölünmüş' },
           ]}
           secili={gorunum}
           degistir={(g) => setGorunum(g as Gorunum)}
@@ -242,11 +242,11 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
         <Anahtar acik={izgaraGorunur} degistir={setIzgaraGorunur} ad="Izgara" />
         <Anahtar acik={odaEtiketi} degistir={setOdaEtiketi} ad="Alan" />
         <Anahtar acik={altKatGorunur} degistir={setAltKatGorunur} ad="Alt kat izi" />
-        <Anahtar acik={tesrifatGorunur} degistir={setTesrifatGorunur} ad="Tesrifat" />
+        <Anahtar acik={tesrifatGorunur} degistir={setTesrifatGorunur} ad="Teşrifat" />
         {gorunum !== '2b' && (
           <>
-            <Anahtar acik={tumKatlar} degistir={setTumKatlar} ad="Tum katlar" />
-            <Anahtar acik={golge} degistir={setGolge} ad="Golge" />
+            <Anahtar acik={tumKatlar} degistir={setTumKatlar} ad="Tüm katlar" />
+            <Anahtar acik={golge} degistir={setGolge} ad="Gölge" />
             <Anahtar acik={tavan} degistir={setTavan} ad="Tavan" />
           </>
         )}
@@ -259,13 +259,13 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
             }}
             className="rounded-[6px] border border-cizgi px-2.5 py-1.5 text-[13px] font-medium text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
           >
-            Sigdir
+            Sığdır
           </button>
           <button
             onClick={() => void kritikAl()}
             className="rounded-[6px] bg-kiremit px-3.5 py-1.5 text-[13.5px] font-medium text-white transition-opacity hover:opacity-90"
           >
-            Plani kritige gonder
+            Planı kritiğe gönder
           </button>
         </div>
       </div>
@@ -276,7 +276,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           aktifId={durum.proje.id}
           kapat={() => setProjelerAcik(false)}
           yeni={() => {
-            gonder({ t: 'proje-yukle', proje: yeniProje('Adsiz plan') })
+            gonder({ t: 'proje-yukle', proje: yeniProje('Adsız plan') })
             setProjelerAcik(false)
           }}
           ac={(id) => {
@@ -330,7 +330,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
             <div className="flex items-center justify-between">
               <span className="etiket">Katlar</span>
               <span className="flex gap-1">
-                <MiniDugme onClick={() => gonder({ t: 'kat-ekle', yon: 'ust' })} ipucu="Ust kat ekle">
+                <MiniDugme onClick={() => gonder({ t: 'kat-ekle', yon: 'ust' })} ipucu="Üst kat ekle">
                   +
                 </MiniDugme>
                 <MiniDugme onClick={() => gonder({ t: 'kat-ekle', yon: 'alt' })} ipucu="Alt kat ekle">
@@ -376,16 +376,16 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           </ul>
 
           <div className="px-4 py-3">
-            <div className="etiket mb-2">Kat ayari</div>
+            <div className="etiket mb-2">Kat ayarı</div>
             <SayiAlani
-              ad="Kat yuksekligi"
+              ad="Kat yüksekliği"
               deger={aktifKat.yukseklik}
               adim={0.05}
               birim="m"
               degistir={(v) => gonder({ t: 'kat-yama', id: aktifKat.id, yama: { yukseklik: v } })}
             />
             <SayiAlani
-              ad="Doseme kotu"
+              ad="Döşeme kotu"
               deger={aktifKat.kot}
               adim={0.05}
               birim="m"
@@ -399,11 +399,11 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           </div>
 
           <div className="border-t border-cizgi px-4 py-3">
-            <div className="etiket mb-2">Altlik gorsel</div>
+            <div className="etiket mb-2">Altlık görsel</div>
             {aktifKat.altlik ? (
               <div className="space-y-2">
                 <SayiAlani
-                  ad="Olcek"
+                  ad="Ölçek"
                   deger={aktifKat.altlik.olcek}
                   adim={0.002}
                   birim="m/px"
@@ -412,7 +412,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                   }
                 />
                 <SayiAlani
-                  ad="Saydamlik"
+                  ad="Saydamlık"
                   deger={aktifKat.altlik.saydamlik}
                   adim={0.05}
                   birim=""
@@ -427,7 +427,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                   onClick={() => gonder({ t: 'altlik', altlik: null })}
                   className="text-[12.5px] font-medium text-kiremit-koyu"
                 >
-                  Kaldir
+                  Kaldır
                 </button>
               </div>
             ) : (
@@ -435,17 +435,17 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                 onClick={() => altlikGirisi.current?.click()}
                 className="w-full rounded-[6px] border border-dashed border-cizgi-2 px-3 py-2.5 text-[13px] text-murekkep-3 transition-colors hover:border-murekkep-3 hover:text-murekkep-2"
               >
-                Plan / eskiz yukle
+                Plan / eskiz yükle
               </button>
             )}
           </div>
 
           <div className="mt-auto border-t border-cizgi px-4 py-3">
-            <div className="etiket mb-2">Kat ozeti</div>
-            <Satir ad="Mekan" deger={`${ozet.odaSayisi}`} />
+            <div className="etiket mb-2">Kat özeti</div>
+            <Satir ad="Mekân" deger={`${ozet.odaSayisi}`} />
             <Satir ad="Toplam alan" deger={`${ozet.toplamAlan.toFixed(1)} m²`} />
             <Satir ad="Duvar" deger={`${ozet.duvarUzunluk.toFixed(1)} m`} />
-            <Satir ad="Kapi / pencere" deger={`${ozet.kapi} / ${ozet.pencere}`} />
+            <Satir ad="Kapı / pencere" deger={`${ozet.kapi} / ${ozet.pencere}`} />
           </div>
         </aside>
 
@@ -567,7 +567,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           {gorunum !== '2b' && (
             <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-1.5 rounded-[8px] border border-cizgi bg-kart/95 px-2 py-1.5 backdrop-blur">
               <Cip secili={tema === 'studyo'} onClick={() => setTema('studyo')}>
-                Studyo
+                Stüdyo
               </Cip>
               <Cip secili={tema === 'maket'} onClick={() => setTema('maket')}>
                 Maket
@@ -582,7 +582,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
                 value={gunesAcisi}
                 onChange={(e) => setGunesAcisi(Number(e.target.value))}
                 className="ml-1 w-[92px] accent-[#a97b4c]"
-                title="Gunes yonu"
+                title="Güneş yönü"
               />
             </div>
           )}
@@ -613,11 +613,11 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
           )}
 
           <div className="border-t border-cizgi px-4 py-3">
-            <div className="etiket mb-2">Disa aktar</div>
+            <div className="etiket mb-2">Dışa aktar</div>
             <div className="space-y-1.5">
               <IndirDugmesi
                 ad="Plan · DXF"
-                alt="Katmanli, 1:1 metre"
+                alt="Katmanlı, 1:1 metre"
                 onClick={() =>
                   dosyaIndir(planDxf(aktifKat, durum.proje.ad), `${damga}.dxf`, 'application/dxf')
                 }
@@ -635,7 +635,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
               />
               <IndirDugmesi
                 ad="Model · OBJ"
-                alt={tumKatlar ? 'Tum katlar' : 'Aktif kat'}
+                alt={tumKatlar ? 'Tüm katlar' : 'Aktif kat'}
                 onClick={() =>
                   dosyaIndir(
                     modelObj(
@@ -649,7 +649,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
               />
               <IndirDugmesi
                 ad="Proje · JSON"
-                alt="Yedek ve tasima"
+                alt="Yedek ve taşıma"
                 onClick={() =>
                   dosyaIndir(projeJson(durum.proje), `${damga}.archlib.json`, 'application/json')
                 }
@@ -715,7 +715,7 @@ export default function Cizim({ saglayici, anahtarPaneliniAc }: Props) {
 function Yukleniyor() {
   return (
     <div className="flex h-full items-center justify-center text-[13.5px] text-murekkep-3">
-      3B goruntuleyici yukleniyor…
+      3B görüntüleyici yükleniyor…
     </div>
   )
 }
@@ -882,7 +882,7 @@ function AracAyari(p: {
   return (
     <div className="border-b border-cizgi px-4 py-3">
       <div className="flex items-baseline justify-between">
-        <span className="etiket">Arac</span>
+        <span className="etiket">Araç</span>
         <span className="sayi text-[11.5px] text-murekkep-3">{tanim?.kisayol}</span>
       </div>
       <div className="mt-1 text-[14.5px] font-medium text-murekkep">{tanim?.ad}</div>
@@ -891,28 +891,28 @@ function AracAyari(p: {
       {(p.arac === 'duvar' || p.arac === 'dikdortgen') && (
         <div className="mt-3 border-t border-cizgi pt-3">
           <SayiAlani
-            ad="Duvar kalinligi"
+            ad="Duvar kalınlığı"
             deger={p.varsayilan.duvarKalinlik}
             adim={0.05}
             birim="m"
             degistir={(v) => p.varsayilanYama({ duvarKalinlik: Math.max(0.05, v) })}
           />
           <SayiAlani
-            ad="Izgara adimi"
+            ad="Izgara adımı"
             deger={p.varsayilan.izgaraAdim}
             adim={0.05}
             birim="m"
             degistir={(v) => p.varsayilanYama({ izgaraAdim: Math.max(0.01, v) })}
           />
           <SayiAlani
-            ad="Aci adimi"
+            ad="Açı adımı"
             deger={p.varsayilan.aciAdim}
             adim={5}
             birim="°"
             degistir={(v) => p.varsayilanYama({ aciAdim: Math.max(1, v) })}
           />
           <p className="mt-2 text-[12px] leading-relaxed text-murekkep-3">
-            Shift basiliyken aci kilidi kalkar. Esc zinciri bitirir.
+            Shift basılıyken açı kilidi kalkar. Esc zinciri bitirir.
           </p>
         </div>
       )}
@@ -922,7 +922,7 @@ function AracAyari(p: {
           liste={KAPILAR}
           secili={p.kapiKatalog}
           sec={p.setKapiKatalog}
-          baslik="Kapi tipi"
+          baslik="Kapı tipi"
         />
       )}
       {p.arac === 'pencere' && (
@@ -935,7 +935,7 @@ function AracAyari(p: {
       )}
       {p.arac === 'mobilya' && (
         <div className="mt-3 border-t border-cizgi pt-3">
-          <div className="etiket mb-2">Donati</div>
+          <div className="etiket mb-2">Donatı</div>
           <div className="mb-2 flex flex-wrap gap-1">
             {DONATI_GRUPLARI.map((g) => (
               <Cip key={g} secili={p.donatiGrup === g} onClick={() => p.setDonatiGrup(g)}>
@@ -967,7 +967,7 @@ function AracAyari(p: {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[12px] text-murekkep-3">R / T tuslari 15° dondurur.</p>
+          <p className="mt-2 text-[12px] text-murekkep-3">R / T tuşları 15° döndürür.</p>
         </div>
       )}
     </div>
@@ -1034,7 +1034,7 @@ function OzellikPaneli({
   return (
     <div className="border-b border-cizgi px-4 py-3">
       <div className="flex items-baseline justify-between">
-        <span className="etiket">Secili</span>
+        <span className="etiket">Seçili</span>
         <button
           onClick={() => gonder({ t: 'sil', secim })}
           className="text-[12.5px] font-medium text-kiremit-koyu"
@@ -1044,7 +1044,7 @@ function OzellikPaneli({
       </div>
 
       {secim.length > 1 && (
-        <p className="mt-2 text-[13px] text-murekkep-2">{secim.length} eleman secili.</p>
+        <p className="mt-2 text-[13px] text-murekkep-2">{secim.length} eleman seçili.</p>
       )}
 
       {duvar && (
@@ -1052,7 +1052,7 @@ function OzellikPaneli({
           <div className="text-[14px] font-medium text-murekkep">Duvar</div>
           <Satir ad="Uzunluk" deger={`${duvarUzunluk(duvar).toFixed(2)} m`} />
           <SayiAlani
-            ad="Kalinlik"
+            ad="Kalınlık"
             deger={duvar.kalinlik}
             adim={0.05}
             birim="m"
@@ -1061,7 +1061,7 @@ function OzellikPaneli({
             }
           />
           <SayiAlani
-            ad="Yukseklik"
+            ad="Yükseklik"
             deger={duvar.yukseklik}
             adim={0.1}
             birim="m"
@@ -1079,7 +1079,7 @@ function OzellikPaneli({
             ))}
           </div>
           <p className="mt-1.5 text-[11.5px] text-murekkep-3">
-            Yukseklik 0 birakilirsa kat yuksekligi kullanilir.
+            Yükseklik 0 bırakılırsa kat yüksekliği kullanılır.
           </p>
         </div>
       )}
@@ -1087,10 +1087,10 @@ function OzellikPaneli({
       {aciklik && (
         <div className="mt-2">
           <div className="text-[14px] font-medium text-murekkep">
-            {aciklik.tur === 'kapi' ? 'Kapi' : 'Pencere'}
+            {aciklik.tur === 'kapi' ? 'Kapı' : 'Pencere'}
           </div>
           <SayiAlani
-            ad="Genislik"
+            ad="Genişlik"
             deger={aciklik.genislik}
             adim={0.05}
             birim="m"
@@ -1099,7 +1099,7 @@ function OzellikPaneli({
             }
           />
           <SayiAlani
-            ad="Yukseklik"
+            ad="Yükseklik"
             deger={aciklik.yukseklik}
             adim={0.05}
             birim="m"
@@ -1108,7 +1108,7 @@ function OzellikPaneli({
             }
           />
           <SayiAlani
-            ad="Esik / parapet"
+            ad="Eşik / parapet"
             deger={aciklik.esik}
             adim={0.05}
             birim="m"
@@ -1125,7 +1125,7 @@ function OzellikPaneli({
             onClick={() => gonder({ t: 'aciklik-yama', id: aciklik.id, yama: { ters: !aciklik.ters } })}
             className="mt-2 rounded-[6px] border border-cizgi bg-kart px-2.5 py-1.5 text-[12.5px] font-medium text-murekkep-2"
           >
-            Acilis yonunu cevir
+            Açılış yönünü çevir
           </button>
         </div>
       )}
@@ -1134,7 +1134,7 @@ function OzellikPaneli({
         <div className="mt-2">
           <div className="text-[14px] font-medium text-murekkep">{mobilya.ad}</div>
           <SayiAlani
-            ad="Genislik"
+            ad="Genişlik"
             deger={mobilya.genislik}
             adim={0.05}
             birim="m"
@@ -1148,14 +1148,14 @@ function OzellikPaneli({
             degistir={(v) => gonder({ t: 'mobilya-yama', id: mobilya.id, yama: { derinlik: Math.max(0.1, v) } })}
           />
           <SayiAlani
-            ad="Yukseklik"
+            ad="Yükseklik"
             deger={mobilya.yukseklik}
             adim={0.05}
             birim="m"
             degistir={(v) => gonder({ t: 'mobilya-yama', id: mobilya.id, yama: { yukseklik: Math.max(0.02, v) } })}
           />
           <SayiAlani
-            ad="Aci"
+            ad="Açı"
             deger={mobilya.aci}
             adim={15}
             birim="°"
@@ -1171,7 +1171,7 @@ function OzellikPaneli({
         <div className="mt-2">
           <div className="text-[14px] font-medium text-murekkep">Kolon</div>
           <SayiAlani
-            ad="Genislik"
+            ad="Genişlik"
             deger={kolon.genislik}
             adim={0.05}
             birim="m"
@@ -1185,7 +1185,7 @@ function OzellikPaneli({
             degistir={(v) => gonder({ t: 'kolon-yama', id: kolon.id, yama: { derinlik: Math.max(0.1, v) } })}
           />
           <SayiAlani
-            ad="Aci"
+            ad="Açı"
             deger={kolon.aci}
             adim={15}
             birim="°"
@@ -1227,10 +1227,10 @@ function ProjePaneli({
                 Yeni
               </button>
               <button onClick={iceAktar} className="text-[13px] font-medium text-murekkep-3 hover:text-murekkep">
-                Ice aktar
+                İçe aktar
               </button>
               <button onClick={disaAktar} className="text-[13px] font-medium text-murekkep-3 hover:text-murekkep">
-                Disa aktar
+                Dışa aktar
               </button>
               <button onClick={kapat} className="text-[13px] font-medium text-murekkep-3 hover:text-murekkep">
                 Kapat
@@ -1240,7 +1240,7 @@ function ProjePaneli({
         />
         {projeler.length === 0 ? (
           <p className="px-4 py-4 text-[13.5px] text-murekkep-3">
-            Kayitli proje yok. Cizmeye basladiginda otomatik kaydedilir.
+            Kayıtlı proje yok. Çizmeye başladığında otomatik kaydedilir.
           </p>
         ) : (
           <ul className="max-h-[220px] overflow-y-auto">

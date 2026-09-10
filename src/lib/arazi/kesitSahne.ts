@@ -296,7 +296,7 @@ export function kesitSahnesiSvg(s: KesitSahnesi, secenek: KesitCizimSecenek = {}
   p.push(
     `<text x="${solPay}" y="${Y - 18}" font-family="monospace" font-size="11.5" fill="#262320">` +
       `UZUNLUK ${s.uzunluk.toFixed(0)} m · BANT ${s.bant.toFixed(0)} m ${tarafAdi(s.taraf)} · KOT ${s.enDusuk.toFixed(1)}–${s.enYuksek.toFixed(1)} m` +
-      `${abartma !== 1 ? ` · DUSEY ABARTMA ${abartma}x` : ''} · ${s.binalar.length} yapi, ${s.agaclar.length} agac</text>`,
+      `${abartma !== 1 ? ` · DÜŞEY ABARTMA ${abartma}x` : ''} · ${s.binalar.length} yapı, ${s.agaclar.length} ağaç</text>`,
   )
   p.push(
     `<text x="${solPay}" y="${ustPay + 2}" font-family="monospace" font-size="11.5" fill="#7d7568">A</text>` +
@@ -314,5 +314,5 @@ function kotAdimi(fark: number): number {
 }
 
 function tarafAdi(t: KesitTarafi): string {
-  return t === 'on' ? '(on)' : t === 'arka' ? '(arka)' : '(iki taraf)'
+  return t === 'on' ? '(ön)' : t === 'arka' ? '(arka)' : '(iki taraf)'
 }

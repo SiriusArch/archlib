@@ -39,7 +39,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
 
   function kaydet() {
     if (!anahtar.trim()) {
-      setMesaj('Anahtar bos olamaz.')
+      setMesaj('Anahtar boş olamaz.')
       return
     }
     anahtarYaz({
@@ -50,7 +50,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
     aktifSaglayiciYaz(secili)
     aktifDegisti(secili)
     guncellendi()
-    setMesaj('Kaydedildi. Anahtar yalnizca bu tarayicida saklanir.')
+    setMesaj('Kaydedildi. Anahtar yalnızca bu tarayıcıda saklanır.')
   }
 
   return (
@@ -64,8 +64,8 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-6 py-4">
           <div>
-            <div className="etiket">Baglanti</div>
-            <h2 className="mt-1 text-[22px] leading-tight text-murekkep">API anahtari</h2>
+            <div className="etiket">Bağlantı</div>
+            <h2 className="mt-1 text-[22px] leading-tight text-murekkep">API anahtarı</h2>
           </div>
           <button
             onClick={kapat}
@@ -77,20 +77,20 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
 
         <div className="space-y-5 px-6 py-5">
           <p className="text-[14.5px] leading-relaxed text-murekkep-2">
-            ArchLib in sunucusu yoktur. Analiz istegi tarayicindan dogrudan sectigin saglayiciya
-            gider; anahtarin yalnizca bu tarayicinin{' '}
+            ArchLib’in sunucusu yoktur. Analiz isteği tarayıcından doğrudan seçtiğin sağlayıcıya
+            gider; anahtarın yalnızca bu tarayıcının{' '}
             <code className="rounded-[4px] bg-kagit-3 px-1 py-0.5 text-[13px]">localStorage</code>{' '}
-            alaninda saklanir, hicbir yere gonderilmez. Token maliyetini kendi hesabin karsilar.
+            alanında saklanır, hiçbir yere gönderilmez. Token maliyetini kendi hesabın karşılar.
           </p>
 
           <div>
-            <div className="etiket mb-2">Saglayici</div>
+            <div className="etiket mb-2">Sağlayıcı</div>
             <div className="flex flex-wrap gap-1.5">
               {SAGLAYICILAR.map((s) => (
                 <Cip key={s.id} secili={secili === s.id} onClick={() => setSecili(s.id)}>
                   {s.ad}
                   <span className="ml-1.5 text-[11.5px] opacity-60">
-                    {kayitli[s.id]?.anahtar ? 'kayitli' : 'bos'}
+                    {kayitli[s.id]?.anahtar ? 'kayıtlı' : 'boş'}
                   </span>
                 </Cip>
               ))}
@@ -114,7 +114,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
                 onClick={() => setGoster((g) => !g)}
                 className="shrink-0 text-[13px] font-medium text-murekkep-3 transition-colors hover:text-murekkep"
               >
-                {goster ? 'gizle' : 'goster'}
+                {goster ? 'gizle' : 'göster'}
               </button>
             </div>
             <a
@@ -123,7 +123,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
               rel="noreferrer noopener"
               className="mt-2 inline-block text-[13px] font-medium text-kiremit-koyu underline decoration-kiremit/35 underline-offset-4"
             >
-              Anahtari buradan al
+              Anahtarı buradan al
             </a>
           </div>
 
@@ -142,8 +142,8 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
               ))}
             </datalist>
             <p className="mt-1.5 text-[13px] leading-relaxed text-murekkep-3">
-              Listeden secebilir ya da elle yazabilirsin. "Model bulunamadi (404)" hatasi alirsan
-              buradan guncelle.
+              Listeden seçebilir ya da elle yazabilirsin. "Model bulunamadı (404)" hatası alırsan
+              buradan güncelle.
             </p>
           </div>
 

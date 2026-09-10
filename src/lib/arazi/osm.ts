@@ -141,14 +141,14 @@ export async function araziVerisiGetir(
       kaynak = ayna
       break
     } catch (e) {
-      if (signal?.aborted) throw new DOMException('Iptal edildi', 'AbortError')
+      if (signal?.aborted) throw new DOMException('İptal edildi', 'AbortError')
       sonHata = e
     }
   }
   if (!ogeler) {
     throw new Error(
-      'Overpass sunucularinin hicbiri yanit vermedi. Bu servis ucretsiz ve zaman zaman ' +
-        'yogun olur. Alani kucultup tekrar dene ya da birkac dakika bekle. ' +
+      'Overpass sunucularının hiçbiri yanıt vermedi. Bu servis ücretsiz ve zaman zaman ' +
+        'yoğun olur. Alanı küçültüp tekrar dene ya da birkaç dakika bekle. ' +
         `(son hata: ${(sonHata as Error)?.message?.slice(0, 120) ?? 'bilinmiyor'})`,
     )
   }

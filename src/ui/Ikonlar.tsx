@@ -45,6 +45,16 @@ export function IkonArazi({ className = 'h-[18px] w-[18px]' }: Props) {
   )
 }
 
+export function IkonArsiv({ className = 'h-[18px] w-[18px]' }: Props) {
+  return (
+    <svg {...ortak} className={className} aria-hidden="true">
+      <rect x="3.5" y="4" width="17" height="5" rx="1" />
+      <path d="M4.5 9v8.5A1.5 1.5 0 0 0 6 19h12a1.5 1.5 0 0 0 1.5-1.5V9" />
+      <path d="M10 13h4" />
+    </svg>
+  )
+}
+
 export function IkonKitaplik({ className = 'h-[18px] w-[18px]' }: Props) {
   return (
     <svg {...ortak} className={className} aria-hidden="true">
@@ -97,6 +107,23 @@ export function IkonOk({ className = 'h-[14px] w-[14px]' }: Props) {
   return (
     <svg {...ortak} className={className} aria-hidden="true">
       <path d="M7 17 17 7M9 7h8v8" />
+    </svg>
+  )
+}
+
+export function IkonGunes({ className = 'h-[15px] w-[15px]' }: Props) {
+  return (
+    <svg {...ortak} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.3M12 19.2v2.3M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" />
+    </svg>
+  )
+}
+
+export function IkonAy({ className = 'h-[15px] w-[15px]' }: Props) {
+  return (
+    <svg {...ortak} className={className} aria-hidden="true">
+      <path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a6.8 6.8 0 0 0 10.2 10.2Z" />
     </svg>
   )
 }

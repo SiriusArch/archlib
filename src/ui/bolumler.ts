@@ -1,10 +1,10 @@
-export type Sekme = 'analiz' | 'cizim' | 'arazi' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
+export type Sekme = 'analiz' | 'cizim' | 'arazi' | 'arsiv' | 'katalog' | 'bilgi' | 'liste' | 'kaynak'
 
 export interface BolumTanimi {
   id: Sekme
   ad: string
   alt: string
-  /** Sinif adlari statik olmali ki Tailwind tarasin. */
+  /** Sınıf adları statik olmalı ki Tailwind tarasın. */
   metin: string
   zemin: string
   kenar: string
@@ -14,7 +14,7 @@ export interface BolumTanimi {
 export const BOLUMLER: readonly BolumTanimi[] = [
   {
     id: 'analiz',
-    ad: 'Kritik Masasi',
+    ad: 'Kritik Masası',
     alt: 'Pafta ve maket analizi',
     metin: 'text-kiremit-koyu',
     zemin: 'bg-kiremit-soft',
@@ -23,8 +23,8 @@ export const BOLUMLER: readonly BolumTanimi[] = [
   },
   {
     id: 'cizim',
-    ad: 'Cizim',
-    alt: '2B plan ve 3B kutle',
+    ad: 'Çizim',
+    alt: '2B plan ve 3B kütle',
     metin: 'text-mor-koyu',
     zemin: 'bg-mor-soft',
     kenar: 'border-mor',
@@ -40,9 +40,18 @@ export const BOLUMLER: readonly BolumTanimi[] = [
     dolgu: 'bg-mavi',
   },
   {
+    id: 'arsiv',
+    ad: 'Arşiv',
+    alt: 'Hazır CAD projeleri',
+    metin: 'text-mor-koyu',
+    zemin: 'bg-mor-soft',
+    kenar: 'border-mor',
+    dolgu: 'bg-mor',
+  },
+  {
     id: 'katalog',
-    ad: 'Arac Kitapligi',
-    alt: '48 arac',
+    ad: 'Araç Kitaplığı',
+    alt: '48 araç',
     metin: 'text-adacayi-koyu',
     zemin: 'bg-adacayi-soft',
     kenar: 'border-adacayi',
@@ -50,8 +59,8 @@ export const BOLUMLER: readonly BolumTanimi[] = [
   },
   {
     id: 'bilgi',
-    ad: 'Bilgi Bankasi',
-    alt: 'Kavram, standart, olcu',
+    ad: 'Bilgi Bankası',
+    alt: 'Kavram, standart, ölçü',
     metin: 'text-kehribar-koyu',
     zemin: 'bg-kehribar-soft',
     kenar: 'border-kehribar',
@@ -60,7 +69,7 @@ export const BOLUMLER: readonly BolumTanimi[] = [
   {
     id: 'liste',
     ad: 'Kontrol Listeleri',
-    alt: 'Teslim oncesi',
+    alt: 'Teslimden önce',
     metin: 'text-mor-koyu',
     zemin: 'bg-mor-soft',
     kenar: 'border-mor',
@@ -69,7 +78,7 @@ export const BOLUMLER: readonly BolumTanimi[] = [
   {
     id: 'kaynak',
     ad: 'Kaynaklar',
-    alt: 'Seffaflik',
+    alt: 'Şeffaflık',
     metin: 'text-murekkep',
     zemin: 'bg-kagit-3',
     kenar: 'border-murekkep',

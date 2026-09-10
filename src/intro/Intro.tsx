@@ -104,17 +104,17 @@ export default function Intro({ gir }: Props) {
           <div className="mt-2 flex items-center gap-2">
             <span className="block h-px w-9 bg-[#ece8e0]/30" />
             <span className="text-[9px] tracking-[0.24em] text-[#ece8e0]/45 uppercase sm:text-[10px]">
-              Mimarlik
+              Mimarlık
             </span>
           </div>
         </div>
 
         <div className="hidden text-right sm:block">
           <div className="text-[10px] tracking-[0.22em] text-[#ece8e0]/70 uppercase">
-            Kemer / Yarim Daire
+            Kemer / Yarım Daire
           </div>
           <div className="mt-1 text-[10px] tracking-[0.16em] text-[#ece8e0]/45 uppercase">
-            Prosedurel &nbsp;·&nbsp; WebGPU
+            Prosedürel &nbsp;·&nbsp; WebGPU
           </div>
         </div>
       </header>
@@ -127,13 +127,13 @@ export default function Intro({ gir }: Props) {
               className="text-[26px] leading-[1.1] tracking-[-0.015em] text-[#f2eee6] sm:text-[40px]"
               style={{ fontFamily: SERIF }}
             >
-              Once <span className="text-[#d1685f]">olcu</span>,
+              Önce <span className="text-[#d1685f]">ölçü</span>,
               <br />
-              sonra <span className="text-[#7ea9c4]">bicim</span>.
+              sonra <span className="text-[#7ea9c4]">biçim</span>.
             </h1>
             <p className="mt-3 max-w-sm text-[12.5px] leading-relaxed text-[#ece8e0]/60 sm:mt-4 sm:text-[13.5px]">
-              Arac kitapligi, olcu bankasi ve pafta kritigi. Temel Tasar, Neufert ve TS/DIN
-              standartlari uzerine kurulu.
+              Araç kitaplığı, ölçü bankası ve pafta kritiği. Temel Tasar, Neufert ve TS/DIN
+              standartları üzerine kurulu.
             </p>
           </div>
 
@@ -143,7 +143,7 @@ export default function Intro({ gir }: Props) {
                 ipucu && durum === 'hazir' ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              Surukleyerek cevir
+              Sürükleyerek çevir
             </div>
 
             <button
@@ -154,7 +154,7 @@ export default function Intro({ gir }: Props) {
                 className="absolute inset-0 -translate-y-full bg-[#b03e3e] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0"
                 aria-hidden="true"
               />
-              <span className="relative">Kitapliga gir</span>
+              <span className="relative">Kitaplığa gir</span>
             </button>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function Intro({ gir }: Props) {
         }`}
       >
         <span className="text-[10px] tracking-[0.28em] text-[#ece8e0]/35 uppercase">
-          Sahne hazirlaniyor
+          Sahne hazırlanıyor
         </span>
       </div>
     </div>

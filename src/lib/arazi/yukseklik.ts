@@ -50,18 +50,18 @@ function goruntuYukle(url: string, signal?: AbortSignal): Promise<HTMLImageEleme
     }
     img.onerror = () => {
       temizle()
-      reddet(new Error(`Yukseklik karosu yuklenemedi: ${url}`))
+      reddet(new Error(`Yükseklik karosu yüklenemedi: ${url}`))
     }
     if (signal) {
       if (signal.aborted) {
-        reddet(new DOMException('Iptal edildi', 'AbortError'))
+        reddet(new DOMException('İptal edildi', 'AbortError'))
         return
       }
       signal.addEventListener(
         'abort',
         () => {
           img.src = ''
-          reddet(new DOMException('Iptal edildi', 'AbortError'))
+          reddet(new DOMException('İptal edildi', 'AbortError'))
         },
         { once: true },
       )
@@ -106,14 +106,14 @@ export async function yukseklikGetir(
   const enKaro = x1 - x0 + 1
   const boyKaro = y1 - y0 + 1
   if (enKaro * boyKaro > 24) {
-    throw new Error('Secilen alan yukseklik verisi icin fazla buyuk. Yaricapi kucult.')
+    throw new Error('Seçilen alan yükseklik verisi için fazla büyük. Yarıçapı küçült.')
   }
 
   const tuval = document.createElement('canvas')
   tuval.width = enKaro * KARO_BOYUT
   tuval.height = boyKaro * KARO_BOYUT
   const ctx = tuval.getContext('2d', { willReadFrequently: true })
-  if (!ctx) throw new Error('Canvas 2D baglami olusturulamadi.')
+  if (!ctx) throw new Error('Canvas 2D bağlamı oluşturulamadı.')
 
   const isler: Promise<void>[] = []
   let basarisiz = 0
@@ -133,7 +133,7 @@ export async function yukseklikGetir(
   }
   await Promise.all(isler)
   if (basarisiz === enKaro * boyKaro) {
-    throw new Error('Yukseklik karolarinin hicbiri yuklenemedi. Baglantiyi kontrol et.')
+    throw new Error('Yükseklik karolarının hiçbiri yüklenemedi. Bağlantıyı kontrol et.')
   }
 
   const piksel = ctx.getImageData(0, 0, tuval.width, tuval.height).data

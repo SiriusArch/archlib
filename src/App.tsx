@@ -2,19 +2,24 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import type { Saglayici } from './types'
 import { aktifSaglayiciOku, anahtarlariOku } from './lib/storage'
 import { saglayiciBul } from './lib/llm'
+import { useTema } from './lib/tema'
 import { BOLUMLER, bolumBul, type Sekme } from './ui/bolumler'
 import {
   IkonKritik,
   IkonCizim,
   IkonArazi,
+  IkonArsiv,
   IkonKitaplik,
   IkonBilgi,
   IkonListe,
   IkonKaynak,
   IkonAnahtar,
   IkonOk,
+  IkonGunes,
+  IkonAy,
 } from './ui/Ikonlar'
 import Katalog from './components/Katalog'
+import Arsiv from './components/Arsiv'
 import Analiz from './components/Analiz'
 import BilgiBankasi from './components/BilgiBankasi'
 import Listeler from './components/Listeler'
@@ -31,6 +36,7 @@ const IKONLAR: Record<Sekme, (p: { className?: string }) => ReactNode> = {
   analiz: IkonKritik,
   cizim: IkonCizim,
   arazi: IkonArazi,
+  arsiv: IkonArsiv,
   katalog: IkonKitaplik,
   bilgi: IkonBilgi,
   liste: IkonListe,
@@ -43,6 +49,7 @@ export default function App() {
   const [panelAcik, setPanelAcik] = useState(false)
   const [anahtarSurumu, setAnahtarSurumu] = useState(0)
   const [menuAcik, setMenuAcik] = useState(false)
+  const { tema, degistir: temaDegistir } = useTema()
   const [introBitti, setIntroBitti] = useState<boolean>(() => {
     try {
       return sessionStorage.getItem(INTRO_ANAHTARI) === 'gecildi'
@@ -64,7 +71,7 @@ export default function App() {
     try {
       sessionStorage.setItem(INTRO_ANAHTARI, 'gecildi')
     } catch {
-      /* depolama kapali olabilir */
+      /* depolama kapalı olabilir */
     }
     setIntroBitti(true)
   }
@@ -83,31 +90,41 @@ export default function App() {
 
   return (
     <div className="animasyon-acilis flex min-h-full">
-      {/* ================================================== kenar cubugu */}
+      {/* ================================================== kenar çubuğu */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-cizgi bg-yan transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           menuAcik ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="px-5 pt-7 pb-5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-[7px] border border-kiremit/35 bg-kiremit-soft">
-              <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" aria-hidden="true">
-                <path
-                  d="M4 20V10.5L12 4l8 6.5V20"
-                  fill="none"
-                  stroke="#b9573e"
-                  strokeWidth="1.6"
-                  strokeLinejoin="round"
-                />
-                <path d="M9.5 20v-5.5h5V20" fill="none" stroke="#b9573e" strokeWidth="1.6" />
-              </svg>
-            </span>
-            <span className="font-baslik text-[21px] font-semibold tracking-[-0.03em] text-murekkep">
-              ArchLib<span className="text-kiremit">.</span>
-            </span>
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[7px] border border-kiremit/35 bg-kiremit-soft">
+                <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" aria-hidden="true">
+                  <path
+                    d="M4 20V10.5L12 4l8 6.5V20"
+                    fill="none"
+                    stroke="#b9573e"
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M9.5 20v-5.5h5V20" fill="none" stroke="#b9573e" strokeWidth="1.6" />
+                </svg>
+              </span>
+              <span className="font-baslik text-[21px] font-semibold tracking-[-0.03em] text-murekkep">
+                ArchLib<span className="text-kiremit">.</span>
+              </span>
+            </div>
+            <button
+              onClick={temaDegistir}
+              aria-label={tema === 'koyu' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+              title={tema === 'koyu' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-cizgi bg-kart text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
+            >
+              {tema === 'koyu' ? <IkonAy /> : <IkonGunes />}
+            </button>
           </div>
-          <p className="etiket-buyuk mt-3 leading-relaxed">Mimarligin dijital kutuphanesi</p>
+          <p className="etiket-buyuk mt-3 leading-relaxed">Mimarlığın dijital kütüphanesi</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3">
@@ -135,7 +152,7 @@ export default function App() {
           </ul>
 
           <div className="mt-7 px-3">
-            <div className="etiket-buyuk mb-2.5">Bolum</div>
+            <div className="etiket-buyuk mb-2.5">Bölüm</div>
             <p className="text-[13.5px] leading-relaxed text-murekkep-3">{aktif.alt}</p>
           </div>
         </nav>
@@ -144,18 +161,18 @@ export default function App() {
           <div className="rounded-[8px] border border-cizgi bg-kart p-4">
             <div className="flex items-center gap-2">
               <IkonAnahtar className="h-[15px] w-[15px] text-murekkep-3" />
-              <span className="text-[14px] font-medium text-murekkep">API anahtari</span>
+              <span className="text-[14px] font-medium text-murekkep">API anahtarı</span>
             </div>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-murekkep-3">
               {anahtarVar
-                ? `${saglayiciBul(saglayici).ad.split(' ')[0]} bagli. Tokeni kendi hesabin harciyor.`
-                : 'Kritik almak icin kendi anahtarini gir. Tarayicidan cikmaz.'}
+                ? `${saglayiciBul(saglayici).ad.split(' ')[0]} bağlı. Tokeni kendi hesabın harcıyor.`
+                : 'Kritik almak için kendi anahtarını gir. Tarayıcıdan çıkmaz.'}
             </p>
             <button
               onClick={() => setPanelAcik(true)}
               className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-kiremit-koyu transition-colors hover:text-kiremit"
             >
-              {anahtarVar ? 'Degistir' : 'Anahtar gir'}
+              {anahtarVar ? 'Değiştir' : 'Anahtar gir'}
               <IkonOk className="h-[13px] w-[13px]" />
             </button>
           </div>
@@ -165,26 +182,26 @@ export default function App() {
       {menuAcik && (
         <button
           onClick={() => setMenuAcik(false)}
-          aria-label="Menuyu kapat"
+          aria-label="Menüyü kapat"
           className="fixed inset-0 z-40 bg-murekkep/25 lg:hidden"
         />
       )}
 
-      {/* ======================================================== icerik */}
+      {/* ======================================================== içerik */}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-cizgi bg-kagit/90 backdrop-blur-[6px]">
           <div className="flex items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMenuAcik(true)}
-                aria-label="Bolumler"
+                aria-label="Bölümler"
                 className="rounded-[6px] border border-cizgi p-2 text-murekkep-2 lg:hidden"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                   <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" />
                 </svg>
               </button>
-              <span className="etiket">Kutuphane</span>
+              <span className="etiket">Kütüphane</span>
               <span className="text-murekkep-3">/</span>
               <span className="text-[14px] font-medium text-murekkep">{aktif.ad}</span>
             </div>
@@ -205,7 +222,7 @@ export default function App() {
         {sekme === 'cizim' ? (
           <main className="flex-1">
             <Suspense
-              fallback={<div className="etiket py-24 text-center">Cizim stuyosu yukleniyor</div>}
+              fallback={<div className="etiket py-24 text-center">Çizim stüdyosu yükleniyor</div>}
             >
               <Cizim saglayici={saglayici} anahtarPaneliniAc={() => setPanelAcik(true)} />
             </Suspense>
@@ -224,12 +241,13 @@ export default function App() {
             {sekme === 'arazi' && (
               <Suspense
                 fallback={
-                  <div className="etiket py-24 text-center">Arazi araci yukleniyor</div>
+                  <div className="etiket py-24 text-center">Arazi aracı yükleniyor</div>
                 }
               >
                 <Arazi />
               </Suspense>
             )}
+            {sekme === 'arsiv' && <Arsiv />}
             {sekme === 'katalog' && <Katalog />}
             {sekme === 'bilgi' && <BilgiBankasi />}
             {sekme === 'liste' && <Listeler />}
@@ -240,11 +258,11 @@ export default function App() {
         <footer className="border-t border-cizgi px-5 py-7 sm:px-8">
           <div className="mx-auto flex max-w-[1180px] flex-wrap items-end justify-between gap-6">
             <p className="max-w-2xl text-[13px] leading-relaxed text-murekkep-3">
-              Sunucusuz calisir; anahtarin ve verilerin yalnizca bu tarayicida saklanir. Bilgi
-              tabani <span className="text-murekkep-2">Temel Tasar</span> (I. Hulusi Gungor),{' '}
-              <span className="text-murekkep-2">Yapi Tasarim Bilgisi</span> (Neufert), MIM 153 ve
-              MIM 244 ders notlari basta olmak uzere 16 kaynaktan cikarilmistir. Yapay zeka kritigi
-              on degerlendirmedir; danismanin ve jurinin yerine gecmez.
+              Sunucusuz çalışır; anahtarın ve verilerin yalnızca bu tarayıcıda saklanır. Bilgi
+              tabanı <span className="text-murekkep-2">Temel Tasar</span> (İ. Hulûsi Güngör),{' '}
+              <span className="text-murekkep-2">Yapı Tasarım Bilgisi</span> (Neufert), MİM 153 ve
+              MİM 244 ders notları başta olmak üzere 16 kaynaktan çıkarılmıştır. Yapay zekâ kritiği
+              ön değerlendirmedir; danışmanın ve jürinin yerine geçmez.
             </p>
             <div className="flex w-[170px] overflow-hidden rounded-full">
               {BOLUMLER.filter((b) => b.id !== 'kaynak').map((b) => (

@@ -20,7 +20,7 @@ export const SAGLAYICILAR: SaglayiciBilgi[] = [
     modeller: ['claude-sonnet-5', 'claude-opus-5', 'claude-haiku-4-5-20251001'],
     varsayilanModel: 'claude-sonnet-5',
     gorselDestegi: true,
-    not: 'Uzun ve yapili metin kritigi ile gorsel okumada guclu. Tarayicidan cagri icin ozel basliğı otomatik ekleniyor.',
+    not: 'Uzun ve yapılı metin kritiği ile görsel okumada güçlü. Tarayıcıdan çağrı için özel başlık otomatik ekleniyor.',
   },
   {
     id: 'openai',
@@ -30,7 +30,7 @@ export const SAGLAYICILAR: SaglayiciBilgi[] = [
     modeller: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini'],
     varsayilanModel: 'gpt-4o',
     gorselDestegi: true,
-    not: 'Model adi zamanla degisebilir; listeden secebilir ya da elle yazabilirsin.',
+    not: 'Model adı zamanla değişebilir; listeden seçebilir ya da elle yazabilirsin.',
   },
   {
     id: 'gemini',
@@ -40,13 +40,13 @@ export const SAGLAYICILAR: SaglayiciBilgi[] = [
     modeller: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'],
     varsayilanModel: 'gemini-2.5-flash',
     gorselDestegi: true,
-    not: 'Ucretsiz kotasi olan tek saglayici. Yuksek cozunurluklu pafta gorsellerinde iyi calisir.',
+    not: 'Ücretsiz kotası olan tek sağlayıcı. Yüksek çözünürlüklü pafta görsellerinde iyi çalışır.',
   },
 ]
 
 export function saglayiciBul(id: Saglayici): SaglayiciBilgi {
   const s = SAGLAYICILAR.find((x) => x.id === id)
-  if (!s) throw new Error(`Bilinmeyen saglayici: ${id}`)
+  if (!s) throw new Error(`Bilinmeyen sağlayıcı: ${id}`)
   return s
 }
 
@@ -69,14 +69,14 @@ async function sseOku(
   signal?: AbortSignal,
 ): Promise<void> {
   const okuyucu = yanit.body?.getReader()
-  if (!okuyucu) throw new Error('Yanit govdesi okunamadi.')
+  if (!okuyucu) throw new Error('Yanıt gövdesi okunamadı.')
   const cozucu = new TextDecoder()
   let tampon = ''
 
   while (true) {
     if (signal?.aborted) {
       await okuyucu.cancel().catch(() => {})
-      throw new DOMException('Iptal edildi', 'AbortError')
+      throw new DOMException('İptal edildi', 'AbortError')
     }
     const { done, value } = await okuyucu.read()
     if (done) break
@@ -109,12 +109,12 @@ async function hataMetni(yanit: Response): Promise<string> {
   }
   const kisa = ayrinti.slice(0, 400)
   if (yanit.status === 401 || yanit.status === 403)
-    return `Anahtar reddedildi (${yanit.status}). API anahtarini kontrol et. ${kisa}`
+    return `Anahtar reddedildi (${yanit.status}). API anahtarını kontrol et. ${kisa}`
   if (yanit.status === 404)
-    return `Model bulunamadi (404). Model adini kontrol et. ${kisa}`
+    return `Model bulunamadı (404). Model adını kontrol et. ${kisa}`
   if (yanit.status === 429)
-    return `Kota veya hiz siniri asildi (429). Biraz bekleyip tekrar dene. ${kisa}`
-  return `Istek basarisiz (${yanit.status}). ${kisa}`
+    return `Kota veya hız sınırı aşıldı (429). Biraz bekleyip tekrar dene. ${kisa}`
+  return `İstek başarısız (${yanit.status}). ${kisa}`
 }
 
 async function anthropicCagir(p: IstekParam): Promise<void> {
@@ -151,7 +151,7 @@ async function anthropicCagir(p: IstekParam): Promise<void> {
         if (o.type === 'content_block_delta' && o.delta?.type === 'text_delta') {
           p.onParca(o.delta.text as string)
         } else if (o.type === 'error') {
-          throw new Error(o.error?.message || 'Anthropic akis hatasi')
+          throw new Error(o.error?.message || 'Anthropic akış hatası')
         }
       } catch (e) {
         if (e instanceof SyntaxError) return
@@ -247,7 +247,7 @@ async function geminiCagir(p: IstekParam): Promise<void> {
 }
 
 export async function analizCagir(p: IstekParam): Promise<void> {
-  if (!p.anahtar.trim()) throw new Error('Once API anahtarini gir.')
+  if (!p.anahtar.trim()) throw new Error('Önce API anahtarını gir.')
   switch (p.saglayici) {
     case 'anthropic':
       return anthropicCagir(p)
@@ -256,7 +256,7 @@ export async function analizCagir(p: IstekParam): Promise<void> {
     case 'gemini':
       return geminiCagir(p)
     default:
-      throw new Error('Desteklenmeyen saglayici.')
+      throw new Error('Desteklenmeyen sağlayıcı.')
   }
 }
 
@@ -264,7 +264,7 @@ export async function analizCagir(p: IstekParam): Promise<void> {
 export function dosyayiOku(dosya: File): Promise<{ veri: string; onizleme: string }> {
   return new Promise((coz, reddet) => {
     const okuyucu = new FileReader()
-    okuyucu.onerror = () => reddet(new Error('Dosya okunamadi.'))
+    okuyucu.onerror = () => reddet(new Error('Dosya okunamadı.'))
     okuyucu.onload = () => {
       const sonuc = String(okuyucu.result || '')
       const virgul = sonuc.indexOf(',')

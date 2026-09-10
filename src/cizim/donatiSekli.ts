@@ -170,8 +170,11 @@ export function sembol2B(id: string, g: number, d: number): Sekil2B[] {
       const s: Sekil2B[] = [dik(0, 0, g, d, 0.04, 0.12)]
       for (let i = 0; i < yanBasi; i++) {
         const x = -g / 2 + (g / yanBasi) * (i + 0.5)
-        s.push(...sandalyeSembolu(x, -dy - 0.28, 0.45, 0.5, 0))
-        s.push(...sandalyeSembolu(x, dy + 0.28, 0.45, 0.5, 180))
+        // Sandalyenin "arka"si (sirt dayama) +y'de tanimli, yani aci=0
+        // sandalyeyi -y'ye baktirir. Masanin onundeki (-y) sira masaya
+        // (+y) baksin diye 180, arkasindaki (+y) sira -y'ye baksin diye 0.
+        s.push(...sandalyeSembolu(x, -dy - 0.28, 0.45, 0.5, 180))
+        s.push(...sandalyeSembolu(x, dy + 0.28, 0.45, 0.5, 0))
       }
       return s
     }
@@ -179,7 +182,16 @@ export function sembol2B(id: string, g: number, d: number): Sekil2B[] {
       const s: Sekil2B[] = [dai(0, 0, gy, 0.12), dai(0, 0, gy - 0.06)]
       for (let i = 0; i < 4; i++) {
         const a = (Math.PI / 2) * i
-        s.push(...sandalyeSembolu(Math.sin(a) * (gy + 0.28), -Math.cos(a) * (gy + 0.28), 0.45, 0.5, (i * 90) % 360))
+        // +180: sandalye disari degil merkeze (masaya) baksin.
+        s.push(
+          ...sandalyeSembolu(
+            Math.sin(a) * (gy + 0.28),
+            -Math.cos(a) * (gy + 0.28),
+            0.45,
+            0.5,
+            (i * 90 + 180) % 360,
+          ),
+        )
       }
       return s
     }
@@ -268,7 +280,8 @@ export function sembol2B(id: string, g: number, d: number): Sekil2B[] {
     case 'ofis-masa':
     case 'sira': {
       const s: Sekil2B[] = [dik(0, 0, g, d, 0.02, 0.12)]
-      s.push(...sandalyeSembolu(0, dy + 0.3, 0.46, 0.5, 180))
+      // Masanin +y (arka) tarafindaki sandalye, masaya donuk (-y) otursun.
+      s.push(...sandalyeSembolu(0, dy + 0.3, 0.46, 0.5, 0))
       return s
     }
 
@@ -481,8 +494,9 @@ export function parca3B(id: string, g: number, d: number, y: number): Parca3B[] 
       }
       for (let i = 0; i < yanBasi; i++) {
         const x = -g / 2 + (g / yanBasi) * (i + 0.5)
-        p.push(...sandalyeParcasi(x, -dy - 0.28, 0))
-        p.push(...sandalyeParcasi(x, dy + 0.28, 180))
+        // bkz. sembol2B'deki ayni not: sandalyeler masaya donuk otursun.
+        p.push(...sandalyeParcasi(x, -dy - 0.28, 180))
+        p.push(...sandalyeParcasi(x, dy + 0.28, 0))
       }
       return p
     }
@@ -494,7 +508,13 @@ export function parca3B(id: string, g: number, d: number, y: number): Parca3B[] 
       ]
       for (let i = 0; i < 4; i++) {
         const a = (Math.PI / 2) * i
-        p.push(...sandalyeParcasi(Math.sin(a) * (gy + 0.28), -Math.cos(a) * (gy + 0.28), (i * 90) % 360))
+        p.push(
+          ...sandalyeParcasi(
+            Math.sin(a) * (gy + 0.28),
+            -Math.cos(a) * (gy + 0.28),
+            (i * 90 + 180) % 360,
+          ),
+        )
       }
       return p
     }
@@ -600,7 +620,7 @@ export function parca3B(id: string, g: number, d: number, y: number): Parca3B[] 
       ]) {
         p.push(kutu(sx, (y - 0.04) / 2, sz, 0.05, y - 0.04, 0.05))
       }
-      p.push(...sandalyeParcasi(0, dy + 0.3, 180))
+      p.push(...sandalyeParcasi(0, dy + 0.3, 0))
       return p
     }
 
@@ -754,35 +774,35 @@ function sandalyeParcasi(x: number, z: number, aci: number): Parca3B[] {
  * kesikli olarak gosterilir; ogrenci olcuyu ekrandan okuyarak yerlestirir.
  */
 const TESRIFAT: Record<string, Tesrifat> = {
-  'kanepe-3': { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Sehpaya 40 cm; TV mesafesi ekran kosegeni x2.5' },
-  'kanepe-2': { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Sehpaya 40 cm bos birak' },
-  koltuk: { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Onunde 40 cm hareket alani' },
-  'masa-4': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Sandalye cekildikten sonra 35 cm gecis; kisi basi 60x40 cm masa' },
-  'masa-6': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Sandalye cekme payi dahil 80 cm; cevrede 35 cm gecis' },
-  'masa-yuvarlak': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Yuvarlak masada kisi basi 60 cm cevre' },
-  'toplanti-8': { on: 0.5, arka: 0.5, sol: 0.5, sag: 0.5, not: 'Toplanti masasi cevresinde 50 cm dolasim' },
-  'tezgah-180': { on: 1.2, arka: 0, sol: 0, sag: 0, not: 'DIN 18022: calisma koridoru en az 120 cm' },
-  'tezgah-240': { on: 1.2, arka: 0, sol: 0, sag: 0, not: 'DIN 18022: calisma koridoru en az 120 cm' },
-  ada: { on: 1.2, arka: 1.2, sol: 0.9, sag: 0.9, not: 'Ada ile tezgah arasi en az 120 cm' },
-  buzdolabi: { on: 1.0, arka: 0, sol: 0, sag: 0, not: 'Kapak acilimi + gecis icin 100 cm' },
-  ocak: { on: 1.2, arka: 0, sol: 0.4, sag: 0.4, not: 'Yanina en az 40 cm tezgah; onunde 120 cm' },
-  'yatak-tek': { on: 0.7, arka: 0, sol: 0.7, sag: 0, not: 'Neufert: yatak yaninda 70 cm gecis' },
-  'yatak-cift': { on: 0.7, arka: 0, sol: 0.7, sag: 0.7, not: 'Neufert: iki yandan 70 cm gecis, ayakucunda 70 cm' },
-  gardirop: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Kapak acilimi + giyinme icin 70 cm' },
-  'calisma-masa': { on: 0, arka: 0.8, sol: 0, sag: 0, not: 'Sandalye cekme payi 80 cm' },
-  'ofis-masa': { on: 0, arka: 0.8, sol: 0.6, sag: 0.6, not: 'Kisi basi en az 8 m² calisma alani' },
-  sira: { on: 0, arka: 0.8, sol: 0.5, sag: 0.5, not: 'Derslikte siralar arasi 80 cm' },
-  klozet: { on: 0.6, arka: 0, sol: 0.2, sag: 0.2, not: 'Onunde 60x60 cm, yanlarda 20 cm serbest' },
-  lavabo: { on: 0.7, arka: 0, sol: 0.1, sag: 0.1, not: 'Ayna onu 70 cm hareket alani' },
-  dus: { on: 0.6, arka: 0, sol: 0, sag: 0, not: 'Kabin onunde 60 cm kurulanma alani' },
-  kuvet: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Kuvet yaninda 70 cm' },
-  camasir: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Kapak acilimi icin 70 cm' },
-  'merdiven-duz': { on: 1.0, arka: 1.0, sol: 0, sag: 0, not: 'Sahanlik en az kol genisligi; 2h+t=63' },
-  'merdiven-u': { on: 1.0, arka: 0, sol: 0, sag: 0, not: 'Sahanlik en az kol genisligi kadar' },
-  asansor: { on: 1.5, arka: 0, sol: 0, sag: 0, not: 'Kabin onunde en az 150 cm bekleme alani' },
-  'asansor-sedye': { on: 1.8, arka: 0, sol: 0, sag: 0, not: 'Sedye manevrasi icin 180 cm' },
+  'kanepe-3': { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Sehpaya 40 cm; TV mesafesi ekran köşegeni x2.5' },
+  'kanepe-2': { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Sehpaya 40 cm boş bırak' },
+  koltuk: { on: 0.4, arka: 0, sol: 0, sag: 0, not: 'Önünde 40 cm hareket alanı' },
+  'masa-4': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Sandalye çekildikten sonra 35 cm geçiş; kişi başı 60x40 cm masa' },
+  'masa-6': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Sandalye çekme payı dahil 80 cm; çevrede 35 cm geçiş' },
+  'masa-yuvarlak': { on: 0.35, arka: 0.35, sol: 0.35, sag: 0.35, not: 'Yuvarlak masada kişi başı 60 cm çevre' },
+  'toplanti-8': { on: 0.5, arka: 0.5, sol: 0.5, sag: 0.5, not: 'Toplantı masası çevresinde 50 cm dolaşım' },
+  'tezgah-180': { on: 1.2, arka: 0, sol: 0, sag: 0, not: 'DIN 18022: çalışma koridoru en az 120 cm' },
+  'tezgah-240': { on: 1.2, arka: 0, sol: 0, sag: 0, not: 'DIN 18022: çalışma koridoru en az 120 cm' },
+  ada: { on: 1.2, arka: 1.2, sol: 0.9, sag: 0.9, not: 'Ada ile tezgâh arası en az 120 cm' },
+  buzdolabi: { on: 1.0, arka: 0, sol: 0, sag: 0, not: 'Kapak açılımı + geçiş için 100 cm' },
+  ocak: { on: 1.2, arka: 0, sol: 0.4, sag: 0.4, not: 'Yanına en az 40 cm tezgâh; önünde 120 cm' },
+  'yatak-tek': { on: 0.7, arka: 0, sol: 0.7, sag: 0, not: 'Neufert: yatak yanında 70 cm geçiş' },
+  'yatak-cift': { on: 0.7, arka: 0, sol: 0.7, sag: 0.7, not: 'Neufert: iki yandan 70 cm geçiş, ayakucunda 70 cm' },
+  gardirop: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Kapak açılımı + giyinme için 70 cm' },
+  'calisma-masa': { on: 0, arka: 0.8, sol: 0, sag: 0, not: 'Sandalye çekme payı 80 cm' },
+  'ofis-masa': { on: 0, arka: 0.8, sol: 0.6, sag: 0.6, not: 'Kişi başı en az 8 m² çalışma alanı' },
+  sira: { on: 0, arka: 0.8, sol: 0.5, sag: 0.5, not: 'Derslikte sıralar arası 80 cm' },
+  klozet: { on: 0.6, arka: 0, sol: 0.2, sag: 0.2, not: 'Önünde 60x60 cm, yanlarda 20 cm serbest' },
+  lavabo: { on: 0.7, arka: 0, sol: 0.1, sag: 0.1, not: 'Ayna önü 70 cm hareket alanı' },
+  dus: { on: 0.6, arka: 0, sol: 0, sag: 0, not: 'Kabin önünde 60 cm kurulanma alanı' },
+  kuvet: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Küvet yanında 70 cm' },
+  camasir: { on: 0.7, arka: 0, sol: 0, sag: 0, not: 'Kapak açılımı için 70 cm' },
+  'merdiven-duz': { on: 1.0, arka: 1.0, sol: 0, sag: 0, not: 'Sahanlık en az kol genişliği; 2h+t=63' },
+  'merdiven-u': { on: 1.0, arka: 0, sol: 0, sag: 0, not: 'Sahanlık en az kol genişliği kadar' },
+  asansor: { on: 1.5, arka: 0, sol: 0, sag: 0, not: 'Kabin önünde en az 150 cm bekleme alanı' },
+  'asansor-sedye': { on: 1.8, arka: 0, sol: 0, sag: 0, not: 'Sedye manevrası için 180 cm' },
   arac: { on: 0.6, arka: 0.6, sol: 0.25, sag: 0.25, not: 'Otopark cebi 2.5x5.0 m; manevra yolu 6 m' },
-  televizyon: { on: 2.5, arka: 0, sol: 0, sag: 0, not: 'Izleme mesafesi ekran kosegeni x 2.5' },
+  televizyon: { on: 2.5, arka: 0, sol: 0, sag: 0, not: 'İzleme mesafesi ekran köşegeni x 2.5' },
 }
 
 export function tesrifat(id: string): Tesrifat | null {

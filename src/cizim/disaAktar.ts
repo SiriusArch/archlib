@@ -348,7 +348,7 @@ export function planSvg(kat: Kat, projeAdi: string, genislikPx = 1600): string {
 
   const toplam = odalar.reduce((t, o) => t + o.alan, 0)
   parca.push(
-    `<text x="24" y="${Y - 22}" font-family="DM Sans, sans-serif" font-size="14" fill="#30332d">${projeAdi} · ${kat.ad} · ${odalar.length} mekan · ${toplam.toFixed(1)} m²</text>`,
+    `<text x="24" y="${Y - 22}" font-family="DM Sans, sans-serif" font-size="14" fill="#30332d">${projeAdi} · ${kat.ad} · ${odalar.length} mekân · ${toplam.toFixed(1)} m²</text>`,
   )
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(gen * k)}" height="${Y}" viewBox="0 0 ${Math.round(gen * k)} ${Y}">
