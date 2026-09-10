@@ -2,6 +2,7 @@ import { KAYNAKLAR } from '../data/kritik'
 import { SITELER } from '../data/sites'
 import { SayfaBasligi } from '../ui/Parcalar'
 import { Panel, PanelBasligi } from '../ui/Kontroller'
+import { bolumBul } from '../ui/bolumler'
 
 const GUVEN_SINIF: Record<string, string> = {
   yuksek: 'border-adacayi/45 bg-adacayi-soft text-adacayi-koyu',
@@ -28,6 +29,7 @@ export default function Kaynaklar() {
     <div className="kademe max-w-4xl">
       <SayfaBasligi
         etiket="Kaynaklar"
+        renk={bolumBul('kaynak').metin}
         baslik="Hangi bilgi nereden geliyor"
         aciklama={`Bu uygulamanın bilgi tabanı ${KAYNAKLAR.length} kaynaktan oluşturuldu. Ana kaynaklar doğrudan okunup çıkarıldı; destek kaynaklar çerçeve için kullanıldı. Nereden geldiğini bilmen, o bilgiyi jüri karşısında savunabilmen için gerekli.`}
       />

@@ -8,7 +8,8 @@ interface Props {
 
 type Durum = 'yukleniyor' | 'hazir' | 'desteklenmiyor'
 
-const SERIF = '"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif'
+const BASLIK_FONT = 'var(--font-baslik)'
+const ETIKET_FONT = 'var(--font-mono)'
 const PALET = ['#b03e3e', '#519976', '#be8144', '#517a95', '#5c5992']
 
 export default function Intro({ gir }: Props) {
@@ -96,20 +97,23 @@ export default function Intro({ gir }: Props) {
       <header className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between px-6 py-5 sm:px-12 sm:py-9">
         <div>
           <div
-            className="text-[21px] leading-none tracking-[-0.01em] text-[#ece8e0] sm:text-[26px]"
-            style={{ fontFamily: SERIF }}
+            className="text-[21px] leading-none font-extrabold tracking-[-0.01em] text-[#ece8e0] sm:text-[26px]"
+            style={{ fontFamily: BASLIK_FONT }}
           >
             ArchLib
           </div>
           <div className="mt-2 flex items-center gap-2">
             <span className="block h-px w-9 bg-[#ece8e0]/30" />
-            <span className="text-[9px] tracking-[0.24em] text-[#ece8e0]/45 uppercase sm:text-[10px]">
+            <span
+              className="text-[9px] tracking-[0.24em] text-[#ece8e0]/45 uppercase sm:text-[10px]"
+              style={{ fontFamily: ETIKET_FONT }}
+            >
               Mimarlık
             </span>
           </div>
         </div>
 
-        <div className="hidden text-right sm:block">
+        <div className="hidden text-right sm:block" style={{ fontFamily: ETIKET_FONT }}>
           <div className="text-[10px] tracking-[0.22em] text-[#ece8e0]/70 uppercase">
             Kemer / Yarım Daire
           </div>
@@ -124,8 +128,8 @@ export default function Intro({ gir }: Props) {
         <div className="mx-auto flex max-w-5xl flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
           <div className="max-w-md">
             <h1
-              className="text-[26px] leading-[1.1] tracking-[-0.015em] text-[#f2eee6] sm:text-[40px]"
-              style={{ fontFamily: SERIF }}
+              className="text-[28px] leading-[0.98] font-extrabold tracking-[-0.02em] text-[#f2eee6] sm:text-[42px]"
+              style={{ fontFamily: BASLIK_FONT }}
             >
               Önce <span className="text-[#d1685f]">ölçü</span>,
               <br />
@@ -142,13 +146,15 @@ export default function Intro({ gir }: Props) {
               className={`text-[9px] tracking-[0.2em] text-[#ece8e0]/40 uppercase transition-opacity duration-500 sm:text-[10px] ${
                 ipucu && durum === 'hazir' ? 'opacity-100' : 'opacity-0'
               }`}
+              style={{ fontFamily: ETIKET_FONT }}
             >
               Sürükleyerek çevir
             </div>
 
             <button
               onClick={girisBaslat}
-              className="group relative overflow-hidden border border-[#ece8e0]/30 px-7 py-3.5 text-[10px] tracking-[0.2em] text-[#f2eee6] uppercase transition-colors duration-500 hover:border-[#b03e3e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b03e3e]/60 sm:px-9 sm:py-4 sm:text-[11px]"
+              style={{ fontFamily: ETIKET_FONT }}
+              className="group relative overflow-hidden border border-[#ece8e0]/30 px-7 py-3.5 text-[10px] font-medium tracking-[0.2em] text-[#f2eee6] uppercase transition-colors duration-500 hover:border-[#b03e3e] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b03e3e]/60 sm:px-9 sm:py-4 sm:text-[11px]"
             >
               <span
                 className="absolute inset-0 -translate-y-full bg-[#b03e3e] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0"
@@ -173,7 +179,10 @@ export default function Intro({ gir }: Props) {
           durum === 'yukleniyor' ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <span className="text-[10px] tracking-[0.28em] text-[#ece8e0]/35 uppercase">
+        <span
+          className="text-[10px] tracking-[0.28em] text-[#ece8e0]/35 uppercase"
+          style={{ fontFamily: ETIKET_FONT }}
+        >
           Sahne hazırlanıyor
         </span>
       </div>

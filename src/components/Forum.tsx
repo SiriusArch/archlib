@@ -6,6 +6,7 @@ import Basliklar from './forum/Basliklar'
 import Arkadaslar from './forum/Arkadaslar'
 import Mesajlar from './forum/Mesajlar'
 import Kimlik from './forum/Kimlik'
+import { bolumBul } from '../ui/bolumler'
 
 type ForumSekme = 'basliklar' | 'arkadaslar' | 'mesajlar'
 
@@ -18,7 +19,7 @@ export default function Forum() {
   if (!kimlik.yapilandirilmis) {
     return (
       <div className="kademe">
-        <SayfaBasligi etiket="Forum" renk="text-mavi-koyu" baslik="Forum henüz kurulmadı" />
+        <SayfaBasligi etiket="Forum" renk={bolumBul('forum').metin} baslik="Forum henüz kurulmadı" />
         <Bos
           baslik="Backend bağlanmamış"
           aciklama="Bu özellik için ücretsiz bir Firebase projesi gerekiyor. README.md'deki 'Forum kurulumu' bölümünü izleyip proje köküne bir .env.local dosyası ekle."
@@ -34,7 +35,7 @@ export default function Forum() {
   if (kimlik.kullanici && kimlik.profilHatasi) {
     return (
       <div className="kademe">
-        <SayfaBasligi etiket="Forum" renk="text-mavi-koyu" baslik="Profilin yüklenemedi" />
+        <SayfaBasligi etiket="Forum" renk={bolumBul('forum').metin} baslik="Profilin yüklenemedi" />
         <Bos
           baslik="Bağlantı sorunu"
           aciklama="Giriş yaptın ama profil bilgin okunamadı. İnternet bağlantını kontrol edip tekrar dene."
@@ -51,7 +52,7 @@ export default function Forum() {
       <div className="kademe">
         <SayfaBasligi
           etiket="Forum"
-          renk="text-mavi-koyu"
+          renk={bolumBul('forum').metin}
           baslik="Teknik sorular sor, cevap ver, arkadaş edin"
           aciklama="Forum tamamen anonimdir: e-postan hiçbir yerde görünmez, diğer kullanıcılar seni yalnızca seçtiğin takma adla görür. Katılmak için ücretsiz bir hesap aç."
         />
@@ -67,7 +68,7 @@ export default function Forum() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Forum"
-        renk="text-mavi-koyu"
+        renk={bolumBul('forum').metin}
         baslik="Teknik sorular sor, cevap ver, arkadaş edin"
         aciklama="Ahlaki sınırlar içinde kal: hakaret, ayrımcılık ve taciz içeren içerik kaldırılır. Uygunsuz gördüğünü 'Bildir' ile işaretle."
         sag={

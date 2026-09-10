@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Archivo:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import 'tailwindcss';
 
 /* ==========================================================================
@@ -48,10 +48,26 @@
   --color-mor-koyu: var(--t-mor-koyu);
   --color-mor-soft: var(--t-mor-soft);
 
+  --color-zeytin: var(--t-zeytin);
+  --color-zeytin-koyu: var(--t-zeytin-koyu);
+  --color-zeytin-soft: var(--t-zeytin-soft);
+
+  --color-yesil: var(--t-yesil);
+  --color-yesil-koyu: var(--t-yesil-koyu);
+  --color-yesil-soft: var(--t-yesil-soft);
+
+  --color-turkuaz: var(--t-turkuaz);
+  --color-turkuaz-koyu: var(--t-turkuaz-koyu);
+  --color-turkuaz-soft: var(--t-turkuaz-soft);
+
+  --color-lacivert: var(--t-lacivert);
+  --color-lacivert-koyu: var(--t-lacivert-koyu);
+  --color-lacivert-soft: var(--t-lacivert-soft);
+
   /* --- tipografi -------------------------------------------------------- */
-  --font-baslik: 'Manrope', system-ui, sans-serif;
+  --font-baslik: 'Archivo', system-ui, sans-serif;
   --font-govde: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 :root {
@@ -93,6 +109,22 @@
   --t-mor: #6d6a8f;
   --t-mor-koyu: #5c5979;
   --t-mor-soft: #ecebf1;
+
+  --t-zeytin: #a8a348;
+  --t-zeytin-koyu: #918d3b;
+  --t-zeytin-soft: #f3f2e2;
+
+  --t-yesil: #48a860;
+  --t-yesil-koyu: #3b9151;
+  --t-yesil-soft: #e2f3e7;
+
+  --t-turkuaz: #48a898;
+  --t-turkuaz-koyu: #3b9183;
+  --t-turkuaz-soft: #e2f3f0;
+
+  --t-lacivert: #4860a8;
+  --t-lacivert-koyu: #3b5191;
+  --t-lacivert-soft: #e2e7f3;
 
   --t-secim-bg: #f0e6dc;
   --t-odak-bg: #ffffff;
@@ -144,6 +176,22 @@
     --t-mor-koyu: #b7b2d6;
     --t-mor-soft: #292739;
 
+    --t-zeytin: #c1be86;
+    --t-zeytin-koyu: #e3e1b5;
+    --t-zeytin-soft: #38371e;
+
+    --t-yesil: #86c195;
+    --t-yesil-koyu: #b5e3c1;
+    --t-yesil-soft: #1e3825;
+
+    --t-turkuaz: #86c1b7;
+    --t-turkuaz-koyu: #b5e3db;
+    --t-turkuaz-soft: #1e3834;
+
+    --t-lacivert: #8695c1;
+    --t-lacivert-koyu: #b5c1e3;
+    --t-lacivert-soft: #1e2538;
+
     --t-secim-bg: #4a3325;
     --t-odak-bg: #29281f;
     --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
@@ -187,6 +235,22 @@
   --t-mor-koyu: #b7b2d6;
   --t-mor-soft: #292739;
 
+  --t-zeytin: #c1be86;
+  --t-zeytin-koyu: #e3e1b5;
+  --t-zeytin-soft: #38371e;
+
+  --t-yesil: #86c195;
+  --t-yesil-koyu: #b5e3c1;
+  --t-yesil-soft: #1e3825;
+
+  --t-turkuaz: #86c1b7;
+  --t-turkuaz-koyu: #b5e3db;
+  --t-turkuaz-soft: #1e3834;
+
+  --t-lacivert: #8695c1;
+  --t-lacivert-koyu: #b5c1e3;
+  --t-lacivert-soft: #1e2538;
+
   --t-secim-bg: #4a3325;
   --t-odak-bg: #29281f;
   --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
@@ -226,10 +290,10 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: 'Manrope', system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.022em;
-  line-height: 1.18;
+  font-family: var(--font-baslik);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   margin: 0;
 }
 
@@ -241,18 +305,18 @@ h4 {
  * cevrildi. Buyuk harf yalnizca .etiket-buyuk'te, o da olculu bir aralikla.
  */
 .etiket {
-  font-family: var(--font-govde);
-  font-size: 12.5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.01em;
   color: var(--color-murekkep-3);
 }
 
 .etiket-buyuk {
-  font-family: var(--font-govde);
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.075em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-murekkep-3);
 }

@@ -3,6 +3,7 @@ import { KONTROL_LISTELERI } from '../data/kritik'
 import { listeDurumuOku, listeDurumuYaz } from '../lib/storage'
 import { SayfaBasligi } from '../ui/Parcalar'
 import { Panel, PanelBasligi, Cip } from '../ui/Kontroller'
+import { bolumBul } from '../ui/bolumler'
 
 export default function Listeler() {
   const [durum, setDurum] = useState<Record<string, boolean>>({})
@@ -39,7 +40,7 @@ export default function Listeler() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Listeler"
-        renk="text-mor-koyu"
+        renk={bolumBul('liste').metin}
         baslik="Teslimden önce tek tek işaretle"
         aciklama="Çoğu pafta, tasarım kötü olduğu için değil, bu maddelerden birkaçı atlandığı için puan kaybeder. İşaretler bu tarayıcıda saklanır."
         sag={
@@ -81,7 +82,7 @@ export default function Listeler() {
           </p>
           <div className="mt-4 h-[3px] w-full overflow-hidden rounded-full bg-cizgi">
             <div
-              className="h-full rounded-full bg-mor transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              className="h-full rounded-full bg-lacivert transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
               style={{ width: `${yuzde}%` }}
             />
           </div>
@@ -100,7 +101,7 @@ export default function Listeler() {
                     type="checkbox"
                     checked={isaretli}
                     onChange={() => degistir(m.id)}
-                    className="mt-[3px] h-4 w-4 shrink-0 rounded-[3px] accent-[#6d6a8f]"
+                    className="mt-[3px] h-4 w-4 shrink-0 rounded-[3px] accent-[#4860a8]"
                   />
                   <div className="min-w-0 flex-1">
                     <div

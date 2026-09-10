@@ -165,12 +165,15 @@ function sutunEkle(b: MeshBuilder, merkezX: number): void {
       const d = nokta(y1, r1, f1, j)
 
       if (r0 === 0) {
-        // alt/ust kapak ucgeni
-        b.triFlat([merkezX, y0, 0], c, d)
+        // alt/ust kapak ucgeni (sira ters: normal disari doggru olsun)
+        b.triFlat([merkezX, y0, 0], d, c)
       } else if (r1 === 0) {
-        b.triFlat(a, bb, [merkezX, y1, 0])
+        b.triFlat(a, [merkezX, y1, 0], bb)
       } else {
-        b.quadFlat(a, bb, c, d)
+        // Sira (a,d,c,bb): normal (a,bb,c)'nin tersi, disari donuk --
+        // aksi halde bu yuzeyler kameradan hep "sirt" gorunur, fresnel her
+        // yerde maksimuma kilitlenir ve base_color hic etki etmez.
+        b.quadFlat(a, d, c, bb)
       }
     }
   }

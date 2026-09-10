@@ -3,6 +3,7 @@ import type { Asama, Kategori, Site, Ucret } from '../types'
 import { SITELER, KATEGORI_ADI, KATEGORI_ACIKLAMA, UCRET_ADI, ASAMA_ADI } from '../data/sites'
 import { SayfaBasligi, Rozet, Kart } from '../ui/Parcalar'
 import { Portal } from '../ui/Portal'
+import { bolumBul } from '../ui/bolumler'
 
 const UCRET_SINIF: Record<Ucret, string> = {
   ucretsiz: 'border-adacayi/45 text-adacayi-koyu',
@@ -12,9 +13,9 @@ const UCRET_SINIF: Record<Ucret, string> = {
 
 function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
   return (
-    <Kart onClick={() => ac(site)} vurgu="bg-adacayi" className="flex h-full flex-col p-5">
+    <Kart onClick={() => ac(site)} vurgu="bg-turkuaz" className="flex h-full flex-col p-5">
       <div className="mb-2.5 flex items-start justify-between gap-3">
-        <h3 className="text-[18px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
+        <h3 className="text-[18px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-turkuaz-koyu">
           {site.ad}
         </h3>
         <Rozet className={`${UCRET_SINIF[site.ucret]} shrink-0`}>{UCRET_ADI[site.ucret]}</Rozet>
@@ -26,7 +27,7 @@ function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
             {ASAMA_ADI[a].split(' ')[0]}
           </span>
         ))}
-        {site.turkce && <span className="etiket text-adacayi-koyu">TR</span>}
+        {site.turkce && <span className="etiket text-turkuaz-koyu">TR</span>}
         {site.dogrulama === 'dogrulanmadi' && (
           <span className="etiket text-kiremit-koyu">doğrulanmadı</span>
         )}
@@ -48,7 +49,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
-            <div className="etiket text-adacayi-koyu">{KATEGORI_ADI[site.kategori]}</div>
+            <div className="etiket text-turkuaz-koyu">{KATEGORI_ADI[site.kategori]}</div>
             <h2 className="mt-1.5 text-[27px] leading-tight text-murekkep">{site.ad}</h2>
           </div>
           <button
@@ -77,7 +78,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
 
           <section>
             <h3 className="etiket mb-2 text-murekkep-3">Projende nerede kullanırsın</h3>
-            <p className="border-l-2 border-adacayi pl-4 text-[16px] leading-relaxed text-murekkep-2">
+            <p className="border-l-2 border-turkuaz pl-4 text-[16px] leading-relaxed text-murekkep-2">
               {site.kullanim}
             </p>
           </section>
@@ -109,7 +110,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
               href={site.url}
               target="_blank"
               rel="noreferrer noopener"
-              className="rounded-[6px] bg-adacayi px-5 py-2.5 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
+              className="rounded-[6px] bg-turkuaz px-5 py-2.5 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
             >
               Siteye git
             </a>
@@ -168,7 +169,7 @@ export default function Katalog() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Kitaplık"
-        renk="text-adacayi-koyu"
+        renk={bolumBul('katalog').metin}
         baslik="Öğrencinin işine yarayan 48 araç"
         aciklama="Ücret, içerik ve proje aşamasına göre sınıflandırıldı. Her kartta aracın ne işe yaradığı ve projende tam olarak nerede kullanılacağı yazıyor."
         sag={

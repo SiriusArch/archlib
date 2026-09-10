@@ -155,7 +155,7 @@ function BaslikDetayi({
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
-            <div className="etiket text-mavi-koyu">{FORUM_KATEGORI_ADI[baslik.kategori]}</div>
+            <div className="etiket text-yesil-koyu">{FORUM_KATEGORI_ADI[baslik.kategori]}</div>
             <h2 className="mt-1.5 text-[24px] leading-tight text-murekkep">{baslik.baslik}</h2>
             <p className="mt-1 text-[13px] text-murekkep-3">
               {baslik.yazarAdi} · {goreliZaman(baslik.tarih)}
@@ -307,11 +307,11 @@ export default function Basliklar({ uid, takmaAd }: { uid: string; takmaAd: stri
       ) : (
         <div className="space-y-2.5">
           {filtreli.map((b) => (
-            <Kart key={b.id} onClick={() => setSecili(b)} vurgu="bg-mavi" className="p-4">
+            <Kart key={b.id} onClick={() => setSecili(b)} vurgu="bg-yesil" className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <Rozet className="border-mavi/45 text-mavi-koyu">
+                    <Rozet className="border-yesil/45 text-yesil-koyu">
                       {FORUM_KATEGORI_ADI[b.kategori]}
                     </Rozet>
                     <span className="text-[12.5px] text-murekkep-3">{goreliZaman(b.sonAktivite)}</span>

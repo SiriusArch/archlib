@@ -3,6 +3,7 @@ import type { ArsivFormat, ArsivKaynagi, ArsivTur, Ucret } from '../types'
 import { ARSIV_KAYNAKLARI, ARSIV_TUR_ADI, ARSIV_FORMAT_ADI, ARSIV_UCRET_ADI } from '../data/arsiv'
 import { SayfaBasligi, Rozet, Kart } from '../ui/Parcalar'
 import { Portal } from '../ui/Portal'
+import { bolumBul } from '../ui/bolumler'
 
 const UCRET_SINIF: Record<Ucret, string> = {
   ucretsiz: 'border-adacayi/45 text-adacayi-koyu',
@@ -15,9 +16,9 @@ const FORMATLAR = Object.keys(ARSIV_FORMAT_ADI) as ArsivFormat[]
 
 function KaynakKarti({ kaynak, ac }: { kaynak: ArsivKaynagi; ac: (k: ArsivKaynagi) => void }) {
   return (
-    <Kart onClick={() => ac(kaynak)} vurgu="bg-mor" className="flex h-full flex-col p-5">
+    <Kart onClick={() => ac(kaynak)} vurgu="bg-adacayi" className="flex h-full flex-col p-5">
       <div className="mb-2.5 flex items-start justify-between gap-3">
-        <h3 className="text-[18px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-mor-koyu">
+        <h3 className="text-[18px] leading-tight text-murekkep transition-colors duration-300 group-hover:text-adacayi-koyu">
           {kaynak.ad}
         </h3>
         <Rozet className={`${UCRET_SINIF[kaynak.ucret]} shrink-0`}>{ARSIV_UCRET_ADI[kaynak.ucret]}</Rozet>
@@ -30,6 +31,7 @@ function KaynakKarti({ kaynak, ac }: { kaynak: ArsivKaynagi; ac: (k: ArsivKaynag
           </span>
         ))}
         {kaynak.turkce && <span className="etiket text-adacayi-koyu">TR</span>}
+
         {kaynak.dogrulama === 'dogrulanmadi' && (
           <span className="etiket text-kiremit-koyu">doğrulanmadı</span>
         )}
@@ -51,7 +53,7 @@ function Detay({ kaynak, kapat }: { kaynak: ArsivKaynagi; kapat: () => void }) {
       >
         <div className="flex items-start justify-between gap-6 border-b border-cizgi px-7 py-5">
           <div>
-            <div className="etiket text-mor-koyu">
+            <div className="etiket text-adacayi-koyu">
               {kaynak.turler.map((t) => ARSIV_TUR_ADI[t]).join(' · ')}
             </div>
             <h2 className="mt-1.5 text-[27px] leading-tight text-murekkep">{kaynak.ad}</h2>
@@ -82,7 +84,7 @@ function Detay({ kaynak, kapat }: { kaynak: ArsivKaynagi; kapat: () => void }) {
 
           <section>
             <h3 className="etiket mb-2 text-murekkep-3">Projende nerede kullanırsın</h3>
-            <p className="border-l-2 border-mor pl-4 text-[16px] leading-relaxed text-murekkep-2">
+            <p className="border-l-2 border-adacayi pl-4 text-[16px] leading-relaxed text-murekkep-2">
               {kaynak.kullanim}
             </p>
           </section>
@@ -114,7 +116,7 @@ function Detay({ kaynak, kapat }: { kaynak: ArsivKaynagi; kapat: () => void }) {
               href={kaynak.url}
               target="_blank"
               rel="noreferrer noopener"
-              className="rounded-[6px] bg-mor px-5 py-2.5 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
+              className="rounded-[6px] bg-adacayi px-5 py-2.5 text-[14.5px] font-medium text-white transition-opacity duration-200 hover:opacity-90"
             >
               Kaynağa git
             </a>
@@ -158,7 +160,7 @@ export default function Arsiv() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Arşiv"
-        renk="text-mor-koyu"
+        renk={bolumBul('arsiv').metin}
         baslik="Hazır AutoCAD ve SketchUp projeleri"
         aciklama="İndirilebilir gerçek proje dosyaları sunan dış kaynaklar — tipolojisine, formatına ve ücretine göre sınıflandırıldı. ArchLib dosya barındırmaz; her kart seni kaynağın kendi sitesine yönlendirir."
         sag={

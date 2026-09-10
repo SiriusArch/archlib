@@ -77,7 +77,7 @@ export default function Mesajlar({
                 onClick={() => setAktifId(s.id)}
                 className={`block w-full rounded-[7px] border px-3.5 py-2.5 text-left transition-colors ${
                   s.id === aktifId
-                    ? 'border-mavi bg-mavi-soft'
+                    ? 'border-yesil bg-yesil-soft'
                     : 'border-cizgi bg-kart hover:border-cizgi-2'
                 }`}
               >
@@ -118,7 +118,7 @@ export default function Mesajlar({
                       key={m.id}
                       className={`max-w-[75%] rounded-[8px] px-3.5 py-2 text-[14px] leading-relaxed whitespace-pre-wrap ${
                         m.gonderenId === uid
-                          ? 'ml-auto bg-mavi-soft text-murekkep'
+                          ? 'ml-auto bg-yesil-soft text-murekkep'
                           : 'bg-kagit-2 text-murekkep-2'
                       }`}
                     >

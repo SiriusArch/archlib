@@ -3,6 +3,7 @@ import { BILGI_BOLUMLERI } from '../data/bilgi'
 import { OLCU_TABLOLARI } from '../data/olculer'
 import { SayfaBasligi } from '../ui/Parcalar'
 import { Panel, PanelBasligi, Segment } from '../ui/Kontroller'
+import { bolumBul } from '../ui/bolumler'
 
 function Metin({ icerik }: { icerik: string }) {
   return (
@@ -61,7 +62,7 @@ export default function BilgiBankasi() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Bilgi"
-        renk="text-kehribar-koyu"
+        renk={bolumBul('bilgi').metin}
         baslik="Analiz motorunun beslediği kaynak"
         aciklama="Temel Tasar (İ. Hulûsi Güngör), Neufert ve MİM 153 / MİM 244 ders notlarından çıkarılmış kavramlar, standartlar ve ölçüler."
         sag={
@@ -114,8 +115,8 @@ export default function BilgiBankasi() {
                       <span
                         className={`text-[15.5px] font-medium transition-colors duration-300 ${
                           secili
-                            ? 'text-kehribar-koyu'
-                            : 'text-murekkep group-hover:text-kehribar-koyu'
+                            ? 'text-mavi-koyu'
+                            : 'text-murekkep group-hover:text-mavi-koyu'
                         }`}
                       >
                         {m.baslik}

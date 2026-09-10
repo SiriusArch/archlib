@@ -103,7 +103,7 @@ export default function Arkadaslar({
                 ) : (
                   <button
                     onClick={() => void istekGonder(s.uid, s.takmaAd)}
-                    className="text-[13px] font-medium text-mavi-koyu hover:text-mavi"
+                    className="text-[13px] font-medium text-yesil-koyu hover:text-yesil"
                   >
                     İstek gönder
                   </button>
@@ -157,7 +157,7 @@ export default function Arkadaslar({
                   <span className="flex shrink-0 gap-3">
                     <button
                       onClick={() => mesajBaslat(a.uid, a.takmaAd)}
-                      className="text-[13px] font-medium text-mavi-koyu hover:text-mavi"
+                      className="text-[13px] font-medium text-yesil-koyu hover:text-yesil"
                     >
                       Mesaj
                     </button>

@@ -24,6 +24,7 @@ import {
 import { SayfaBasligi } from '../ui/Parcalar'
 import { Panel, PanelBasligi, Cip, KatmanSatiri, DegerSecici, Segment } from '../ui/Kontroller'
 import { IkonIndir } from '../ui/Ikonlar'
+import { bolumBul } from '../ui/bolumler'
 
 type Mod = 'plan' | 'kesit'
 type Durum = 'bos' | 'yukleniyor' | 'hazir' | 'hata'
@@ -768,7 +769,7 @@ export default function Arazi() {
     <div className="kademe">
       <SayfaBasligi
         etiket="Arazi"
-        renk="text-mavi-koyu"
+        renk={bolumBul('arazi').metin}
         baslik="Konumdan plan, model ve kesit"
         aciklama="Haritadan bir alan seç ya da serbest bir kesit hattı çiz. Bina, yol, su, yeşil alan ve kontur verisi CAD ve 3B programlarına götürebileceğin formatlarda iner. İşlem tamamen tarayıcında çalışır."
         sag={
@@ -815,7 +816,7 @@ export default function Arazi() {
                     <li key={i} className="border-b border-cizgi last:border-0">
                       <button
                         onClick={() => konumaGit(s)}
-                        className="w-full px-3 py-2 text-left text-[13.5px] leading-snug text-murekkep-2 transition-colors hover:bg-mavi-soft hover:text-murekkep"
+                        className="w-full px-3 py-2 text-left text-[13.5px] leading-snug text-murekkep-2 transition-colors hover:bg-zeytin-soft hover:text-murekkep"
                       >
                         {s.ad}
                       </button>
@@ -1079,7 +1080,7 @@ export default function Arazi() {
           </button>
 
           {durum === 'yukleniyor' && ilerleme && (
-            <p className="text-[13.5px] text-mavi-koyu">{ilerleme}</p>
+            <p className="text-[13.5px] text-zeytin-koyu">{ilerleme}</p>
           )}
           {hata && (
             <p className="rounded-[7px] bg-kiremit-soft px-3.5 py-2.5 text-[13.5px] leading-relaxed text-kiremit-koyu">
