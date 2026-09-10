@@ -97,6 +97,14 @@
   --t-secim-bg: #f0e6dc;
   --t-odak-bg: #ffffff;
   --t-leaflet-attrib: rgba(252, 251, 248, 0.9);
+
+  /* --- bauhaus / 80'ler retro vurgu katmani -------------------------------
+   * Ana govde hala sade kalir; bu belirtecler yalnizca kart/rozet/dugme gibi
+   * "imza" ogelerde sert golge + kalin kontur icin kullanilir. */
+  --t-golge-ink: #1c1a15;
+  --t-golge: 4px 4px 0 0 var(--t-golge-ink);
+  --t-golge-sm: 3px 3px 0 0 var(--t-golge-ink);
+  --t-golge-kucuk: 2px 2px 0 0 var(--t-golge-ink);
 }
 
 /* Kullanici acik ac/kapa dugmesine hic dokunmadiysa sistem tercihi gecerli. */
@@ -139,6 +147,7 @@
     --t-secim-bg: #4a3325;
     --t-odak-bg: #29281f;
     --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
+    --t-golge-ink: #000000;
   }
 }
 
@@ -181,11 +190,13 @@
   --t-secim-bg: #4a3325;
   --t-odak-bg: #29281f;
   --t-leaflet-attrib: rgba(23, 22, 20, 0.85);
+  --t-golge-ink: #000000;
 }
 
 /* Kullanici acikca "acik" secti: sistem koyuysa da bu gecerli olsun. */
 :root[data-theme='light'] {
   color-scheme: light;
+  --t-golge-ink: #1c1a15;
 }
 
 html {
@@ -257,6 +268,32 @@ h4 {
   border-radius: 8px;
 }
 
+/* --- bauhaus / 80'ler retro desenler --------------------------------------
+ * Kucuk noktali ve capraz cizgili dokular; sayfa basliklarinda ve panel
+ * kose vurgularinda kullanilir. Renk her yerde currentColor'a baglidir ki
+ * cagiran, rengini text-* siniflariyla versin. */
+.desen-noktalar {
+  background-image: radial-gradient(currentColor 1.3px, transparent 1.3px);
+  background-size: 13px 13px;
+}
+
+.desen-capraz {
+  background-image: repeating-linear-gradient(
+    45deg,
+    currentColor 0,
+    currentColor 1.5px,
+    transparent 1.5px,
+    transparent 9px
+  );
+}
+
+/* Kucuk geometrik "imza" sekli — Bauhaus'un ucgen/daire/kare uclusu. */
+.sekil-ucgen {
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
 /* --- gecisler ------------------------------------------------------------ */
 
 @keyframes acilis {
@@ -324,8 +361,8 @@ h4 {
 .alan {
   width: 100%;
   background: var(--color-kart);
-  border: 1px solid var(--color-cizgi);
-  border-radius: 6px;
+  border: 1.5px solid var(--color-cizgi-2);
+  border-radius: 4px;
   padding: 9px 12px;
   font-family: var(--font-govde);
   font-size: 15px;
@@ -336,7 +373,7 @@ h4 {
     background 220ms ease;
 }
 .alan:focus {
-  border-color: var(--color-murekkep-3);
+  border-color: var(--color-murekkep);
   background: var(--t-odak-bg);
 }
 .alan::placeholder {

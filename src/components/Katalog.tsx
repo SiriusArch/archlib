@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Asama, Kategori, Site, Ucret } from '../types'
 import { SITELER, KATEGORI_ADI, KATEGORI_ACIKLAMA, UCRET_ADI, ASAMA_ADI } from '../data/sites'
 import { SayfaBasligi, Rozet, Kart } from '../ui/Parcalar'
+import { Portal } from '../ui/Portal'
 
 const UCRET_SINIF: Record<Ucret, string> = {
   ucretsiz: 'border-adacayi/45 text-adacayi-koyu',
@@ -36,6 +37,7 @@ function SiteKarti({ site, ac }: { site: Site; ac: (s: Site) => void }) {
 
 function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/45 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -122,6 +124,7 @@ function Detay({ site, kapat }: { site: Site; kapat: () => void }) {
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
 

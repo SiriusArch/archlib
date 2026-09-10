@@ -4,6 +4,7 @@ import { FORUM_KATEGORI_ADI, basliklariDinle, basligOlustur, basligiSil, cevapEk
 import { raporOlustur } from '../../lib/moderasyon'
 import { goreliZaman } from '../../lib/zaman'
 import { BolumBasligi, Bos, Dugme, Kart, Rozet } from '../../ui/Parcalar'
+import { Portal } from '../../ui/Portal'
 
 const KATEGORILER = Object.keys(FORUM_KATEGORI_ADI) as ForumKategori[]
 
@@ -36,6 +37,7 @@ function YeniBaslikFormu({
   }
 
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/40 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -89,6 +91,7 @@ function YeniBaslikFormu({
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
 
@@ -141,6 +144,7 @@ function BaslikDetayi({
   }
 
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/45 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -250,6 +254,7 @@ function BaslikDetayi({
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
 

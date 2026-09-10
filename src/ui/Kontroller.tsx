@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-/** Arac panellerinde kullanilan kart blogu. */
+/** Arac panellerinde kullanilan kart blogu — kalin kontur + sert golge. */
 export function Panel({
   children,
   className = '',
@@ -9,7 +9,9 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`overflow-hidden rounded-[8px] border border-cizgi bg-kart ${className}`}>
+    <section
+      className={`overflow-hidden rounded-[4px] border-[1.5px] border-murekkep bg-kart shadow-[var(--t-golge-sm)] ${className}`}
+    >
       {children}
     </section>
   )
@@ -29,7 +31,7 @@ export function PanelBasligi({
   renk?: string
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-cizgi px-4 py-3">
+    <div className="flex items-center justify-between gap-3 border-b-[1.5px] border-murekkep px-4 py-3">
       <label className={`flex items-center gap-2.5 ${degistir ? 'cursor-pointer' : ''}`}>
         {degistir && (
           <input
@@ -39,6 +41,7 @@ export function PanelBasligi({
             className="h-4 w-4 rounded-[3px]"
           />
         )}
+        <span className="h-2 w-2 shrink-0 bg-current opacity-60" />
         <span className={`text-[14.5px] font-medium ${renk}`}>{baslik}</span>
       </label>
       {sag}
@@ -46,7 +49,7 @@ export function PanelBasligi({
   )
 }
 
-/** Format / secenek cipi — hap bicimli. */
+/** Format / secenek cipi — geometrik kose, secilince dolu renk blogu. */
 export function Cip({
   secili,
   onClick,
@@ -65,10 +68,10 @@ export function Cip({
       onClick={onClick}
       disabled={pasif}
       title={ipucu}
-      className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-35 ${
+      className={`rounded-[3px] border-[1.5px] px-3 py-1.5 text-[13px] font-semibold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-35 ${
         secili
-          ? 'border-kiremit bg-kiremit-soft text-kiremit-koyu'
-          : 'border-cizgi bg-kart text-murekkep-2 hover:border-cizgi-2 hover:text-murekkep'
+          ? 'border-murekkep bg-kiremit text-white shadow-[var(--t-golge-kucuk)]'
+          : 'border-cizgi-2 bg-kart text-murekkep-2 hover:border-murekkep hover:text-murekkep'
       }`}
     >
       {children}
@@ -106,7 +109,7 @@ export function KatmanSatiri({
           onChange={(e) => degistir(e.target.checked)}
           className="h-4 w-4 rounded-[3px]"
         />
-        <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-[3px] ${renk}`} />
+        <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-[2px] border-[1.5px] border-murekkep ${renk}`} />
         <span className="text-[14.5px] text-murekkep-2">{ad}</span>
       </span>
       {sag}
@@ -127,7 +130,7 @@ export function DegerSecici<T extends string | number>({
   birim?: string
 }) {
   return (
-    <span className="flex overflow-hidden rounded-full border border-cizgi">
+    <span className="flex overflow-hidden rounded-[4px] border-[1.5px] border-murekkep">
       {degerler.map((d) => (
         <button
           key={String(d)}
@@ -135,9 +138,9 @@ export function DegerSecici<T extends string | number>({
             e.preventDefault()
             degistir(d)
           }}
-          className={`px-2.5 py-1 text-[12px] font-medium transition-colors ${
+          className={`px-2.5 py-1 text-[12px] font-semibold transition-colors ${
             secili === d
-              ? 'bg-kiremit-soft text-kiremit-koyu'
+              ? 'bg-kiremit text-white'
               : 'text-murekkep-3 hover:bg-kagit-2 hover:text-murekkep-2'
           }`}
         >
@@ -162,15 +165,17 @@ export function Segment<T extends string>({
   className?: string
 }) {
   return (
-    <div className={`flex overflow-hidden rounded-[7px] border border-cizgi bg-kart ${className}`}>
+    <div
+      className={`flex overflow-hidden rounded-[4px] border-[1.5px] border-murekkep bg-kart ${className}`}
+    >
       {secenekler.map((s) => (
         <button
           key={s.deger}
           title={s.ipucu}
           onClick={() => degistir(s.deger)}
-          className={`flex-1 px-3 py-2 text-[13.5px] font-medium transition-colors duration-200 ${
+          className={`flex-1 px-3 py-2 text-[13.5px] font-semibold transition-colors duration-150 ${
             secili === s.deger
-              ? 'bg-kiremit-soft text-kiremit-koyu'
+              ? 'bg-kiremit text-white'
               : 'text-murekkep-3 hover:bg-kagit-2 hover:text-murekkep-2'
           }`}
         >

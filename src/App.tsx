@@ -104,16 +104,16 @@ export default function App() {
         <div className="px-5 pt-7 pb-5">
           <div className="flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-[7px] border border-kiremit/35 bg-kiremit-soft">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[4px] border-[1.5px] border-murekkep bg-kiremit shadow-[var(--t-golge-kucuk)]">
                 <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" aria-hidden="true">
                   <path
                     d="M4 20V10.5L12 4l8 6.5V20"
                     fill="none"
-                    stroke="#b9573e"
+                    stroke="#fffefa"
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                   />
-                  <path d="M9.5 20v-5.5h5V20" fill="none" stroke="#b9573e" strokeWidth="1.6" />
+                  <path d="M9.5 20v-5.5h5V20" fill="none" stroke="#fffefa" strokeWidth="1.6" />
                 </svg>
               </span>
               <span className="font-baslik text-[21px] font-semibold tracking-[-0.03em] text-murekkep">
@@ -124,16 +124,21 @@ export default function App() {
               onClick={temaDegistir}
               aria-label={tema === 'koyu' ? 'Açık temaya geç' : 'Koyu temaya geç'}
               title={tema === 'koyu' ? 'Açık temaya geç' : 'Koyu temaya geç'}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-cizgi bg-kart text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border-[1.5px] border-murekkep bg-kart text-murekkep-2 transition-colors hover:text-murekkep"
             >
               {tema === 'koyu' ? <IkonAy /> : <IkonGunes />}
             </button>
           </div>
           <p className="etiket-buyuk mt-3 leading-relaxed">Mimarlığın dijital kütüphanesi</p>
+          <div className="mt-4 flex h-[4px] overflow-hidden rounded-[2px]">
+            {BOLUMLER.filter((b) => b.id !== 'kaynak').map((b) => (
+              <span key={b.id} className={`h-full flex-1 ${b.dolgu}`} />
+            ))}
+          </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3">
-          <ul className="space-y-0.5">
+          <ul className="space-y-1">
             {BOLUMLER.map((b) => {
               const Ikon = IKONLAR[b.id]
               const secili = b.id === sekme
@@ -141,15 +146,17 @@ export default function App() {
                 <li key={b.id}>
                   <button
                     onClick={() => setSekme(b.id)}
-                    className={`group flex w-full items-center gap-3 rounded-[7px] px-3 py-2.5 text-left transition-colors duration-200 ${
+                    className={`group flex w-full items-center gap-3 rounded-[3px] border-[1.5px] px-3 py-2.5 text-left transition-all duration-150 ${
                       secili
-                        ? 'bg-kiremit-soft text-kiremit-koyu'
-                        : 'text-murekkep-2 hover:bg-kagit-2 hover:text-murekkep'
+                        ? `${b.kenar} ${b.zemin} ${b.metin} shadow-[var(--t-golge-kucuk)]`
+                        : 'border-transparent text-murekkep-2 hover:bg-kagit-2 hover:text-murekkep'
                     }`}
                   >
                     <Ikon className={`h-[18px] w-[18px] shrink-0 ${secili ? '' : 'opacity-70'}`} />
-                    <span className="flex-1 text-[15px] font-medium">{b.ad}</span>
-                    {secili && <span className="h-1.5 w-1.5 rounded-full bg-kiremit" />}
+                    <span className={`flex-1 text-[15px] ${secili ? 'font-semibold' : 'font-medium'}`}>
+                      {b.ad}
+                    </span>
+                    {secili && <span className={`h-2 w-2 shrink-0 ${b.dolgu}`} />}
                   </button>
                 </li>
               )
@@ -163,7 +170,7 @@ export default function App() {
         </nav>
 
         <div className="p-3">
-          <div className="rounded-[8px] border border-cizgi bg-kart p-4">
+          <div className="rounded-[4px] border-[1.5px] border-murekkep bg-kart p-4 shadow-[var(--t-golge-sm)]">
             <div className="flex items-center gap-2">
               <IkonAnahtar className="h-[15px] w-[15px] text-murekkep-3" />
               <span className="text-[14px] font-medium text-murekkep">API anahtarı</span>
@@ -175,7 +182,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setPanelAcik(true)}
-              className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-kiremit-koyu transition-colors hover:text-kiremit"
+              className="mt-3 flex items-center gap-1.5 text-[13px] font-semibold text-kiremit-koyu transition-colors hover:text-kiremit"
             >
               {anahtarVar ? 'Değiştir' : 'Anahtar gir'}
               <IkonOk className="h-[13px] w-[13px]" />
@@ -200,7 +207,7 @@ export default function App() {
               <button
                 onClick={() => setMenuAcik(true)}
                 aria-label="Bölümler"
-                className="rounded-[6px] border border-cizgi p-2 text-murekkep-2 lg:hidden"
+                className="rounded-[4px] border-[1.5px] border-murekkep p-2 text-murekkep-2 lg:hidden"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                   <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" />
@@ -213,11 +220,9 @@ export default function App() {
 
             <button
               onClick={() => setPanelAcik(true)}
-              className="flex items-center gap-2 rounded-[6px] border border-cizgi bg-kart px-3 py-2 text-[13.5px] text-murekkep-2 transition-colors hover:border-cizgi-2 hover:text-murekkep"
+              className="flex items-center gap-2 rounded-[4px] border-[1.5px] border-murekkep bg-kart px-3 py-2 text-[13.5px] font-medium text-murekkep-2 shadow-[var(--t-golge-kucuk)] transition-colors hover:text-murekkep"
             >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${anahtarVar ? 'bg-adacayi' : 'bg-kiremit'}`}
-              />
+              <span className={`h-2 w-2 ${anahtarVar ? 'bg-adacayi' : 'bg-kiremit'}`} />
               {anahtarVar ? saglayiciBul(saglayici).ad.split(' ')[0] : 'Anahtar yok'}
             </button>
           </div>

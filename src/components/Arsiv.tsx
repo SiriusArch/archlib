@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ArsivFormat, ArsivKaynagi, ArsivTur, Ucret } from '../types'
 import { ARSIV_KAYNAKLARI, ARSIV_TUR_ADI, ARSIV_FORMAT_ADI, ARSIV_UCRET_ADI } from '../data/arsiv'
 import { SayfaBasligi, Rozet, Kart } from '../ui/Parcalar'
+import { Portal } from '../ui/Portal'
 
 const UCRET_SINIF: Record<Ucret, string> = {
   ucretsiz: 'border-adacayi/45 text-adacayi-koyu',
@@ -39,6 +40,7 @@ function KaynakKarti({ kaynak, ac }: { kaynak: ArsivKaynagi; ac: (k: ArsivKaynag
 
 function Detay({ kaynak, kapat }: { kaynak: ArsivKaynagi; kapat: () => void }) {
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/45 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -127,6 +129,7 @@ function Detay({ kaynak, kapat }: { kaynak: ArsivKaynagi; kapat: () => void }) {
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
 

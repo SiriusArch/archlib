@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { KimlikDurumu } from '../../lib/kimlik'
 import { Segment } from '../../ui/Kontroller'
 import { Dugme } from '../../ui/Parcalar'
+import { Portal } from '../../ui/Portal'
 
 interface Props {
   acik: boolean
@@ -120,6 +121,7 @@ export default function Kimlik({ acik, kapat, kimlik }: Props) {
   }
 
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/40 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -244,5 +246,6 @@ export default function Kimlik({ acik, kapat, kimlik }: Props) {
         )}
       </div>
     </div>
+    </Portal>
   )
 }

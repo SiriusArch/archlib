@@ -3,6 +3,7 @@ import type { ModelSeviyesi, Saglayici } from '../types'
 import { SAGLAYICILAR, SEVIYE_ADI, saglayiciBul } from '../lib/llm'
 import { anahtarlariOku, anahtarYaz, anahtarSil, aktifSaglayiciYaz } from '../lib/storage'
 import { Cip, Segment } from '../ui/Kontroller'
+import { Portal } from '../ui/Portal'
 
 const SEVIYELER: ModelSeviyesi[] = ['hizli', 'dengeli', 'guclu']
 const OZEL_MODEL = '__ozel__'
@@ -70,6 +71,7 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
   }
 
   return (
+    <Portal>
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-murekkep/40 p-4 backdrop-blur-[3px]"
       onClick={kapat}
@@ -229,5 +231,6 @@ export default function AnahtarPaneli({ acik, kapat, aktif, aktifDegisti, guncel
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
