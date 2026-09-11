@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Asama, Kategori, Site, Ucret } from '../types'
-import { SITELER, KATEGORI_ADI, KATEGORI_ACIKLAMA, UCRET_ADI, ASAMA_ADI } from '../data/sites'
+import { SITELER, SITE_SAYISI, KATEGORI_ADI, KATEGORI_ACIKLAMA, UCRET_ADI, ASAMA_ADI } from '../data/sites'
 import { SayfaBasligi, Rozet, Kart } from '../ui/Parcalar'
 import { Portal } from '../ui/Portal'
 import { bolumBul } from '../ui/bolumler'
@@ -170,7 +170,7 @@ export default function Katalog() {
       <SayfaBasligi
         etiket="Kitaplık"
         renk={bolumBul('katalog').metin}
-        baslik="Öğrencinin işine yarayan 48 araç"
+        baslik={`Öğrencinin işine yarayan ${SITE_SAYISI} araç`}
         aciklama="Ücret, içerik ve proje aşamasına göre sınıflandırıldı. Her kartta aracın ne işe yaradığı ve projende tam olarak nerede kullanılacağı yazıyor."
         sag={
           <div className="sayi text-right text-[14.5px] text-murekkep-3">

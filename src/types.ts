@@ -39,36 +39,6 @@ export interface Site {
   turkce?: boolean
 }
 
-/** Arsiv kaynaginda bulunabilecek dosya formati */
-export type ArsivFormat = 'dwg' | 'skp' | 'rvt' | 'pdf' | '3ds' | 'obj' | 'ifc'
-
-/** Projenin tipolojik siniflandirmasi */
-export type ArsivTur =
-  | 'konut'
-  | 'ticari-kamu'
-  | 'kulturel'
-  | 'kentsel-peyzaj'
-  | 'tarihi-roleve'
-  | 'detay-blok'
-  | 'mobilya-obje'
-
-export interface ArsivKaynagi {
-  id: string
-  ad: string
-  url: string
-  turler: ArsivTur[]
-  formatlar: ArsivFormat[]
-  ucret: Ucret
-  ozet: string
-  anlatim: string
-  kullanim: string
-  etiketler: string[]
-  fiyatNotu?: string
-  uyari?: string
-  dogrulama: Dogrulama
-  turkce?: boolean
-}
-
 export interface BilgiMaddesi {
   id: string
   baslik: string

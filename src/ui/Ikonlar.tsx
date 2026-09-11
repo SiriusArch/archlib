@@ -45,16 +45,6 @@ export function IkonArazi({ className = 'h-[18px] w-[18px]' }: Props) {
   )
 }
 
-export function IkonArsiv({ className = 'h-[18px] w-[18px]' }: Props) {
-  return (
-    <svg {...ortak} className={className} aria-hidden="true">
-      <rect x="3.5" y="4" width="17" height="5" rx="1" />
-      <path d="M4.5 9v8.5A1.5 1.5 0 0 0 6 19h12a1.5 1.5 0 0 0 1.5-1.5V9" />
-      <path d="M10 13h4" />
-    </svg>
-  )
-}
-
 export function IkonForum({ className = 'h-[18px] w-[18px]' }: Props) {
   return (
     <svg {...ortak} className={className} aria-hidden="true">

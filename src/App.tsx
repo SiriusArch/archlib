@@ -8,7 +8,6 @@ import {
   IkonKritik,
   IkonCizim,
   IkonArazi,
-  IkonArsiv,
   IkonForum,
   IkonKitaplik,
   IkonBilgi,
@@ -20,7 +19,6 @@ import {
   IkonAy,
 } from './ui/Ikonlar'
 import Katalog from './components/Katalog'
-import Arsiv from './components/Arsiv'
 import Analiz from './components/Analiz'
 import BilgiBankasi from './components/BilgiBankasi'
 import Listeler from './components/Listeler'
@@ -40,7 +38,6 @@ const IKONLAR: Record<Sekme, (p: { className?: string }) => ReactNode> = {
   analiz: IkonKritik,
   cizim: IkonCizim,
   arazi: IkonArazi,
-  arsiv: IkonArsiv,
   forum: IkonForum,
   katalog: IkonKitaplik,
   bilgi: IkonBilgi,
@@ -257,7 +254,6 @@ export default function App() {
                 <Arazi />
               </Suspense>
             )}
-            {sekme === 'arsiv' && <Arsiv />}
             {sekme === 'forum' && (
               <Suspense fallback={<div className="etiket py-24 text-center">Forum yükleniyor</div>}>
                 <Forum />

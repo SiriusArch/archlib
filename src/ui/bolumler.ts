@@ -1,8 +1,9 @@
+import { SITE_SAYISI } from '../data/sites'
+
 export type Sekme =
   | 'analiz'
   | 'cizim'
   | 'arazi'
-  | 'arsiv'
   | 'forum'
   | 'katalog'
   | 'bilgi'
@@ -49,15 +50,6 @@ export const BOLUMLER: readonly BolumTanimi[] = [
     dolgu: 'bg-zeytin',
   },
   {
-    id: 'arsiv',
-    ad: 'Arşiv',
-    alt: 'Hazır CAD projeleri',
-    metin: 'text-adacayi-koyu',
-    zemin: 'bg-adacayi-soft',
-    kenar: 'border-adacayi',
-    dolgu: 'bg-adacayi',
-  },
-  {
     id: 'forum',
     ad: 'Forum',
     alt: 'Soru, cevap, arkadaşlık',
@@ -69,7 +61,7 @@ export const BOLUMLER: readonly BolumTanimi[] = [
   {
     id: 'katalog',
     ad: 'Araç Kitaplığı',
-    alt: '48 araç',
+    alt: `${SITE_SAYISI} araç`,
     metin: 'text-turkuaz-koyu',
     zemin: 'bg-turkuaz-soft',
     kenar: 'border-turkuaz',
